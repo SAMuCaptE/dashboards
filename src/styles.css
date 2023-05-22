@@ -1,0 +1,26 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+aside form {
+  width: 300px;
+  display: grid;
+  margin: 0 auto;
+  grid-template-columns: 150px 150px;
+}
+
+aside #selection-response {
+  grid-column: 1 / span 2;
+  text-align: center;
+  color: red;
+}
+
+main {
+  display: block;
+  width: 8.5in;
+  height: 11in;
+  border: 2px solid black;
+  margin: 30px auto;
+}

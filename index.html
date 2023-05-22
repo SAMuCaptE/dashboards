@@ -4,9 +4,49 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>Tableau de bord</title>
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="./script.js" defer></script>
+
+    <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="stylesheet" href="./src/print.css" media="print" />
+
+    <script src="./src/script.js" defer type="module"></script>
   </head>
-  <body></body>
+  <body>
+    <aside>
+      <form>
+        <label for="session-input">Session:</label>
+        <select id="session-input" type="" placeholder="s6">
+          <option value="s6">s6</option>
+          <option value="s7">s7</option>
+          <option value="s8">s8</option>
+        </select>
+        <label for="dashboard-date">Date de remise:</label>
+        <input type="date" />
+        <p id="selection-response"></p>
+      </form>
+    </aside>
+
+    <main>
+      <header>
+        <hgroup>
+          <h1>Tableau de bord</h1>
+          <h3>Période du <b>{{dateStart}}</b> au <b>{{dateEnd}}</b></h3>
+        </hgroup>
+
+        <figure>
+          <img src="./assets/logo.jpg" />
+        </figure>
+      </header>
+
+      <ul>
+        <li t="members.[]">
+          <figure>
+            <img src="./assets/{{img}}" />
+            <figcaption>{{firstname}} {{lastname}}</figcaption>
+          </figure>
+        </li>
+      </ul>
+    </main>
+  </body>
 </html>

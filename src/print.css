@@ -1,0 +1,17 @@
+@page {
+  margin: 0;
+}
+
+.page {
+  margin: 0;
+  border: none;
+}
+
+aside {
+  display: none;
+}
+
+main {
+  margin: 0 auto;
+  border: none;
+}

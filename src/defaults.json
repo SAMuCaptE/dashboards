@@ -1,0 +1,12 @@
+{
+  "members": [
+    { "img": "", "firstname": "Ariel", "lastname": "Martin Fontau" },
+    { "img": "", "firstname": "Daniel", "lastname": "Blanchette" },
+    { "img": "", "firstname": "Julien", "lastname": "Rousseau" },
+    { "img": "", "firstname": "Médérick", "lastname": "Marcotte" },
+    { "img": "", "firstname": "Nataël", "lastname": "Laroche-Latulippe" },
+    { "img": "", "firstname": "Raphaël", "lastname": "Auclair" },
+    { "img": "", "firstname": "Simon", "lastname": "Leroux" },
+    { "img": "", "firstname": "Zachary", "lastname": "Gagnon" }
+  ]
+}
