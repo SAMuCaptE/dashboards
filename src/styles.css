@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Roboto";
 }
 
 aside form {
@@ -55,8 +56,16 @@ header figure img {
   margin: 0 auto;
 }
 
+.objectives th,
 .objectives td {
   text-align: center;
+  padding: 0 8px;
+}
+
+.agenda {
+  display: grid;
+  grid-template-columns: repeat(var(--columnCount), 1fr);
+  list-style-position: inside;
 }
 
 .members {

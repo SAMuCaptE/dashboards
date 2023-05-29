@@ -11,6 +11,13 @@
     <link rel="stylesheet" href="./src/print.css" media="print" />
 
     <script src="./src/script.js" defer type="module"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <aside>
@@ -42,17 +49,26 @@
       <table class="objectives">
         <thead>
           <tr>
-            <th>Objectif de la session</th>
+            <th>Ordre du jour</th>
             <th>Objectif de la semaine</th>
+            <th>Objectif de la session</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>{{[session].objective}}</td>
-            <td>{{objective}}</td>
+            <td width="{{meeting.agenda.width}}">
+              <ol
+                style="--columnCount: {{meeting.agenda.columnCount}}"
+                t="meeting.agenda.items.[]"
+                class="agenda"
+              >
+                <li>{{value}}</li>
+              </ol>
+            </td>
+            <td width="auto">{{objective}}</td>
+            <td width="auto">{{[session].objective}}</td>
           </tr>
         </tbody>
-        <tbody></tbody>
       </table>
 
       <hr />

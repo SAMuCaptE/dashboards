@@ -1,0 +1,16 @@
+{
+  "objective": "Insérer un objectif pour la semaine ici",
+  "meeting": {
+    "date": "1 juin 2023 - 14h00",
+    "agenda": {
+      "width": "35%",
+      "columnCount": 2,
+      "items": [
+        { "value": "test 1" },
+        { "value": "test 2" },
+        { "value": "test 3" },
+        { "value": "test 4" }
+      ]
+    }
+  }
+}
