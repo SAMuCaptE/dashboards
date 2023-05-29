@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
     onValueChange({ target: input });
     input.addEventListener("change", onValueChange);
   });
+
+  document
+    .querySelector(".print")
+    .addEventListener("click", () => window.print());
 });
 
 const onValueChange = async (e) => {

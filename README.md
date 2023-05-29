@@ -13,7 +13,7 @@ TODO
 - [x] Photos des membres avec leur nom et responsabilités
 - [x] Objectif du projet (sommaire – maximum sur deux lignes)
 - [x] Objectifs de réalisation pour la session (sommaire – maximum sur deux lignes)
-- [x]Ordre du jour (spécifique aux points à aborder durant la rencontre)
+- [x] Ordre du jour (spécifique aux points à aborder durant la rencontre)
 - [x] Période couverte pour les activités rapportées dans le tableau de bord
 - [ ] Gestion traditionnelle
   - [ ] Courbe en S (semaine et projet)

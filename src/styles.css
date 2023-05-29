@@ -18,6 +18,18 @@ aside #selection-response {
   color: red;
 }
 
+aside .print {
+  display: block;
+  background: none;
+  border: none;
+  margin: 0 auto;
+  margin-top: 10px;
+}
+
+aside .print:hover {
+  cursor: pointer;
+}
+
 main {
   display: block;
   position: relative;
