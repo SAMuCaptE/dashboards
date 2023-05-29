@@ -1,9 +1,10 @@
+import workedHoursChart from "./charts/worked-hours.js";
 import { flatten } from "./utils.js";
 
+const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
+const charts = [workedHoursChart];
 let session = "";
 let date = "";
-
-const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
 
 document.addEventListener("DOMContentLoaded", () => {
   let requestedDate = window.location.search
@@ -114,5 +115,9 @@ function update(data, dateStart, dateEnd) {
     }
   } catch (err) {
     alert(err.message);
+  }
+
+  for (const chart of charts) {
+    chart.render();
   }
 }
