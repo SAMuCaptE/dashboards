@@ -55,8 +55,13 @@ const onValueChange = async (e) => {
 function update(data, dateStart, dateEnd) {
   try {
     const containers = document.querySelectorAll("main");
+    const footer = document.querySelector("footer");
 
     for (const container of containers) {
+      if (!container.querySelector("footer")) {
+        container.appendChild(footer);
+      }
+
       container.innerHTML = container.innerHTML.replace(
         "{{dateStart}}",
         dateFormatter.format(dateStart)
