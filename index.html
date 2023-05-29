@@ -39,11 +39,14 @@
         </figure>
       </header>
 
-      <ul>
-        <li t="members.[]">
+      <ul t="members.[]" class="members">
+        <li class="member">
           <figure>
             <img src="./assets/{{img}}" />
-            <figcaption>{{firstname}} {{lastname}}</figcaption>
+            <figcaption>
+              <p><strong>{{firstname}} {{lastname}}</strong></p>
+              <p>{{role}}</p>
+            </figcaption>
           </figure>
         </li>
       </ul>

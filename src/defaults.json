@@ -1,12 +1,52 @@
 {
   "members": [
-    { "img": "", "firstname": "Ariel", "lastname": "Martin Fontau" },
-    { "img": "", "firstname": "Daniel", "lastname": "Blanchette" },
-    { "img": "", "firstname": "Julien", "lastname": "Rousseau" },
-    { "img": "", "firstname": "Médérick", "lastname": "Marcotte" },
-    { "img": "", "firstname": "Nataël", "lastname": "Laroche-Latulippe" },
-    { "img": "", "firstname": "Raphaël", "lastname": "Auclair" },
-    { "img": "", "firstname": "Simon", "lastname": "Leroux" },
-    { "img": "", "firstname": "Zachary", "lastname": "Gagnon" }
+    {
+      "img": "",
+      "firstname": "Ariel",
+      "lastname": "M F",
+      "role": "Correcteur"
+    },
+    {
+      "img": "daniel.jpg",
+      "firstname": "Daniel",
+      "lastname": "B",
+      "role": "Médiateur"
+    },
+    {
+      "img": "",
+      "firstname": "Julien",
+      "lastname": "R",
+      "role": "Secrétaire"
+    },
+    {
+      "img": "mederick.jpg",
+      "firstname": "Médérick",
+      "lastname": "M",
+      "role": "Gestionnaire"
+    },
+    {
+      "img": "natael.jpg",
+      "firstname": "Nataël",
+      "lastname": "L-L",
+      "role": "Superviseur"
+    },
+    {
+      "img": "raphael.jpg",
+      "firstname": "Raphaël",
+      "lastname": "A",
+      "role": "Trésorier"
+    },
+    {
+      "img": "",
+      "firstname": "Simon",
+      "lastname": "L",
+      "role": "Chef d'équipe"
+    },
+    {
+      "img": "zachary.jpg",
+      "firstname": "Zachary",
+      "lastname": "G",
+      "role": "Animateur"
+    }
   ]
 }
