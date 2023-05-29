@@ -54,45 +54,48 @@ const onValueChange = async (e) => {
 
 function update(data, dateStart, dateEnd) {
   try {
-    const container = document.querySelector("main");
-    container.innerHTML = container.innerHTML.replace(
-      "{{dateStart}}",
-      dateFormatter.format(dateStart)
-    );
-    container.innerHTML = container.innerHTML.replace(
-      "{{dateEnd}}",
-      dateFormatter.format(dateEnd)
-    );
+    const containers = document.querySelectorAll("main");
 
-    container.innerHTML = container.innerHTML.replaceAll(
-      /(s[678])|(\[session\])/g,
-      session
-    );
+    for (const container of containers) {
+      container.innerHTML = container.innerHTML.replace(
+        "{{dateStart}}",
+        dateFormatter.format(dateStart)
+      );
+      container.innerHTML = container.innerHTML.replace(
+        "{{dateEnd}}",
+        dateFormatter.format(dateEnd)
+      );
 
-    for (const key of Object.keys(data)) {
-      if (Array.isArray(data[key])) {
-        const element = document.querySelector(`[t="${key}.[]"]`);
-        if (element.childElementCount > 1) {
-          break;
-        }
+      container.innerHTML = container.innerHTML.replaceAll(
+        /(s[678])|(\[session\])/g,
+        session
+      );
 
-        let originalHtml = element.innerHTML;
-        element.innerHTML = "";
-
-        for (const generationData of data[key]) {
-          element.innerHTML += originalHtml;
-          for (const subkey of Object.keys(generationData)) {
-            element.innerHTML = element.innerHTML.replace(
-              `{{${subkey}}}`,
-              generationData[subkey]
-            );
+      for (const key of Object.keys(data)) {
+        if (Array.isArray(data[key])) {
+          const element = document.querySelector(`[t="${key}.[]"]`);
+          if (element.childElementCount > 1) {
+            continue;
           }
+
+          let originalHtml = element.innerHTML;
+          element.innerHTML = "";
+
+          for (const generationData of data[key]) {
+            element.innerHTML += originalHtml;
+            for (const subkey of Object.keys(generationData)) {
+              element.innerHTML = element.innerHTML.replaceAll(
+                `{{${subkey}}}`,
+                generationData[subkey]
+              );
+            }
+          }
+        } else {
+          container.innerHTML = container.innerHTML.replaceAll(
+            `{{${key}}}`,
+            data[key]
+          );
         }
-      } else {
-        container.innerHTML = container.innerHTML.replace(
-          `{{${key}}}`,
-          data[key]
-        );
       }
     }
   } catch (err) {
