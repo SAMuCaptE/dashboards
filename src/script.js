@@ -1,7 +1,26 @@
+import { flatten } from "./utils.js";
+
 let session = "";
 let date = "";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const requestedDate = window.location.search
+    .replace("?", "")
+    .split("&")
+    .find((str) => /date=.*/.test(str))
+    ?.replace("date=", "");
+  if (requestedDate !== undefined) {
+    document.querySelector("input").value = requestedDate;
+    date = requestedDate;
+  }
+
+  document.querySelectorAll("input,select").forEach((input) => {
+    onValueChange({ target: input });
+    input.addEventListener("change", onValueChange);
+  });
+});
 
 const onValueChange = async (e) => {
   const value = e.target.value;
@@ -14,44 +33,66 @@ const onValueChange = async (e) => {
   const errorElement = document.getElementById("selection-response");
   errorElement.innerText = "";
   try {
-    const responses = await Promise.all([fetch(`./sources/${session}/${date}/data.json`), fetch(`./src/defaults.json`)]);
-    const [selectedData, defaults] = await Promise.all(responses.map((response) => response.json()));
+    const responses = await Promise.all([
+      fetch(`./sources/${session}/${date}/data.json`),
+      fetch(`./src/defaults.json`),
+    ]);
+    const [selectedData, defaults] = await Promise.all(
+      responses.map((response) => response.json())
+    );
     const data = { ...defaults, ...selectedData };
+    const flatData = flatten(data);
 
     const [year, month, day] = date.split("-").map((v) => parseInt(v));
     const dateEnd = new Date(year, month - 1, day, 0, 0, 0);
     const dateStart = new Date(dateEnd.getTime() - 6 * 24 * 3600 * 1000);
-    update(data, dateStart, dateEnd);
+    update(flatData, dateStart, dateEnd);
   } catch {
     errorElement.innerText = `'${session}' et '${date}' ne sont pas des arguments valides.`;
   }
 };
 
-document.querySelectorAll("input,select").forEach((input) => {
-  onValueChange({ target: input });
-  input.addEventListener("change", onValueChange);
-});
-
 function update(data, dateStart, dateEnd) {
   try {
     const container = document.querySelector("main");
-    container.innerHTML = container.innerHTML.replace("{{dateStart}}", dateFormatter.format(dateStart));
-    container.innerHTML = container.innerHTML.replace("{{dateEnd}}", dateFormatter.format(dateEnd));
+    container.innerHTML = container.innerHTML.replace(
+      "{{dateStart}}",
+      dateFormatter.format(dateStart)
+    );
+    container.innerHTML = container.innerHTML.replace(
+      "{{dateEnd}}",
+      dateFormatter.format(dateEnd)
+    );
+
+    container.innerHTML = container.innerHTML.replaceAll(
+      /(s[678])|(\[session\])/g,
+      session
+    );
 
     for (const key of Object.keys(data)) {
       if (Array.isArray(data[key])) {
         const element = document.querySelector(`[t="${key}.[]"]`);
+        if (element.childElementCount > 1) {
+          break;
+        }
+
         let originalHtml = element.innerHTML;
         element.innerHTML = "";
 
         for (const generationData of data[key]) {
           element.innerHTML += originalHtml;
           for (const subkey of Object.keys(generationData)) {
-            element.innerHTML = element.innerHTML.replace(`{{${subkey}}}`, generationData[subkey]);
+            element.innerHTML = element.innerHTML.replace(
+              `{{${subkey}}}`,
+              generationData[subkey]
+            );
           }
         }
       } else {
-        container.innerHTML = container.innerHTML.replace(`{{${key}}}`, data[key]);
+        container.innerHTML = container.innerHTML.replace(
+          `{{${key}}}`,
+          data[key]
+        );
       }
     }
   } catch (err) {
