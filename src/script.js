@@ -6,15 +6,20 @@ let date = "";
 const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const requestedDate = window.location.search
+  let requestedDate = window.location.search
     .replace("?", "")
     .split("&")
     .find((str) => /date=.*/.test(str))
     ?.replace("date=", "");
-  if (requestedDate !== undefined) {
-    document.querySelector("input").value = requestedDate;
-    date = requestedDate;
+
+  if (requestedDate === undefined) {
+    const thursday = new Date();
+    thursday.setDate(thursday.getDate() + ((4 + 7 - thursday.getDay()) % 7));
+    requestedDate = thursday.toLocaleDateString("fr-CA");
   }
+
+  document.querySelector("input").value = requestedDate;
+  date = requestedDate;
 
   document.querySelectorAll("input,select").forEach((input) => {
     onValueChange({ target: input });
