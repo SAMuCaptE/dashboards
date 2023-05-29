@@ -25,6 +25,11 @@ main {
   margin: 30px auto;
 }
 
+hr {
+  margin-bottom: 5px;
+  visibility: hidden;
+}
+
 header,
 header img {
   height: 1in;
@@ -43,6 +48,16 @@ header figure img {
   object-fit: contain;
   display: block;
 }
+
+.objectives {
+  width: 95%;
+  margin: 0 auto;
+}
+
+.objectives td {
+  text-align: center;
+}
+
 .members {
   display: flex;
   justify-content: space-evenly;
