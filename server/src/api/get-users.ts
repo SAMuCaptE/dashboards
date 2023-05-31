@@ -10,7 +10,11 @@ type ResponseSchema = z.infer<typeof ResponseSchema>;
 
 export async function getUsers() {
   const listId = "900300765608";
-  return api(ResponseSchema).get(
+  const users = await api(ResponseSchema).get(
     `https://api.clickup.com/api/v2/list/${listId}/member`
   );
+
+  return users
+    ? { members: users.members.filter((member) => member.initials !== "JG") }
+    : null;
 }

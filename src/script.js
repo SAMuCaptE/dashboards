@@ -62,7 +62,7 @@ const onValueChange = async (e) => {
   }
 };
 
-function update(data, dateStart, dateEnd) {
+async function update(data, dateStart, dateEnd) {
   try {
     const containers = document.querySelectorAll("main");
     const footer = document.querySelector("footer");
@@ -118,6 +118,6 @@ function update(data, dateStart, dateEnd) {
   }
 
   for (const chart of charts) {
-    chart.render();
+    await chart.render();
   }
 }

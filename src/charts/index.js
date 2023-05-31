@@ -34,14 +34,14 @@ export class ChartBuilder {
     return this;
   }
 
-  render() {
+  async render() {
     const selectedOption = this.defaultOptions[this.type];
 
     return new Chart(document.getElementById(this.canvasId), {
       plugins: [ChartDataLabels],
       type: this.type,
       data: {
-        labels: this.labels,
+        labels: await this.labels,
         datasets: this.datasets,
       },
       options: {

@@ -16,11 +16,18 @@ async function getData(path: string) {
 }
 
 const server = createServer(async (req, res) => {
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
+    "Access-Control-Max-Age": 2592000,
+  };
+
   try {
-    res.setHeader("Content-Type", "application/json");
     const data = await getData(req.url ?? "");
-    res.writeHead(200);
-    res.end(JSON.stringify(data));
+    const parsedData = JSON.stringify(data);
+    res.writeHead(200, headers);
+    res.end(parsedData);
   } catch (err) {
     res.writeHead(400);
     if (typeof err === "object" && err instanceof Error) {
