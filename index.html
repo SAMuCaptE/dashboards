@@ -90,14 +90,171 @@
             <img src="./assets/{{img}}" />
             <figcaption>
               <p><strong>{{firstname}} {{lastname}}</strong></p>
-              <p>{{role}}</p>
+              <p style="font-size: 80%">{{role}}</p>
+              <p><strong>Disponibilité</strong></p>
             </figcaption>
           </figure>
         </li>
       </ul>
 
-      <div style="width: 400px; height: 300px">
-        <canvas id="worked-hours"></canvas>
+      <hr />
+      <hr />
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr">
+        <div style="width: 400px; height: 200px">
+          <canvas id="worked-hours"></canvas>
+        </div>
+
+        <div
+          style="
+            width: 400px;
+            height: 200px;
+            position: relative;
+            background-color: pink;
+          "
+        >
+          <p
+            style="
+              width: 70%;
+              text-align: center;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              position: absolute;
+              color: white;
+              font-weight: bold;
+            "
+          >
+            Burndown chart du sprint en cours
+          </p>
+        </div>
+      </div>
+
+      <hr />
+      <hr />
+
+      <div
+        style="display: flex; justify-content: space-evenly; padding-top: 20px"
+      >
+        <img
+          src="./assets/horaire.png"
+          style="display: block; width: 100%; object-fit: contain"
+        />
+        <!-- <div
+          style="
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: red;
+            position: relative;
+          "
+        >
+          <p
+            style="
+              width: 70%;
+              text-align: center;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              position: absolute;
+              color: white;
+              font-weight: bold;
+            "
+          >
+            Pie chart pour la répartition du travail
+          </p>
+        </div> -->
+      </div>
+
+      <hr />
+      <hr />
+      <hr />
+
+      <div style="display: flex; justify-content: space-evenly">
+        <div style="width: 60%; padding: 0 2.5%">
+          <table style="display: block">
+            <thead style="display: block">
+              <tr style="display: flex; justify-content: space-around">
+                <th>Risque</th>
+                <th>Mitigation</th>
+                <th>Gravité</th>
+                <th>Epic ou ticket associé</th>
+              </tr>
+            </thead>
+            <tbody style="display: block">
+              <tr style="display: block">
+                <td colspan="100%" style="display: block">
+                  <div
+                    style="
+                      background-color: lime;
+                      height: 200px;
+                      position: relative;
+                    "
+                  >
+                    <p
+                      style="
+                        width: 70%;
+                        text-align: center;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        position: absolute;
+                        color: white;
+                        text-shadow: black 0 0 5px;
+                        font-weight: bold;
+                      "
+                    >
+                      Tableau comprenant les risques principaux qui seront
+                      attaqués (ou pas) dans ce sprint
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="width: 45%; padding: 0 2.5%">
+          <table style="display: block">
+            <thead style="display: block">
+              <tr style="display: flex; justify-content: space-around">
+                <th>Date</th>
+                <th>Description</th>
+                <th>Montant</th>
+                <th>Somme</th>
+              </tr>
+            </thead>
+            <tbody style="display: block">
+              <tr style="display: block">
+                <td colspan="100%" style="display: block">
+                  <div
+                    style="
+                      background-color: orange;
+                      height: 200px;
+                      position: relative;
+                    "
+                  >
+                    <p
+                      style="
+                        width: 70%;
+                        text-align: center;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        position: absolute;
+                        color: white;
+                        font-weight: bold;
+                      "
+                    >
+                      Tableau qui montre un peu le portrait de l'argent qu'il
+                      nous reste (ou pas)
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <footer>
@@ -105,6 +262,97 @@
       </footer>
     </main>
 
-    <main></main>
+    <main>
+      <div style="width: 95%; padding-left: 2.5%">
+        <table style="display: block">
+          <thead style="display: block">
+            <tr style="display: flex; justify-content: space-around">
+              <th>Tâche</th>
+              <th>Responsable(s)</th>
+              <th colspan="2">Temps prévu</th>
+            </tr>
+          </thead>
+          <tbody style="display: block">
+            <tr style="display: block">
+              <td style="display: block">
+                <div
+                  style="
+                    background-color: purple;
+                    height: 300px;
+                    position: relative;
+                  "
+                >
+                  <p
+                    style="
+                      width: 70%;
+                      text-align: center;
+                      top: 50%;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                      position: absolute;
+                      color: white;
+                      font-weight: bold;
+                    "
+                  >
+                    Tableau comprenant toutes les tâches qui seront faites dans
+                    le prochain sprint. Les domaines sont décrits par une
+                    couleur
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="width: 95%; padding-left: 2.5%">
+        <table style="display: block">
+          <thead style="display: block">
+            <tr style="display: flex; justify-content: space-around">
+              <th>Tâche</th>
+              <th>Responsable(s)</th>
+              <th colspan="2">Heures</th>
+            </tr>
+            <tr style="display: flex; justify-content: flex-end">
+              <th style="margin: 0 10px">prévues</th>
+              <th style="margin: 0 10px">réelles</th>
+            </tr>
+          </thead>
+          <tbody style="display: block">
+            <tr style="display: block">
+              <td style="display: block">
+                <div
+                  style="
+                    background-color: blue;
+                    height: 600px;
+                    position: relative;
+                  "
+                >
+                  <p
+                    style="
+                      width: 70%;
+                      text-align: center;
+                      top: 50%;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                      position: absolute;
+                      color: white;
+                      font-weight: bold;
+                    "
+                  >
+                    Tableau comprenant toutes les tâches effectuées dans la
+                    semaine. Le domaine est décrit par une couleur (la même que
+                    dans le pie chart)
+                    <br />
+                    Potentiellement les heures pour chaque membre? Pas certain
+                    que ça soit utile par contre.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
   </body>
 </html>

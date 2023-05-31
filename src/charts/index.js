@@ -47,9 +47,9 @@ export class ChartBuilder {
       options: {
         ...selectedOption,
         plugins: {
-          ...selectedOption.plugins,
+          ...selectedOption?.plugins,
           datalabels: {
-            ...selectedOption.plugins.datalabels,
+            ...selectedOption?.plugins.datalabels,
             formatter: this.formatter,
           },
         },
