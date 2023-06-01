@@ -4,7 +4,7 @@
   },
   "members": [
     {
-      "img": "",
+      "img": "ariel.png",
       "firstname": "Ariel",
       "lastname": "M F",
       "role": "Correcteur"
@@ -16,7 +16,7 @@
       "role": "Médiateur"
     },
     {
-      "img": "",
+      "img": "julien.png",
       "firstname": "Julien",
       "lastname": "R",
       "role": "Secrétaire"
@@ -46,7 +46,7 @@
       "role": "Chef d'équipe"
     },
     {
-      "img": "zachary.jpg",
+      "img": "zachary.png",
       "firstname": "Zachary",
       "lastname": "G",
       "role": "Animateur"

@@ -61,6 +61,7 @@
         <thead>
           <tr>
             <th>Ordre du jour</th>
+            <th>Plan technique</th>
             <th>Objectif de la semaine</th>
             <th>Objectif de la session</th>
           </tr>
@@ -71,6 +72,15 @@
               <ol
                 style="--columnCount: {{meeting.agenda.columnCount}}"
                 t="meeting.agenda.items.[]"
+                class="agenda"
+              >
+                <li>{{value}}</li>
+              </ol>
+            </td>
+            <td width="{{meeting.technical.width}}">
+              <ol
+                style="--columnCount: {{meeting.technical.columnCount}}"
+                t="meeting.technical.items.[]"
                 class="agenda"
               >
                 <li>{{value}}</li>
@@ -267,6 +277,56 @@
         <table style="display: block">
           <thead style="display: block">
             <tr style="display: flex; justify-content: space-around">
+              <th>Epic</th>
+              <th>Description</th>
+              <th>Tickets</th>
+              <th>Tickets terminés</th>
+              <th>Taux de complétion</th>
+            </tr>
+          </thead>
+          <tbody style="display: block">
+            <tr style="display: block">
+              <td style="display: block">
+                <div
+                  style="
+                    background-color: gold;
+                    height: 200px;
+                    position: relative;
+                  "
+                >
+                  <p
+                    style="
+                      width: 70%;
+                      text-align: center;
+                      top: 50%;
+                      text-shadow: black 0 0 5px;
+                      left: 50%;
+                      transform: translate(-50%, -50%);
+                      position: absolute;
+                      color: white;
+                      font-weight: bold;
+                    "
+                  >
+                    Tableau qui fait un résumé de tous les epics (objectifs).
+                    Comprend le nombre de tickets associés, la quantité terminée
+                    et le taux (%) de complétion. Pourrait éventuellement être
+                    merge avec un diagramme de Gantt pour avoir un meilleur
+                    aperçu.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr />
+
+      <div style="width: 95%; padding-left: 2.5%">
+        <table style="display: block">
+          <thead style="display: block">
+            <tr style="display: flex; justify-content: space-around">
+              <th>Statut</th>
               <th>Tâche</th>
               <th>Responsable(s)</th>
               <th colspan="2">Temps prévu</th>
@@ -306,6 +366,29 @@
       </div>
 
       <div style="width: 95%; padding-left: 2.5%">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: auto 1fr;
+            text-align: center;
+          "
+        >
+          <p style="font-weight: bold">#</p>
+          <p style="font-weight: bold">Problème</p>
+          <p>TICK-1</p>
+          <p>Problème rencontré no 1</p>
+          <p>TICK-2</p>
+          <p>Problème rencontré no 2</p>
+          <p>TICK-3</p>
+          <p>Problème rencontré no 3</p>
+          <p>TICK-4</p>
+          <p>Problème rencontré no 4</p>
+        </div>
+      </div>
+
+      <hr />
+
+      <div style="width: 95%; padding-left: 2.5%">
         <table style="display: block">
           <thead style="display: block">
             <tr style="display: flex; justify-content: space-around">
@@ -324,7 +407,7 @@
                 <div
                   style="
                     background-color: blue;
-                    height: 600px;
+                    height: 300px;
                     position: relative;
                   "
                 >
