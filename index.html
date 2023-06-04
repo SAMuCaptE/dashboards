@@ -235,46 +235,14 @@
           </table>
         </div>
 
-        <div style="width: 45%; padding: 0 2.5%">
-          <table style="display: block">
-            <thead style="display: block">
-              <tr style="display: flex; justify-content: space-around">
-                <th>Date</th>
-                <th>Description</th>
-                <th>Montant</th>
-                <th>Somme</th>
-              </tr>
-            </thead>
-            <tbody style="display: block">
-              <tr style="display: block">
-                <td colspan="100%" style="display: block">
-                  <div
-                    style="
-                      background-color: orange;
-                      height: 200px;
-                      position: relative;
-                    "
-                  >
-                    <p
-                      style="
-                        width: 70%;
-                        text-align: center;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        position: absolute;
-                        color: white;
-                        font-weight: bold;
-                      "
-                    >
-                      Tableau qui montre un peu le portrait de l'argent qu'il
-                      nous reste (ou pas)
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div
+          style="width: 45%; height: 260px; padding: 0 2.5%; position: relative"
+        >
+          <h4 style="text-align: center">Budget</h4>
+          <canvas
+            id="budget"
+            style="margin: 0 auto; transform: translateY(-2em)"
+          ></canvas>
         </div>
       </div>
 

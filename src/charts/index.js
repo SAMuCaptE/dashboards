@@ -12,6 +12,19 @@ export class ChartBuilder {
         },
       },
     },
+    doughnut: {
+      plugins: {
+        legend: {
+          position: "right",
+          labels: {
+            usePointStyle: true,
+          },
+        },
+        datalabels: {
+          font: { weight: "bold" },
+        },
+      },
+    },
   };
 
   constructor(canvasId, type) {

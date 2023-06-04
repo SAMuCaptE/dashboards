@@ -1,12 +1,13 @@
+import budgetChart from "./charts/budget.js";
 import workedHoursChart, { loadData } from "./charts/worked-hours.js";
 import { flatten, mergeDeep } from "./utils.js";
 
+const charts = [workedHoursChart, budgetChart];
+
 const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
-const charts = [workedHoursChart];
+let initialHtml = {};
 let session = "";
 let date = "";
-
-let initialHtml = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
   let requestedDate = window.location.search
