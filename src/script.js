@@ -97,6 +97,10 @@ async function update(data, dateStart, dateEnd) {
         /(s[678])|(\[session\])/g,
         session
       );
+      container.innerHTML = container.innerHTML.replaceAll(
+        /\[date\]/g,
+        dateEnd.toLocaleDateString("fr-CA")
+      );
 
       for (const key of Object.keys(data)) {
         if (Array.isArray(data[key])) {
