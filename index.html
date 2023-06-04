@@ -62,8 +62,8 @@
           <tr>
             <th>Ordre du jour</th>
             <th>Plan technique</th>
-            <th>Objectif de la semaine</th>
-            <th>Objectif de la session</th>
+            <th>Objectifs du sprint</th>
+            <th>Objectifs de la session</th>
           </tr>
         </thead>
         <tbody>
@@ -103,12 +103,15 @@
               <p style="font-size: 80%">{{role}}</p>
               <div class="disponibilities">
                 <span
-                  class="disponibility disponibility-{{disponibility.lastWeek}}"
-                ></span>
+                  class="material-symbols-outlined disponibility disponibility-{{disponibility.lastWeek}}"
+                >
+                  schedule
+                </span>
                 <span>|</span>
                 <span
-                  class="disponibility disponibility-{{disponibility.nextWeek}}"
-                ></span>
+                  class="material-symbols-outlined disponibility disponibility-{{disponibility.nextWeek}}"
+                  >schedule</span
+                >
               </div>
             </figcaption>
           </figure>

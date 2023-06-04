@@ -24,7 +24,8 @@ TODO
   - [ ] Burndown chart (sprint, release)
   - [ ] Tâches accomplies dans la semaine ou dans le sprint
   - [ ] Tâches à faire dans la prochaine semaine ou dans le sprint
-- [ ] Sommaire des heures de la semaine et en moyenne faites par chaque membre
+- [x] Sommaire des heures de la semaine et en moyenne faites par chaque membre
+  - [ ] Séparation des heures selon chaque catégorie (élec, info, mec, gestion,autre)
 - [ ] Répartition du temps passé par chaque membre à réaliser les activités rattachées à ses responsabilités dans l’équipe, avec une description/explication justifiant l’ampleur du travail réalisé
 - [ ] Taux d’atteinte des objectifs du projet pour la session
 - [ ] Suivi des risques avec les moyens pour les annuler ou les atténuer
