@@ -1,11 +1,12 @@
 import { z } from "zod";
+import { ColorSchema } from "./color";
 
 export const UserSchema = z.object({
   id: z.number(),
   username: z.string(),
   email: z.string().email(),
   initials: z.string(),
-  color: z.string().regex(/#[0-9a-fA-F]{6}/),
+  color: ColorSchema,
 });
 
 export type User = z.infer<typeof UserSchema>;

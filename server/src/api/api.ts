@@ -19,7 +19,11 @@ export function api<S extends z.Schema>(
     const data = await response.json();
 
     const parsedData = schema.safeParse(data);
-    return parsedData.success ? parsedData.data : null;
+    if (!parsedData.success) {
+      console.log(parsedData.error);
+      return null;
+    }
+    return parsedData.data;
   };
 
   return {

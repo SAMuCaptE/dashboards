@@ -1,17 +1,52 @@
 import { createServer } from "http";
+import { z } from "zod";
+
 import { getUsers } from "./api/get-users";
+import { getWorkedHours } from "./api/worked-hours";
 import "./env";
+
+type Handler<S extends z.Schema> = {
+  handler: (...args: z.infer<S>) => any;
+  schema: S;
+};
+
+const NoArgs = z.object({});
+
+function makeRoute<S extends z.Schema>(
+  handler: (args: z.infer<S>) => any,
+  schema: S
+): Handler<S> {
+  return { handler, schema };
+}
 
 const port = 16987 || process.env.PORT;
 
-async function getData(path: string) {
-  switch (path) {
-    case "/":
-      return "Server is running";
-    case "/users":
-      return getUsers();
-    default:
-      throw new Error("Request not found");
+const routes = {
+  "/": makeRoute(() => "Server is running", NoArgs),
+  "/users": makeRoute(getUsers, NoArgs),
+  "/hours": makeRoute(
+    getWorkedHours,
+    z.object({
+      start: z.string().transform((str) => new Date(parseInt(str))),
+      end: z.string().transform((str) => new Date(parseInt(str))),
+    })
+  ),
+};
+
+async function getData(url: string) {
+  const [path, rawArgs] = url.split("?");
+  const args =
+    rawArgs?.split("&").reduce((prev, curr) => {
+      const [key, value] = curr.split("=");
+      return { ...prev, [key]: value };
+    }, {}) ?? {};
+
+  for (const [routePath, route] of Object.entries(routes)) {
+    if (routePath === path) {
+      const parsedArgs = route.schema.parse(args);
+      const payload = await route.handler(parsedArgs);
+      return payload;
+    }
   }
 }
 
@@ -31,7 +66,7 @@ const server = createServer(async (req, res) => {
   } catch (err) {
     res.writeHead(400);
     if (typeof err === "object" && err instanceof Error) {
-      res.end(err.name);
+      res.end(err.name + " : " + err.message);
     } else {
       res.end("Unknown error");
     }

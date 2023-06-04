@@ -1,4 +1,4 @@
-import workedHoursChart from "./charts/worked-hours.js";
+import workedHoursChart, { loadData } from "./charts/worked-hours.js";
 import { flatten } from "./utils.js";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
@@ -6,7 +6,7 @@ const charts = [workedHoursChart];
 let session = "";
 let date = "";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   let requestedDate = window.location.search
     .replace("?", "")
     .split("&")
@@ -40,6 +40,14 @@ const onValueChange = async (e) => {
     date = value;
   }
 
+  const [year, month, day] = date.split("-").map((v) => parseInt(v));
+  const dateEnd = new Date(year, month - 1, day, 0, 0, 0);
+  const dateStart = new Date(dateEnd.getTime() - 6 * 24 * 3600 * 1000);
+  dateStart.setHours(0, 0, 0);
+  dateEnd.setHours(23, 59, 59);
+
+  await loadData(dateStart, dateEnd);
+
   const errorElement = document.getElementById("selection-response");
   errorElement.innerText = "";
   try {
@@ -53,9 +61,6 @@ const onValueChange = async (e) => {
     const data = { ...defaults, ...selectedData };
     const flatData = flatten(data);
 
-    const [year, month, day] = date.split("-").map((v) => parseInt(v));
-    const dateEnd = new Date(year, month - 1, day, 0, 0, 0);
-    const dateStart = new Date(dateEnd.getTime() - 6 * 24 * 3600 * 1000);
     update(flatData, dateStart, dateEnd);
   } catch {
     errorElement.innerText = `'${session}' et '${date}' ne sont pas des arguments valides.`;

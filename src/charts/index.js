@@ -37,13 +37,13 @@ export class ChartBuilder {
   async render() {
     const selectedOption = this.defaultOptions[this.type];
 
+    const labels = await this.labels;
+    const datasets = await Promise.all(this.datasets);
+
     return new Chart(document.getElementById(this.canvasId), {
       plugins: [ChartDataLabels],
       type: this.type,
-      data: {
-        labels: await this.labels,
-        datasets: this.datasets,
-      },
+      data: { labels, datasets },
       options: {
         ...selectedOption,
         plugins: {
