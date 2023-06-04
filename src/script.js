@@ -6,6 +6,8 @@ const charts = [workedHoursChart];
 let session = "";
 let date = "";
 
+let initialHtml = {};
+
 document.addEventListener("DOMContentLoaded", async () => {
   let requestedDate = window.location.search
     .replace("?", "")
@@ -72,11 +74,15 @@ async function update(data, dateStart, dateEnd) {
     const containers = document.querySelectorAll("main");
     const footer = document.querySelector("footer");
 
-    for (const container of containers) {
-      if (!container.querySelector("footer")) {
-        container.appendChild(footer);
+    for (const [index, container] of containers.entries()) {
+      if (!initialHtml[index]) {
+        if (!container.querySelector("footer")) {
+          container.appendChild(footer);
+        }
+        initialHtml[index] = container.innerHTML;
       }
 
+      container.innerHTML = initialHtml[index];
       container.innerHTML = container.innerHTML.replace(
         "{{dateStart}}",
         dateFormatter.format(dateStart)
