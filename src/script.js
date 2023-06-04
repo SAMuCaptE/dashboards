@@ -1,5 +1,5 @@
 import workedHoursChart, { loadData } from "./charts/worked-hours.js";
-import { flatten } from "./utils.js";
+import { flatten, mergeDeep } from "./utils.js";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
 const charts = [workedHoursChart];
@@ -60,7 +60,7 @@ const onValueChange = async (e) => {
     const [selectedData, defaults] = await Promise.all(
       responses.map((response) => response.json())
     );
-    const data = { ...defaults, ...selectedData };
+    const data = mergeDeep(defaults, selectedData);
     const flatData = flatten(data);
 
     update(flatData, dateStart, dateEnd);

@@ -101,7 +101,15 @@
             <figcaption>
               <p><strong>{{firstname}} {{lastname}}</strong></p>
               <p style="font-size: 80%">{{role}}</p>
-              <p><strong>Disponibilité</strong></p>
+              <div class="disponibilities">
+                <span
+                  class="disponibility disponibility-{{disponibility.lastWeek}}"
+                ></span>
+                <span>|</span>
+                <span
+                  class="disponibility disponibility-{{disponibility.nextWeek}}"
+                ></span>
+              </div>
             </figcaption>
           </figure>
         </li>

@@ -101,6 +101,42 @@ header figure img {
   text-align: center;
 }
 
+.member .disponibilities {
+  height: 26px;
+  display: flex;
+  width: 80%;
+  margin: 0 auto;
+  position: relative;
+  justify-content: space-evenly;
+}
+
+.member .disponibilities .disponibility {
+  display: block;
+  height: 80%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.member .disponibilities .disponibility-1 {
+  background-color: #f04216;
+}
+
+.member .disponibilities .disponibility-2 {
+  background-color: #f08616;
+}
+
+.member .disponibilities .disponibility-3 {
+  background-color: #f7c923;
+}
+
+.member .disponibilities .disponibility-4 {
+  background-color: #fff94d;
+}
+
+.member .disponibilities .disponibility-5 {
+  background-color: #1cd91c;
+}
+
 footer {
   display: block;
   position: absolute;
