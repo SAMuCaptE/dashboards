@@ -25,9 +25,19 @@ export class ChartBuilder {
         },
       },
     },
+    line: {
+      scales: {
+        x: {
+          type: "time",
+          min: new Date(2023, 5, 1),
+          max: new Date(2023, 5, 8),
+        },
+      },
+    },
   };
 
   constructor(canvasId, type) {
+    this.showLabels = true;
     this.canvasId = canvasId;
     this.type = type;
   }
@@ -47,6 +57,11 @@ export class ChartBuilder {
     return this;
   }
 
+  hideLabels() {
+    this.showLabels = false;
+    return this;
+  }
+
   async render() {
     const selectedOption = this.defaultOptions[this.type];
 
@@ -54,7 +69,7 @@ export class ChartBuilder {
     const datasets = await Promise.all(this.datasets);
 
     return new Chart(document.getElementById(this.canvasId), {
-      plugins: [ChartDataLabels],
+      plugins: this.showLabels ? [ChartDataLabels] : [],
       type: this.type,
       data: { labels, datasets },
       options: {
@@ -62,7 +77,7 @@ export class ChartBuilder {
         plugins: {
           ...selectedOption?.plugins,
           datalabels: {
-            ...selectedOption?.plugins.datalabels,
+            ...selectedOption?.plugins?.datalabels,
             formatter: this.formatter,
           },
         },

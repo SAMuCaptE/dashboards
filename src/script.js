@@ -1,13 +1,14 @@
 import budgetChart from "./charts/budget.js";
+import burndownChart from "./charts/burndown.js";
 import workedHoursChart, { loadData } from "./charts/worked-hours.js";
 import { flatten, mergeDeep } from "./utils.js";
 
-const charts = [workedHoursChart, budgetChart];
+const charts = [workedHoursChart, budgetChart, burndownChart];
 
 const dateFormatter = new Intl.DateTimeFormat("fr-CA", { dateStyle: "long" });
 let initialHtml = {};
-let session = "";
-let date = "";
+let session = null;
+let date = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   let requestedDate = window.location.search

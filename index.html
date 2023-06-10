@@ -14,6 +14,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -97,7 +99,7 @@
       <ul t="members.[]" class="members">
         <li class="member">
           <figure>
-            <img src="./assets/{{img}}" />
+            <img src="./assets/{{img}}" alt="{{firstname}} {{lastname}}" />
             <figcaption>
               <p><strong>{{firstname}} {{lastname}}</strong></p>
               <p style="font-size: 80%">{{role}}</p>
@@ -126,28 +128,8 @@
           <canvas id="worked-hours"></canvas>
         </div>
 
-        <div
-          style="
-            width: 400px;
-            height: 200px;
-            position: relative;
-            background-color: pink;
-          "
-        >
-          <p
-            style="
-              width: 70%;
-              text-align: center;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              position: absolute;
-              color: white;
-              font-weight: bold;
-            "
-          >
-            Burndown chart du sprint en cours
-          </p>
+        <div style="width: 400px; height: 200px">
+          <canvas id="burndown"></canvas>
         </div>
       </div>
 
@@ -161,30 +143,6 @@
           src="./sources/[session]/[date]/horaire.png"
           style="display: block; width: 100%; object-fit: contain"
         />
-        <!-- <div
-          style="
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background-color: red;
-            position: relative;
-          "
-        >
-          <p
-            style="
-              width: 70%;
-              text-align: center;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              position: absolute;
-              color: white;
-              font-weight: bold;
-            "
-          >
-            Pie chart pour la répartition du travail
-          </p>
-        </div> -->
       </div>
 
       <hr />

@@ -13,7 +13,7 @@ export const TimeEntrySchema = z.object({
   duration: z.string().transform((str) => parseInt(str)),
   description: z.string(),
   tags: z.array(z.string()),
-  source: z.literal("clickup"),
+  source: z.literal("clickup").or(z.literal("clickup_mobile")),
   at: z.string().transform((str) => parseInt(str)),
   task_location: z.object({
     list_id: z.string(),
