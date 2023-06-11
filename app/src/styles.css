@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto";
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  aside {
+    display: none;
+  }
+
+  main {
+    margin: 0 auto !important;
+    border: none !important;
+  }
+}

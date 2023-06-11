@@ -1,0 +1,25 @@
+{
+  "objective": "Insérer un objectif pour la semaine ici",
+  "members": [
+    { "disponibility": { "lastWeek": 1, "nextWeek": 4 } },
+    { "disponibility": { "lastWeek": 2, "nextWeek": 3 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 4, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 5, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 4, "nextWeek": 3 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 4 } },
+    { "disponibility": { "lastWeek": 2, "nextWeek": 5 } }
+  ],
+  "meeting": {
+    "date": "1 juin 2023 - 14h00",
+    "agenda": {
+      "width": "20%",
+      "columnCount": 1,
+      "items": ["test 1", "test 2", "test 3", "test 4"]
+    },
+    "technical": {
+      "width": "20%",
+      "items": ["tech 1", "tech 2", "tech 3", "tech 4"]
+    }
+  }
+}
