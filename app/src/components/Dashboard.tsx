@@ -1,22 +1,28 @@
 import { Component } from "solid-js";
+import { fields } from "../stores/fields";
 import { isValidDate } from "../stores/params";
-import Page from "./Page";
 import Header from "./Header";
 import Objectives from "./Objectives";
-import { fields } from "../stores/fields";
+import Page from "./Page";
 
 const Dashboard: Component = () => {
   return (
     <>
-      {isValidDate() && fields()?.success && (
-        <>
-          <Page>
-            <Header />
-            <Objectives />
-          </Page>
-          <Page>page 2</Page>
-        </>
-      )}
+      {isValidDate() &&
+        (() => {
+          const f = fields();
+          return (
+            f?.success && (
+              <>
+                <Page>
+                  <Header />
+                  <Objectives data={f.data} />
+                </Page>
+                <Page>page 2</Page>
+              </>
+            )
+          );
+        })}
     </>
   );
 };

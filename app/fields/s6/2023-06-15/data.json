@@ -13,12 +13,9 @@
   "meeting": {
     "date": "1 juin 2023 - 14h00",
     "agenda": {
-      "width": "20%",
-      "columnCount": 1,
       "items": ["test 1", "test 2", "test 3", "test 4"]
     },
     "technical": {
-      "width": "20%",
       "items": ["tech 1", "tech 2", "tech 3", "tech 4"]
     }
   }

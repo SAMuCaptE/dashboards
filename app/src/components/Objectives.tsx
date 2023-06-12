@@ -1,55 +1,44 @@
 import { Component, For } from "solid-js";
 
-import { fields } from "../stores/fields";
+import { Fields } from "../stores/fields";
+import { session } from "../stores/params";
 
-const Objectives: Component = () => {
+const Objectives: Component<{ data: Fields }> = (props) => {
+  const columns = [
+    "Ordre du jour",
+    "Plan technique",
+    "Objectifs du sprint",
+    "Objectif de la session",
+  ];
+
   return (
-    <div>
-      <div>
-        <p>Ordre du jour</p>
-        <p>Plan technique</p>
-        <p>Objectifs du sprint</p>
-        <p>Objectifs de la session</p>
+    <div class="w-100 mx-auto">
+      <div class="grid grid-cols-4 text-center">
+        {columns.map((title) => (
+          <p>
+            <strong>{title}</strong>
+          </p>
+        ))}
       </div>
-      <div>
-        <ol>{/* <For each={fields().}></For> */}</ol>
+
+      <div class="grid grid-cols-4 text-center">
+        <ol class="justify-center list-decimal list-inside text-sm">
+          <For each={props.data.meeting.agenda.items}>
+            {(item) => <li>{item}</li>}
+          </For>
+        </ol>
+        <ol class="justify-center list-decimal list-inside text-sm">
+          <For each={props.data.meeting.technical.items}>
+            {(item) => <li>{item}</li>}
+          </For>
+        </ol>
+        <p class="flex items-center text-sm">{props.data.objective}</p>
+        <p class="flex items-center text-sm">
+          {props.data.sessions[session()]?.objective}
+        </p>
       </div>
     </div>
   );
-  //   return <table class="objectives">
-  //   <thead>
-  //     <tr>
-  //       <th>Ordre du jour</th>
-  //       <th>Plan technique</th>
-  //       <th>Objectifs du sprint</th>
-  //       <th>Objectifs de la session</th>
-  //     </tr>
-  //   </thead>
-  //   <tbody>
-  //     <tr>
-  //       <td width="{{meeting.agenda.width}}">
-  //         <ol
-  //           style="--columnCount: {{meeting.agenda.columnCount}}"
-  //           t="meeting.agenda.items.[]"
-  //           class="agenda"
-  //         >
-  //           <li>{{value}}</li>
-  //         </ol>
-  //       </td>
-  //       <td width="{{meeting.technical.width}}">
-  //         <ol
-  //           style="--columnCount: {{meeting.technical.columnCount}}"
-  //           t="meeting.technical.items.[]"
-  //           class="agenda"
-  //         >
-  //           <li>{{value}}</li>
-  //         </ol>
-  //       </td>
-  //       <td width="auto">{{objective}}</td>
-  //       <td width="auto">{{[session].objective}}</td>
-  //     </tr>
-  //   </tbody>
-  // </table>;
 };
 
 export default Objectives;

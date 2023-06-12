@@ -1,9 +1,15 @@
 import { createResource } from "solid-js";
-import { dueDate, isValidDate, session } from "./params";
+import { SafeParseError, ZodError, ZodIssueCode, z } from "zod";
 import { mergeDeep } from "../utils";
-import { z } from "zod";
+import { dueDate, isValidDate, session } from "./params";
 
 const schema = z.object({
+  sessions: z.record(
+    z.enum(["s6", "s7", "s8"]),
+    z.object({
+      objective: z.string(),
+    })
+  ),
   objective: z.string(),
   members: z.array(
     z.object({
@@ -35,20 +41,33 @@ const [defaults] = createResource(async () => {
 
 const [fields, { refetch }] = createResource(async () => {
   if (!isValidDate()) {
-    return { success: false, error: "Not a thursday" };
+    return {
+      success: false,
+      error: new ZodError([
+        { code: ZodIssueCode.custom, message: "Not a thursday", path: [] },
+      ]),
+    } satisfies SafeParseError<z.infer<typeof schema>>;
   }
 
   const date = dueDate().toLocaleDateString("fr-CA");
   try {
     const response = await fetch(`./fields/${session()}/${date}/data.json`);
     const data = await response.json();
+
     return schema.safeParse(mergeDeep(defaults(), data));
   } catch (err) {
     return {
       success: false,
-      error: "Could not find " + session() + "/" + date,
-    };
+      error: new ZodError([
+        {
+          code: ZodIssueCode.custom,
+          message: "Could not find " + session() + "/" + date,
+          path: [],
+        },
+      ]),
+    } satisfies SafeParseError<z.infer<typeof schema>>;
   }
 });
 
+export type Fields = z.infer<typeof schema>;
 export { fields, refetch };

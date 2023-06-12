@@ -1,6 +1,8 @@
 {
-  "s6": {
-    "objective": "Insérer un objectif pour la session ici"
+  "sessions": {
+    "s6": {
+      "objective": "Insérer un objectif pour la session ici"
+    }
   },
   "members": [
     {
