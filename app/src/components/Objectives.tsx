@@ -3,14 +3,14 @@ import { Component, For } from "solid-js";
 import { Fields } from "../stores/fields";
 import { session } from "../stores/params";
 
-const Objectives: Component<{ data: Fields }> = (props) => {
-  const columns = [
-    "Ordre du jour",
-    "Plan technique",
-    "Objectifs du sprint",
-    "Objectif de la session",
-  ];
+const columns = [
+  "Ordre du jour",
+  "Plan technique",
+  "Objectifs du sprint",
+  "Objectif de la session",
+];
 
+const Objectives: Component<{ data: Fields }> = (props) => {
   return (
     <div class="w-100 mx-auto">
       <div class="grid grid-cols-4 text-center">
