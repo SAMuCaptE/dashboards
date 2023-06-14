@@ -1,5 +1,4 @@
 import { createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
 
 export type Session = "s6" | "s7" | "s8";
 
@@ -19,5 +18,6 @@ const [session, setSession] = createSignal<Session>("s6");
 const [dueDate, setDueDate] = createSignal<Date>(new Date(defaultDate));
 
 const isValidDate = () => dueDate().getDay() === 4;
+const startDate = () => new Date(dueDate().getTime() - 6 * 24 * 3600 * 1000);
 
-export { session, setSession, dueDate, setDueDate, isValidDate };
+export { dueDate, isValidDate, session, setDueDate, setSession, startDate };

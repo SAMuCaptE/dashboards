@@ -1,7 +1,7 @@
 import { createResource } from "solid-js";
 import { SafeParseError, ZodError, ZodIssueCode, z } from "zod";
+import { dueDate, isValidDate, session } from "../stores/params";
 import { mergeDeep } from "../utils";
-import { dueDate, isValidDate, session } from "./params";
 
 const schema = z.object({
   sessions: z.record(

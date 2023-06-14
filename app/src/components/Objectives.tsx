@@ -1,6 +1,6 @@
 import { Component, For } from "solid-js";
 
-import { Fields } from "../stores/fields";
+import { Fields } from "../resources/fields";
 import { session } from "../stores/params";
 
 const columns = [

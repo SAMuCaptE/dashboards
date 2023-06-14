@@ -1,6 +1,13 @@
 import { Component } from "solid-js";
-import { Session, dueDate, isValidDate, session, setDueDate, setSession } from "../stores/params";
-import { fields, refetch as refetchFields } from "../stores/fields";
+import { fields, refetch as refetchFields } from "../resources/fields";
+import {
+  Session,
+  dueDate,
+  isValidDate,
+  session,
+  setDueDate,
+  setSession,
+} from "../stores/params";
 
 const Controls: Component = () => {
   return (
@@ -26,19 +33,30 @@ const Controls: Component = () => {
           type="date"
           value={dueDate().toLocaleDateString("en-CA")}
           onchange={(e) => {
-            const [year, month, day] = e.currentTarget.value.split("-").map((v) => parseInt(v));
+            const [year, month, day] = e.currentTarget.value
+              .split("-")
+              .map((v) => parseInt(v));
             setDueDate(new Date(year, month - 1, day));
             refetchFields();
           }}
         />
       </form>
 
-      <button class="block bg-transparent border-0 mx-auto my-0" onclick={() => window.print()}>
+      <button
+        class="block bg-transparent border-0 mx-auto my-0"
+        onclick={() => window.print()}
+      >
         <span class="material-symbols-outlined">print</span>
       </button>
 
-      {!isValidDate() && <p class="font-bold text-red-600 text-center">La date choisie n'est pas un jeudi</p>}
-      {!fields()?.success && <pre class="w-fit mx-auto">{JSON.stringify(fields(), null, 2)}</pre>}
+      {!isValidDate() && (
+        <p class="font-bold text-red-600 text-center">
+          La date choisie n'est pas un jeudi
+        </p>
+      )}
+      {!fields()?.success && (
+        <pre class="w-fit mx-auto">{JSON.stringify(fields(), null, 2)}</pre>
+      )}
     </>
   );
 };
