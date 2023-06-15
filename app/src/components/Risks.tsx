@@ -8,7 +8,7 @@ const iconClasses = "material-symbols-outlined block h-6 text-lg";
 
 const Risks: Component<{ data: Fields }> = (props) => {
   return (
-    <ul class="h-[200px]">
+    <ul class="max-h-[200px]">
       <li class="grid grid-cols-[1fr_1fr_50px_45px]">
         <For each={columns}>
           {(title) => <p class="font-semibold text-center">{title}</p>}

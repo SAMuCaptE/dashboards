@@ -2,6 +2,7 @@ import { createServer } from "http";
 import { z } from "zod";
 
 import { getUsers } from "./api/get-users";
+import { getBudget } from "./api/money";
 import { getWorkedHours } from "./api/worked-hours";
 import "./env";
 
@@ -29,6 +30,12 @@ const routes = {
     z.object({
       start: z.string().transform((str) => new Date(parseInt(str))),
       end: z.string().transform((str) => new Date(parseInt(str))),
+    })
+  ),
+  "/budget": makeRoute(
+    getBudget,
+    z.object({
+      date: z.string().transform((str) => new Date(parseInt(str))),
     })
   ),
 };
