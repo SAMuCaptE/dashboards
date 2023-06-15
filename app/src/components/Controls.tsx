@@ -1,5 +1,6 @@
 import { Component } from "solid-js";
 import { fields, refetch as refetchFields } from "../resources/fields";
+import { refetch as refetchUsers } from "../resources/users";
 import {
   Session,
   dueDate,
@@ -42,12 +43,24 @@ const Controls: Component = () => {
         />
       </form>
 
-      <button
-        class="block bg-transparent border-0 mx-auto my-0"
-        onclick={() => window.print()}
-      >
-        <span class="material-symbols-outlined">print</span>
-      </button>
+      <div class="flex w-1/6 mx-auto">
+        <button
+          class="block bg-transparent border-0 mx-auto my-0 "
+          onclick={() => window.print()}
+        >
+          <span class="material-symbols-outlined">print</span>
+        </button>
+
+        <button
+          class="block bg-transparent border-0 mx-auto my-0 "
+          onclick={() => {
+            refetchFields();
+            refetchUsers();
+          }}
+        >
+          <span class="material-symbols-outlined">update</span>
+        </button>
+      </div>
 
       {!isValidDate() && (
         <p class="font-bold text-red-600 text-center">

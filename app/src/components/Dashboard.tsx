@@ -17,7 +17,7 @@ const Dashboard: Component = () => {
           return (
             f?.success && (
               <>
-                <Page>
+                <Page data={f.data}>
                   <Header />
                   <Objectives data={f.data} />
                   <Members data={f.data} />
@@ -26,7 +26,7 @@ const Dashboard: Component = () => {
                     <Risks data={f.data} />
                   </div>
                 </Page>
-                <Page>page 2</Page>
+                <Page data={f.data}>page 2</Page>
               </>
             )
           );
