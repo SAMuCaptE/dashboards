@@ -18,5 +18,18 @@
     "technical": {
       "items": ["tech 1", "tech 2", "tech 3", "tech 4"]
     }
-  }
+  },
+  "risks": [
+    {
+      "description": "risque no1",
+      "mitigation": "on fait ça",
+      "gravity": 5,
+      "ticketUrl": "https://app.clickup.com/t/860qx97ax"
+    },
+    {
+      "description": "risque no2 da awd wawdada da a a da dadwwd a",
+      "mitigation": "on fait qqch d'autre",
+      "gravity": 1
+    }
+  ]
 }

@@ -32,6 +32,14 @@ const schema = z.object({
       items: z.array(z.string()),
     }),
   }),
+  risks: z.array(
+    z.object({
+      description: z.string(),
+      mitigation: z.string(),
+      gravity: z.number().min(1),
+      ticketUrl: z.string().url().optional(),
+    })
+  ),
 });
 
 const [defaults] = createResource(async () => {

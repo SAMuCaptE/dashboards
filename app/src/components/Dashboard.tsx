@@ -5,6 +5,7 @@ import Header from "./Header";
 import Members from "./Members";
 import Objectives from "./Objectives";
 import Page from "./Page";
+import Risks from "./Risks";
 import WorkedHoursChart from "./WorkedHoursChart";
 
 const Dashboard: Component = () => {
@@ -22,6 +23,7 @@ const Dashboard: Component = () => {
                   <Members data={f.data} />
                   <div class="grid grid-cols-2">
                     <WorkedHoursChart />
+                    <Risks data={f.data} />
                   </div>
                 </Page>
                 <Page>page 2</Page>
