@@ -90,7 +90,7 @@ const BudgetChart: Component = () => {
   return (
     <div class="w-[350px] h-[260px] block mx-auto overflow-hidden">
       <h4 class="text-center font-semibold">Budget</h4>
-      <div class="h-[220px]">
+      <div class="h-[180px] mt-[40px]">
         <Doughnut
           data={chartData()}
           options={chartOptions}

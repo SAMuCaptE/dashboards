@@ -7,7 +7,7 @@ const Page: Component<{ children: JSX.Element; data: Fields }> = (props) => {
       {props.children}
       <footer class="opacity-80 absolute bottom-1 left-1/2 -translate-x-1/2">
         <p class="text-sm">
-          <strong>SAMuCaptE</strong> - {props.data.meeting.date}
+          <strong>SAUM</strong> - {props.data.meeting.date}
         </p>
       </footer>
     </main>
