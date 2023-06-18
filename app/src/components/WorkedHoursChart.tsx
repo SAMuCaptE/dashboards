@@ -3,11 +3,18 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Bar } from "solid-chartjs";
 import { Component, createMemo, createResource, onMount } from "solid-js";
 import { users } from "../resources/users";
-import { dueDate, startDate } from "../stores/params";
+import { endDate, startDate } from "../stores/params";
 
-const fetchWorkedHours = async (): Promise<{ weekly: any; average: any }> => {
+const alternateLabels: Record<string, string> = {
+  Administration: "Admin",
+  Mécanique: "Mec",
+  Électrique: "Élec",
+  Informatique: "Info",
+};
+
+const fetchWorkedHours = async () => {
   const response = await fetch(
-    `http://localhost:16987/hours?start=${startDate().getTime()}&end=${dueDate().getTime()}`
+    `http://localhost:16987/hours?start=${startDate().getTime()}&end=${endDate().getTime()}`
   );
   return response.json();
 };
@@ -19,57 +26,90 @@ const WorkedHoursChart: Component = () => {
     Chart.register(Title, Tooltip, Legend, Colors);
   });
 
-  const formattedHours = createMemo(() => {
-    const names = [];
-    const weekly = [];
-    const average = [];
+  const sortedUsers = createMemo(() =>
+    (users()?.members ?? []).sort((a: any, b: any) =>
+      a.username.split(" ")[1].localeCompare(b.username.split(" ")[1])
+    )
+  );
 
-    const data = workedHours();
-    if (data) {
-      const sortedUsers = users().members.sort(
-        (m1: any, m2: any) => m1.id - m2.id
-      );
-      for (const user of sortedUsers) {
-        names.push(user.initials);
-      }
-
-      for (const a of Object.values(data)) {
-        weekly.push(a.weekly);
-        average.push(a.average);
+  const sortedHours = createMemo(() => {
+    const sorted = {} as any;
+    const hours = workedHours() ?? {};
+    for (const user of sortedUsers()) {
+      for (const key of Object.keys(hours)) {
+        sorted[key] ??= [];
+        sorted[key].push(hours[key][user.id] ?? 0);
       }
     }
-    return { names, weekly, average };
+    return sorted;
   });
 
+  const weeklyTotal = () => {
+    const hours = Object.entries(sortedHours())
+      .filter(([key]) => key !== "average")
+      .map(([_, values]) => values) as number[][];
+
+    const totals: number[] = [];
+    for (const hour of hours) {
+      for (let i = 0; i < sortedUsers().length; i++) {
+        totals[i] ??= 0;
+        totals[i] += hour[i];
+      }
+    }
+    return totals;
+  };
+
   const chartData = () => ({
-    labels: formattedHours().names,
+    labels: sortedUsers().map((user: any) => user.initials),
     datasets: [
+      ...Object.entries(sortedHours())
+        .filter(([label]) => label !== "average")
+        .map(([label, data]) => ({
+          data,
+          type: "bar",
+          label: alternateLabels[label] ?? label,
+          borderWidth: 1,
+          barPercentage: 0.6,
+        })),
       {
-        label: "Travail effectué",
-        data: formattedHours().weekly,
-        borderWidth: 1,
-        barPercentage: 0.6,
-      },
-      {
-        label: "Travail moyen",
-        data: formattedHours().average,
-        borderWidth: 1,
-        barPercentage: 0.6,
+        type: "line",
+        label: "Moyenne",
+        data: sortedHours().average,
       },
     ],
   });
 
   const chartOptions = {
-    scales: { y: { beginAtZero: true, ticks: { display: false } } },
+    scales: {
+      y: { beginAtZero: true, ticks: { display: false }, stacked: true },
+      x: { stacked: true },
+    },
     plugins: {
       datalabels: {
         offset: -5,
         align: "top",
         anchor: "end",
-        formatter: (value: number) => Math.round(value * 10) / 10 + "h",
+        formatter: (
+          value: number,
+          metadata: { datasetIndex: number; dataIndex: number }
+        ) => {
+          if (metadata.datasetIndex === 3) {
+            // 3 == dernier
+            return (
+              Math.round(weeklyTotal()[metadata.dataIndex] * 10) / 10 + "h"
+            );
+          } else if (metadata.datasetIndex === 4) {
+            // 4 == average
+            return weeklyTotal()[metadata.dataIndex] - value > 2
+              ? Math.round(value * 10) / 10 + "h"
+              : "";
+          }
+          return "";
+        },
       },
+      legend: { labels: { usePointStyle: true } },
     },
-  };
+  } as const;
 
   return (
     <div>

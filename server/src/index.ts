@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { getUsers } from "./api/get-users";
 import { getBudget } from "./api/money";
+import { getSpaces } from "./api/spaces";
 import { getWorkedHours } from "./api/worked-hours";
 import "./env";
 
@@ -38,6 +39,7 @@ const routes = {
       date: z.string().transform((str) => new Date(parseInt(str))),
     })
   ),
+  "/spaces": makeRoute(getSpaces, NoArgs),
 };
 
 async function getData(url: string) {

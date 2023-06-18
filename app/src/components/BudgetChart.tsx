@@ -2,11 +2,11 @@ import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Doughnut } from "solid-chartjs";
 import { Component, createResource, onMount } from "solid-js";
-import { dueDate } from "../stores/params";
+import { endDate } from "../stores/params";
 
 const fetchBudget = async () => {
   const response = await fetch(
-    `http://localhost:16987/budget?date=${dueDate().getTime()}`
+    `http://localhost:16987/budget?date=${endDate().getTime()}`
   );
   return response.json();
 };

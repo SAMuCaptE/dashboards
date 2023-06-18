@@ -26,6 +26,7 @@ const Dashboard: Component = () => {
                   <Header />
 
                   <Objectives data={f.data} />
+                  <Spacing size={2} />
                   <Members data={f.data} />
 
                   <Columns>

@@ -6,10 +6,10 @@
   },
   "members": [
     {
-      "img": "ariel.png",
-      "firstname": "Ariel",
-      "lastname": "M F",
-      "role": "Correcteur"
+      "img": "raphael.jpg",
+      "firstname": "Raphaël",
+      "lastname": "A",
+      "role": "Trésorier"
     },
     {
       "img": "daniel.jpg",
@@ -18,28 +18,16 @@
       "role": "Médiateur"
     },
     {
-      "img": "julien.png",
-      "firstname": "Julien",
-      "lastname": "R",
-      "role": "Secrétaire"
+      "img": "ariel.png",
+      "firstname": "Ariel",
+      "lastname": "M F",
+      "role": "Correcteur"
     },
     {
-      "img": "mederick.jpg",
-      "firstname": "Médérick",
-      "lastname": "M",
-      "role": "Gestionnaire"
-    },
-    {
-      "img": "natael.jpg",
-      "firstname": "Nataël",
-      "lastname": "L-L",
-      "role": "Superviseur"
-    },
-    {
-      "img": "raphael.jpg",
-      "firstname": "Raphaël",
-      "lastname": "A",
-      "role": "Trésorier"
+      "img": "zachary.png",
+      "firstname": "Zachary",
+      "lastname": "G",
+      "role": "Animateur"
     },
     {
       "img": "",
@@ -48,10 +36,22 @@
       "role": "Chef d'équipe"
     },
     {
-      "img": "zachary.png",
-      "firstname": "Zachary",
-      "lastname": "G",
-      "role": "Animateur"
+      "img": "natael.jpg",
+      "firstname": "Nataël",
+      "lastname": "L-L",
+      "role": "Superviseur"
+    },
+    {
+      "img": "mederick.jpg",
+      "firstname": "Médérick",
+      "lastname": "M",
+      "role": "Gestionnaire"
+    },
+    {
+      "img": "julien.png",
+      "firstname": "Julien",
+      "lastname": "R",
+      "role": "Secrétaire"
     }
   ]
 }

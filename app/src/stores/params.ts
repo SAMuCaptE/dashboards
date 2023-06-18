@@ -18,6 +18,33 @@ const [session, setSession] = createSignal<Session>("s6");
 const [dueDate, setDueDate] = createSignal<Date>(new Date(defaultDate));
 
 const isValidDate = () => dueDate().getDay() === 4;
-const startDate = () => new Date(dueDate().getTime() - 6 * 24 * 3600 * 1000);
 
-export { dueDate, isValidDate, session, setDueDate, setSession, startDate };
+const startDate = () =>
+  new Date(
+    dueDate().getFullYear(),
+    dueDate().getMonth(),
+    dueDate().getDate() - 7,
+    0,
+    0,
+    0
+  );
+
+const endDate = () =>
+  new Date(
+    dueDate().getFullYear(),
+    dueDate().getMonth(),
+    dueDate().getDate() - 1,
+    23,
+    59,
+    59
+  );
+
+export {
+  dueDate,
+  endDate,
+  isValidDate,
+  session,
+  setDueDate,
+  setSession,
+  startDate,
+};
