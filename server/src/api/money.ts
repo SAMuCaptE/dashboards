@@ -1,4 +1,4 @@
-export function getBudget(args: { date: Date }) {
+export function getBudget(date: Date) {
   return {
     planned: {
       s6: 1000,

@@ -1,8 +1,6 @@
 import { createResource } from "solid-js";
+import { client } from "../client";
 
-const [users, { refetch }] = createResource(async () => {
-  const response = await fetch("http://localhost:16987/users");
-  return response.json();
-});
+const [users, { refetch }] = createResource(async () => client.users.query());
 
 export { refetch, users };

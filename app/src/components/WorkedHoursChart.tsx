@@ -2,6 +2,7 @@ import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Bar } from "solid-chartjs";
 import { Component, createMemo, createResource, onMount } from "solid-js";
+import { client } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 
@@ -12,28 +13,26 @@ const alternateLabels: Record<string, string> = {
   Informatique: "Info",
 };
 
-const fetchWorkedHours = async () => {
-  const response = await fetch(
-    `http://localhost:16987/hours?start=${startDate().getTime()}&end=${endDate().getTime()}`
-  );
-  return response.json();
-};
-
 const WorkedHoursChart: Component = () => {
-  const [workedHours] = createResource(fetchWorkedHours);
+  const [workedHours] = createResource(() =>
+    client.hours.query({
+      start: startDate().getTime(),
+      end: endDate().getTime(),
+    })
+  );
 
   onMount(() => {
     Chart.register(Title, Tooltip, Legend, Colors);
   });
 
   const sortedUsers = createMemo(() =>
-    (users()?.members ?? []).sort((a: any, b: any) =>
+    (users()?.members ?? []).sort((a, b) =>
       a.username.split(" ")[1].localeCompare(b.username.split(" ")[1])
     )
   );
 
   const sortedHours = createMemo(() => {
-    const sorted = {} as any;
+    const sorted: Record<string, number[]> = {};
     const hours = workedHours() ?? {};
     for (const user of sortedUsers()) {
       for (const key of Object.keys(hours)) {
@@ -60,7 +59,7 @@ const WorkedHoursChart: Component = () => {
   };
 
   const chartData = () => ({
-    labels: sortedUsers().map((user: any) => user.initials),
+    labels: sortedUsers().map((user) => user.initials),
     datasets: [
       ...Object.entries(sortedHours())
         .filter(([label]) => label !== "average")

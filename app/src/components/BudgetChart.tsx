@@ -2,52 +2,52 @@ import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Doughnut } from "solid-chartjs";
 import { Component, createResource, onMount } from "solid-js";
+import { client } from "../client";
 import { endDate } from "../stores/params";
 
-const fetchBudget = async () => {
-  const response = await fetch(
-    `http://localhost:16987/budget?date=${endDate().getTime()}`
-  );
-  return response.json();
-};
-
 const BudgetChart: Component = () => {
-  const [budget] = createResource(fetchBudget);
+  const [budget] = createResource(() =>
+    client.budget.query({ date: endDate().getTime() })
+  );
 
   onMount(() => {
     Chart.register(Title, Tooltip, Legend, Colors);
   });
 
-  const chartData = () =>
-    budget()
-      ? {
-          labels: ["Boitier", "PCB", "Données", "Services", "Disponible"],
-          datasets: [
-            {
-              label: "Dépenses",
-              data: [...Object.values(budget().spent), budget().available],
-              backgroundColor: [
-                "#ed21dc",
-                "#12a308",
-                "#5fdae8",
-                "#faaf37",
-                "#99989610",
-              ],
-              hoverOffset: 4,
-              weight: 4,
-              borderWidth: 1,
-              borderColor: "#30303030",
-            },
-            {
-              label: "Planification",
-              data: Object.values(budget().planned),
-              backgroundColor: ["#a6fff0", "#dfbaff", "#b6aafa"],
-              hoverOffset: 4,
-              weight: 3,
-            },
+  const chartData = () => {
+    const b = budget();
+    if (!b) {
+      return {};
+    }
+
+    return {
+      labels: ["Boitier", "PCB", "Données", "Services", "Disponible"],
+      datasets: [
+        {
+          label: "Dépenses",
+          data: [...Object.values(b.spent), b.available],
+          backgroundColor: [
+            "#ed21dc",
+            "#12a308",
+            "#5fdae8",
+            "#faaf37",
+            "#99989610",
           ],
-        }
-      : {};
+          hoverOffset: 4,
+          weight: 4,
+          borderWidth: 1,
+          borderColor: "#30303030",
+        },
+        {
+          label: "Planification",
+          data: Object.values(b.planned),
+          backgroundColor: ["#a6fff0", "#dfbaff", "#b6aafa"],
+          hoverOffset: 4,
+          weight: 3,
+        },
+      ],
+    };
+  };
 
   const chartOptions = {
     maintainAspectRatio: false,

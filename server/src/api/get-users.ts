@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UserSchema } from "../schemas/user";
 import { api } from "./api";
@@ -14,7 +15,14 @@ export async function getUsers() {
     `https://api.clickup.com/api/v2/list/${listId}/member`
   );
 
-  return users
-    ? { members: users.members.filter((member) => member.initials !== "JG") }
-    : null;
+  if (!users) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Could not find any users",
+    });
+  }
+
+  return {
+    members: users.members.filter((member) => member.initials !== "JG"),
+  };
 }

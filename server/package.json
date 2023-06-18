@@ -1,23 +1,29 @@
 {
-  "name": "server",
+  "name": "dashboards-server",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
+  "types": "dist/trpc.d.ts",
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
-    "dev": "tsnd --respawn src/index.ts"
+    "dev": "concurrently \"tsnd --respawn src/index.ts\" \"tsc --watch\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/cors": "^2.8.13",
     "@types/node": "^20.2.5",
+    "concurrently": "^8.2.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@trpc/server": "^10.31.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.1.0",
+    "superjson": "^1.12.3",
     "zod": "^3.21.4"
   }
 }

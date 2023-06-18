@@ -1,4 +1,4 @@
-import type { Component } from "solid-js";
+import { type Component } from "solid-js";
 
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
