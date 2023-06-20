@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TimeEntrySchema } from "../schemas/time-entry";
 import { api } from "./api";
-import { getUsers } from "./get-users";
+import { getUsers } from "./users";
 
 const ResponseSchema = z.object({
   data: z.array(TimeEntrySchema),
@@ -22,6 +22,7 @@ export async function getAllTimeEntries() {
 export async function getTimeEntriesForUser(userId: number) {
   const params = new URLSearchParams({
     assignee: userId.toString(),
+    include_task_tags: "true",
   });
 
   const teamId = "9003057443";

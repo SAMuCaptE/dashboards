@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { Task } from "./task";
+import { ColorSchema } from "./color";
+import { ShortTaskSchema } from "./task";
 import { UserSchema } from "./user";
 
 export const TimeEntrySchema = z.object({
   id: z.string(),
-  task: Task,
+  task: ShortTaskSchema,
   wid: z.string(),
   user: UserSchema,
   billable: z.boolean(),
@@ -20,5 +21,13 @@ export const TimeEntrySchema = z.object({
     folder_id: z.string(),
     space_id: z.string(),
   }),
+  task_tags: z.array(
+    z.object({
+      name: z.string(),
+      tag_fg: ColorSchema,
+      tag_bg: ColorSchema,
+      creator: z.number(),
+    })
+  ),
   task_url: z.string().url(),
 });

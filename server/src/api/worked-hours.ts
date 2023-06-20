@@ -23,9 +23,12 @@ export async function getWorkedHours(start: Date, end: Date) {
     });
   }
 
-  const result = spaces.reduce((all, space) => ({ ...all, [space.id]: {} }), {
-    average: {},
-  }) as WorkedHoursResult;
+  const filteredSpaces = spaces.filter((space) => space.name !== "Epics");
+
+  const result = filteredSpaces.reduce(
+    (all, space) => ({ ...all, [space.id]: {} }),
+    { average: {} }
+  ) as WorkedHoursResult;
 
   const now = new Date().getTime();
   const averageStartDate = new Date(process.env.HOURS_START_DATE!).getTime();
@@ -52,7 +55,7 @@ export async function getWorkedHours(start: Date, end: Date) {
     result["average"][timeEntry.user.id] += durationInHours / weekCount;
   }
 
-  for (const space of spaces) {
+  for (const space of filteredSpaces) {
     result[space.name] = result[space.id];
     delete result[space.id];
   }

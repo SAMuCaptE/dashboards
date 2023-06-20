@@ -2,9 +2,11 @@ import { initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 import { z } from "zod";
 
-import { getUsers } from "./api/get-users";
 import { getBudget } from "./api/money";
+import { getTasks } from "./api/tasks";
+import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
+import { TaskSchema } from "./schemas/task";
 import { UserSchema } from "./schemas/user";
 
 const t = initTRPC.create({ transformer: SuperJSON });
@@ -29,11 +31,21 @@ export const appRouter = t.router({
         z.record(z.string(), z.number())
       )
     )
-    .query(async ({ input }) => getWorkedHours(input.start, input.end)),
+    .query(({ input }) => getWorkedHours(input.start, input.end)),
 
   budget: t.procedure
     .input(z.object({ date: z.number().transform((num) => new Date(num)) }))
-    .query(async ({ input }) => getBudget(input.date)),
+    .query(({ input }) => getBudget(input.date)),
+
+  tasks: t.procedure
+    .input(
+      z.object({
+        tags: z.array(z.string()),
+        assigneeIds: z.array(z.string()),
+      })
+    )
+    .output(z.array(TaskSchema))
+    .query(({ input }) => getTasks(input.tags, input.assigneeIds)),
 });
 
 export type AppRouter = typeof appRouter;
