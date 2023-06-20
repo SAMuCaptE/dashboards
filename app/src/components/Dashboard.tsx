@@ -1,14 +1,18 @@
 import { Component } from "solid-js";
 import { fields } from "../resources/fields";
 import { dueDate, isValidDate, session } from "../stores/params";
+
 import BudgetChart from "./BudgetChart";
+import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
+import Epics from "./Epics";
 import Header from "./Header";
 import Members from "./Members";
 import Objectives from "./Objectives";
 import Page from "./Page";
 import Risks from "./Risks";
 import Spacing from "./Spacing";
+import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
 
 const Dashboard: Component = () => {
@@ -31,6 +35,7 @@ const Dashboard: Component = () => {
 
                   <Columns>
                     <WorkedHoursChart />
+                    <BurndownChart />
                   </Columns>
 
                   <div>
@@ -48,7 +53,11 @@ const Dashboard: Component = () => {
                   </Columns>
                 </Page>
 
-                <Page data={f.data}>page 2</Page>
+                <Page data={f.data}>
+                  <Epics />
+                  <Spacing />
+                  <SprintStatus data={f.data} />
+                </Page>
               </>
             )
           );

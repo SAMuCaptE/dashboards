@@ -97,7 +97,7 @@ const WorkedHoursChart: Component = () => {
             return (
               Math.round(weeklyTotal()[metadata.dataIndex] * 10) / 10 + "h"
             );
-          } else if (metadata.datasetIndex === 4) {
+          } else if (metadata.datasetIndex === workedHours.length) {
             // 4 == average
             return weeklyTotal()[metadata.dataIndex] - value > 2
               ? Math.round(value * 10) / 10 + "h"
