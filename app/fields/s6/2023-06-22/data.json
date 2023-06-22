@@ -1,35 +1,56 @@
 {
-  "objective": "Insérer un objectif pour la semaine ici",
+  "objective": "Décider sur quelles possibilités se concentrer pour l'alimentation et la communication.",
   "members": [
-    { "disponibility": { "lastWeek": 1, "nextWeek": 4 } },
-    { "disponibility": { "lastWeek": 2, "nextWeek": 3 } },
-    { "disponibility": { "lastWeek": 3, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 1, "nextWeek": 3 } },
+    { "disponibility": { "lastWeek": 1, "nextWeek": 3 } },
+    { "disponibility": { "lastWeek": 5, "nextWeek": 4 } },
     { "disponibility": { "lastWeek": 4, "nextWeek": 1 } },
     { "disponibility": { "lastWeek": 5, "nextWeek": 2 } },
-    { "disponibility": { "lastWeek": 4, "nextWeek": 3 } },
-    { "disponibility": { "lastWeek": 3, "nextWeek": 4 } },
-    { "disponibility": { "lastWeek": 2, "nextWeek": 5 } }
+    { "disponibility": { "lastWeek": 1, "nextWeek": 5 } },
+    { "disponibility": { "lastWeek": 2, "nextWeek": 5 } },
+    { "disponibility": { "lastWeek": 4, "nextWeek": 4 } }
   ],
   "meeting": {
-    "date": "1 juin 2023 - 14h00",
+    "date": "22 juin 2023 - 10h20",
     "agenda": {
-      "items": ["test 1", "test 2", "test 3", "test 4"]
+      "items": ["SARIC", "Communication avec A. Tessier"]
     },
     "technical": {
-      "items": ["tech 1", "tech 2", "tech 3", "tech 4"]
+      "items": [
+        "Batteries (type)",
+        "Cutoff (alimentation)",
+        "Design modulaire",
+        "Contrôleur (recherches)"
+      ]
     }
   },
   "risks": [
     {
-      "description": "risque no1",
-      "mitigation": "on fait ça",
-      "gravity": 5,
-      "ticketUrl": "https://app.clickup.com/t/860qx97ax"
+      "description": "L'accès rapide et le coût à des système faisant de la communication satellite.",
+      "mitigation": "Analyse approfondie des différentes manières de communiquer ainsi que des systèmes",
+      "gravity": 3,
+      "ticketUrl": "https://app.clickup.com/t/8684w7eqj"
     },
     {
-      "description": "risque no2 da awd wawdada da a a da dadwwd a",
-      "mitigation": "on fait qqch d'autre",
-      "gravity": 1
+      "description": "Problème de transport de batteries par avion.",
+      "mitigation": "Vérifier avec l'université des procédures liées aux matières dangereuses",
+      "gravity": 3,
+      "ticketUrl": "https://app.clickup.com/t/8684w9p3w"
+    },
+    {
+      "description": "Les composants utilisés ne sont pas adaptés pour les températures nordiques.",
+      "mitigation": "Effectuer des tests au 3IT",
+      "gravity": 6,
+      "ticketUrl": "https://app.clickup.com/t/8684w9ny8"
+    },
+    {
+      "description": "Gestion des pertes (alimentation)",
+      "mitigation": "Design de cutoff électrique pour tous les périphériques (rencontre technique)",
+      "gravity": 8
     }
-  ]
+  ],
+  "sprint": {
+    "id": "901100134863",
+    "problems": []
+  }
 }

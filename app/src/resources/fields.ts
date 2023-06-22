@@ -7,7 +7,7 @@ const schema = z.object({
   sessions: z.record(
     z.enum(["s6", "s7", "s8"]),
     z.object({
-      objective: z.string(),
+      objective: z.array(z.string()),
     })
   ),
   objective: z.string(),
@@ -40,6 +40,15 @@ const schema = z.object({
       ticketUrl: z.string().url().optional(),
     })
   ),
+  sprint: z.object({
+    id: z.string(),
+    problems: z.array(
+      z.object({
+        task: z.string(),
+        description: z.string(),
+      })
+    ),
+  }),
 });
 
 const [defaults] = createResource(async () => {

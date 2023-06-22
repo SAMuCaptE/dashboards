@@ -1,7 +1,10 @@
 {
   "sessions": {
     "s6": {
-      "objective": "Insérer un objectif pour la session ici"
+      "objective": [
+        "Électrique: Avoir une base pour tout ce qui est alimentation (prototype conceptuel)",
+        "Informatique: Architecture globale avec une solution pour la communication"
+      ]
     }
   },
   "members": [
@@ -30,7 +33,7 @@
       "role": "Animateur"
     },
     {
-      "img": "",
+      "img": "simon.jpg",
       "firstname": "Simon",
       "lastname": "L",
       "role": "Chef d'équipe"
@@ -39,7 +42,7 @@
       "img": "natael.jpg",
       "firstname": "Nataël",
       "lastname": "L-L",
-      "role": "Superviseur"
+      "role": "Vérificateur"
     },
     {
       "img": "mederick.jpg",
