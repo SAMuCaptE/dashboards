@@ -7,6 +7,9 @@ const rowClasses =
 const iconClasses = "material-symbols-outlined block h-6 text-lg";
 
 const Risks: Component<{ data: Fields }> = (props) => {
+  const sortedRisks = () =>
+    props.data.risks.sort((a, b) => (a.gravity < b.gravity ? 1 : -1));
+
   return (
     <ul class="max-h-[200px]">
       <li class="grid grid-cols-[1fr_1fr_50px_45px]">
@@ -15,19 +18,15 @@ const Risks: Component<{ data: Fields }> = (props) => {
         </For>
       </li>
       <For
-        each={props.data.risks}
+        each={sortedRisks()}
         fallback={
           <li class="italic h-1/2 flex items-center justify-center">
             Aucun risque n'est soulevé pour l'instant
           </li>
         }
       >
-        {(risk, index) => (
-          <li
-            class={`grid grid-cols-[1fr_1fr_50px_45px] ${
-              index() % 2 ? "bg-gray-100" : ""
-            }`}
-          >
+        {(risk) => (
+          <li class={"grid grid-cols-[1fr_1fr_50px_45px] even:bg-gray-200"}>
             <p class={rowClasses}>{risk.description}</p>
             <p class={rowClasses}>{risk.mitigation}</p>
             <p class={rowClasses}>{risk.gravity}</p>

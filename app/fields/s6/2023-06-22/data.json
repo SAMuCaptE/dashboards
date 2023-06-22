@@ -1,5 +1,4 @@
 {
-  "objective": "Décider sur quelles possibilités se concentrer pour l'alimentation et la communication.",
   "members": [
     { "disponibility": { "lastWeek": 1, "nextWeek": 3 } },
     { "disponibility": { "lastWeek": 1, "nextWeek": 3 } },
@@ -51,6 +50,7 @@
   ],
   "sprint": {
     "id": "901100134863",
+    "objective": "Décider sur quelles possibilités se concentrer pour l'alimentation et la communication.",
     "problems": []
   }
 }

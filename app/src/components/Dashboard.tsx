@@ -3,7 +3,6 @@ import { fields } from "../resources/fields";
 import { dueDate, isValidDate, session } from "../stores/params";
 
 import BudgetChart from "./BudgetChart";
-import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
 import Epics from "./Epics";
 import Header from "./Header";
@@ -11,7 +10,6 @@ import Members from "./Members";
 import Objectives from "./Objectives";
 import Page from "./Page";
 import Risks from "./Risks";
-import Spacing from "./Spacing";
 import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
 
@@ -30,13 +28,10 @@ const Dashboard: Component = () => {
                   <Header />
 
                   <Objectives data={f.data} />
-                  <Spacing size={2} />
-                  <Members data={f.data} />
+                  <div class="h-2"></div>
 
-                  <Columns>
-                    <WorkedHoursChart />
-                    <BurndownChart />
-                  </Columns>
+                  <Members data={f.data} />
+                  <div class="h-2"></div>
 
                   <div>
                     <img
@@ -45,17 +40,19 @@ const Dashboard: Component = () => {
                     />
                   </div>
 
-                  <Spacing />
-
                   <Columns>
-                    <Risks data={f.data} />
+                    <WorkedHoursChart />
+                    {/* <BurndownChart /> */}
                     <BudgetChart />
                   </Columns>
+
+                  <div class="w-[95%] mx-auto">
+                    <Risks data={f.data} />
+                  </div>
                 </Page>
 
                 <Page data={f.data}>
                   <Epics />
-                  <Spacing />
                   <SprintStatus data={f.data} />
                 </Page>
               </>

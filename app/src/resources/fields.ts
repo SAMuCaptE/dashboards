@@ -10,7 +10,6 @@ const schema = z.object({
       objective: z.array(z.string()),
     })
   ),
-  objective: z.string(),
   members: z.array(
     z.object({
       img: z.string(),
@@ -42,6 +41,7 @@ const schema = z.object({
   ),
   sprint: z.object({
     id: z.string(),
+    objective: z.string(),
     problems: z.array(
       z.object({
         task: z.string(),
