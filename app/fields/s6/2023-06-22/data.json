@@ -51,6 +51,11 @@
   "sprint": {
     "id": "901100134863",
     "objective": "Décider sur quelles possibilités se concentrer pour l'alimentation et la communication.",
-    "problems": []
+    "problems": [
+      {
+        "taskId": "8684w99t1",
+        "description": "Un exemple de problème qui bloquerait cette tâche avec des informations intéressantes ici"
+      }
+    ]
   }
 }

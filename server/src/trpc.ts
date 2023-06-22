@@ -40,12 +40,15 @@ export const appRouter = t.router({
   tasks: t.procedure
     .input(
       z.object({
-        tags: z.array(z.string()),
-        assigneeIds: z.array(z.string()),
+        tags: z.array(z.string()).optional(),
+        assigneeIds: z.array(z.string()).optional(),
+        listIds: z.array(z.string()).optional(),
       })
     )
     .output(z.array(TaskSchema))
-    .query(({ input }) => getTasks(input.tags, input.assigneeIds)),
+    .query(({ input }) =>
+      getTasks(input.tags ?? [], input.assigneeIds ?? [], input.listIds ?? [])
+    ),
 });
 
 export type AppRouter = typeof appRouter;

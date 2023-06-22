@@ -44,7 +44,7 @@ const schema = z.object({
     objective: z.string(),
     problems: z.array(
       z.object({
-        task: z.string(),
+        taskId: z.string(),
         description: z.string(),
       })
     ),

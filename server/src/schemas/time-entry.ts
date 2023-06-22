@@ -31,3 +31,5 @@ export const TimeEntrySchema = z.object({
   ),
   task_url: z.string().url(),
 });
+
+export type TimeEntry = z.infer<typeof TimeEntrySchema>;

@@ -7,7 +7,11 @@ const ResponseSchema = z.object({
   tasks: z.array(TaskSchema),
 });
 
-export async function getTasks(tags: string[], assigneeIds: string[]) {
+export async function getTasks(
+  tags: string[],
+  assigneeIds: string[],
+  listIds: string[]
+) {
   let query = new URLSearchParams({
     archived: "false",
     page: "0",
@@ -22,6 +26,9 @@ export async function getTasks(tags: string[], assigneeIds: string[]) {
   }
   if (assigneeIds && assigneeIds.length > 0) {
     query += "&" + assigneeIds.map((tag) => `assignees[]=${tag}`).join("&");
+  }
+  if (listIds && listIds.length > 0) {
+    query += "&" + listIds.map((tag) => `list_ids[]=${tag}`).join("&");
   }
 
   const teamId = "9003057443";
