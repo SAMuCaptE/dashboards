@@ -3,8 +3,8 @@
     { "disponibility": { "lastWeek": 1, "nextWeek": 3 } },
     { "disponibility": { "lastWeek": 1, "nextWeek": 3 } },
     { "disponibility": { "lastWeek": 5, "nextWeek": 4 } },
-    { "disponibility": { "lastWeek": 4, "nextWeek": 1 } },
-    { "disponibility": { "lastWeek": 5, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 2, "nextWeek": 5 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 3 } },
     { "disponibility": { "lastWeek": 1, "nextWeek": 5 } },
     { "disponibility": { "lastWeek": 2, "nextWeek": 5 } },
     { "disponibility": { "lastWeek": 4, "nextWeek": 4 } }
@@ -12,7 +12,12 @@
   "meeting": {
     "date": "22 juin 2023 - 10h20",
     "agenda": {
-      "items": ["SARIC", "Communication avec A. Tessier"]
+      "items": [
+        "SARIC",
+        "Communication avec A. Tessier",
+        "Rétroaction sur le MIP",
+        "Réf. télécommunication"
+      ]
     },
     "technical": {
       "items": [

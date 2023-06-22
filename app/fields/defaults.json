@@ -3,7 +3,8 @@
     "s6": {
       "objective": [
         "Électrique: Avoir une base pour tout ce qui est alimentation (prototype conceptuel)",
-        "Informatique: Architecture globale avec une solution pour la communication"
+        "Informatique: Architecture globale avec une solution pour la communication",
+        "Mécanique: Avoir toutes les parties du système dans un environnement simulé (CAD)"
       ]
     }
   },
