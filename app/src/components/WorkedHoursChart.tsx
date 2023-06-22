@@ -7,10 +7,11 @@ import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 
 const alternateLabels: Record<string, string> = {
-  Administration: "Admin",
-  Mécanique: "Mec",
-  Électrique: "Élec",
-  Informatique: "Info",
+  admin: "Admin",
+  mec: "Mec",
+  elec: "Élec",
+  info: "Info",
+  unknown: "Autre",
 };
 
 const WorkedHoursChart: Component = () => {
@@ -92,13 +93,12 @@ const WorkedHoursChart: Component = () => {
           value: number,
           metadata: { datasetIndex: number; dataIndex: number }
         ) => {
-          if (metadata.datasetIndex === 3) {
-            // 3 == dernier
+          const datasetCount = Object.keys(workedHours() ?? {}).length;
+          if (metadata.datasetIndex === datasetCount - 2) {
             return (
               Math.round(weeklyTotal()[metadata.dataIndex] * 10) / 10 + "h"
             );
-          } else if (metadata.datasetIndex === workedHours.length) {
-            // 4 == average
+          } else if (metadata.datasetIndex === datasetCount - 1) {
             return weeklyTotal()[metadata.dataIndex] - value > 2
               ? Math.round(value * 10) / 10 + "h"
               : "";
@@ -112,12 +112,13 @@ const WorkedHoursChart: Component = () => {
 
   return (
     <div>
+      <h4 class="text-center font-semibold">Répartition du travail</h4>
       <Bar
         data={chartData()}
         options={chartOptions}
         plugins={[ChartDataLabels]}
         width={400}
-        height={200}
+        height={176}
       />
     </div>
   );

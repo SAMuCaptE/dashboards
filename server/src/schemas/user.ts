@@ -7,6 +7,7 @@ export const UserSchema = z.object({
   email: z.string().email(),
   initials: z.string(),
   color: ColorSchema,
+  profilePicture: z.string().url().nullable(),
 });
 
 export type User = z.infer<typeof UserSchema>;

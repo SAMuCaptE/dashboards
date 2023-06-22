@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { ColorSchema } from "./color";
+import { UserSchema } from "./user";
 
 export const TaskStatus = z.enum([
   "open",
   "to do",
   "in progress",
   "review",
+  "blocked",
   "complete",
   "closed",
 ]);
@@ -51,9 +53,11 @@ export const TaskSchema = ShortTaskSchema.and(
       id: z.number(),
       username: z.string(),
       color: ColorSchema,
-      profilePricture: z.string().url().optional(),
+      profilePicture: z.string().url().nullable(),
     }),
-    assignees: z.array(z.unknown()),
+    assignees: z
+      .array(UserSchema)
+      .transform((users) => users.filter((user) => user.initials !== "JG")),
     checklists: z.array(z.unknown()),
     tags: z.array(z.unknown()),
     parent: z.unknown().nullable(),
@@ -66,8 +70,8 @@ export const TaskSchema = ShortTaskSchema.and(
       .string()
       .transform((str) => new Date(parseInt(str)))
       .or(z.date().nullable()),
-    time_estimate: z.unknown().nullable(),
-    time_spent: z.unknown().nullable(),
+    time_estimate: z.number().optional().nullable(),
+    time_spent: z.number().optional().nullable(),
     list: z.object({ id: z.string() }),
     folder: z.object({ id: z.string() }),
     space: z.object({ id: z.string() }),

@@ -1,34 +1,45 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { SpaceSchema } from "../schemas/space";
+import { TimeEntry } from "schemas/time-entry";
 import { User } from "../schemas/user";
-import { getSpaces } from "./spaces";
 import { getAllTimeEntries } from "./time-entries";
 
-type Space = z.infer<typeof SpaceSchema>;
 type WorkedHoursResult = Record<
-  Space["id"] | "average",
+  "admin" | "elec" | "info" | "mec" | "unknown" | "average",
   Record<User["id"], number>
 >;
 
+function convertTags(tags: TimeEntry["task_tags"]) {
+  const names = tags.map((t) => t.name);
+  if (names.includes("admin")) {
+    return "admin";
+  } else if (names.includes("élec")) {
+    return "elec";
+  } else if (names.includes("info")) {
+    return "info";
+  } else if (names.includes("mec")) {
+    return "mec";
+  }
+  return "unknown";
+}
+
 export async function getWorkedHours(start: Date, end: Date) {
-  const [timeEntries, spaces] = await Promise.all([
-    getAllTimeEntries(),
-    getSpaces(),
-  ]);
-  if (!timeEntries || !spaces) {
+  const timeEntries = await getAllTimeEntries();
+
+  if (!timeEntries) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: "Could not find time entries or spaces.",
+      message: "Could not find some time entries.",
     });
   }
 
-  const filteredSpaces = spaces.filter((space) => space.name !== "Epics");
-
-  const result = filteredSpaces.reduce(
-    (all, space) => ({ ...all, [space.id]: {} }),
-    { average: {} }
-  ) as WorkedHoursResult;
+  const result: WorkedHoursResult = {
+    admin: {},
+    elec: {},
+    info: {},
+    mec: {},
+    unknown: {},
+    average: {},
+  };
 
   const now = new Date().getTime();
   const averageStartDate = new Date(process.env.HOURS_START_DATE!).getTime();
@@ -46,18 +57,13 @@ export async function getWorkedHours(start: Date, end: Date) {
     const durationInHours = timeEntry.duration / 3600_000;
 
     if (start.getTime() <= moment && end.getTime() > moment) {
-      result[timeEntry.task_location.space_id][timeEntry.user.id] ??= 0;
-      result[timeEntry.task_location.space_id][timeEntry.user.id] +=
+      result[convertTags(timeEntry.task_tags)][timeEntry.user.id] ??= 0;
+      result[convertTags(timeEntry.task_tags)][timeEntry.user.id] +=
         durationInHours;
     }
 
     result["average"][timeEntry.user.id] ??= 0;
     result["average"][timeEntry.user.id] += durationInHours / weekCount;
-  }
-
-  for (const space of filteredSpaces) {
-    result[space.name] = result[space.id];
-    delete result[space.id];
   }
 
   return result;
