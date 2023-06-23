@@ -3,7 +3,7 @@ import { client } from "../client";
 import { Fields } from "../resources/fields";
 
 const statusLabels = {
-  open: "Ouverte",
+  open: "Disponible",
   "to do": "À faire",
   "in progress": "En cours",
   review: "En revue",

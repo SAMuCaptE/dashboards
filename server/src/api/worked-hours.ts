@@ -53,7 +53,7 @@ export async function getWorkedHours(start: Date, end: Date) {
       throw new Error("Some time entry was null.");
     }
 
-    const moment = new Date(timeEntry.at).getTime();
+    const moment = new Date(timeEntry.end).getTime();
     const durationInHours = timeEntry.duration / 3600_000;
 
     if (start.getTime() <= moment && end.getTime() > moment) {

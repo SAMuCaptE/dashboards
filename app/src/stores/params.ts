@@ -24,7 +24,7 @@ const startDate = () =>
     dueDate().getFullYear(),
     dueDate().getMonth(),
     dueDate().getDate() - 7,
-    0,
+    10,
     0,
     0
   );
@@ -33,8 +33,8 @@ const endDate = () =>
   new Date(
     dueDate().getFullYear(),
     dueDate().getMonth(),
-    dueDate().getDate() - 1,
-    23,
+    dueDate().getDate(),
+    9,
     59,
     59
   );
