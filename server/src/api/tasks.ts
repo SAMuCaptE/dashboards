@@ -10,7 +10,9 @@ const ResponseSchema = z.object({
 export async function getTasks(
   tags: string[],
   assigneeIds: string[],
-  listIds: string[]
+  listIds: string[],
+  spaceIds: string[],
+  epicId: string | null
 ) {
   let query = new URLSearchParams({
     archived: "false",
@@ -29,6 +31,18 @@ export async function getTasks(
   }
   if (listIds && listIds.length > 0) {
     query += "&" + listIds.map((tag) => `list_ids[]=${tag}`).join("&");
+  }
+  if (spaceIds && spaceIds.length > 0) {
+    query += "&" + spaceIds.map((tag) => `space_ids[]=${tag}`).join("&");
+  }
+
+  if (epicId) {
+    const filter = {
+      field_id: "9ea77eb9-0a2b-4130-b94d-8fa80f68f048",
+      operator: "ANY",
+      value: [epicId],
+    };
+    query += `&custom_fields=[${JSON.stringify(filter)}]`;
   }
 
   const teamId = "9003057443";

@@ -2,6 +2,7 @@ import { initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 import { z } from "zod";
 
+import { getEpics } from "./api/epics";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
 import { getUsers } from "./api/users";
@@ -43,12 +44,42 @@ export const appRouter = t.router({
         tags: z.array(z.string()).optional(),
         assigneeIds: z.array(z.string()).optional(),
         listIds: z.array(z.string()).optional(),
+        spaceIds: z.array(z.string()).optional(),
+        associatedWithAnEpic: z.boolean().optional(),
+        epicId: z.string().optional(),
       })
     )
     .output(z.array(TaskSchema))
     .query(({ input }) =>
-      getTasks(input.tags ?? [], input.assigneeIds ?? [], input.listIds ?? [])
+      getTasks(
+        input.tags ?? [],
+        input.assigneeIds ?? [],
+        input.listIds ?? [],
+        input.spaceIds ?? [],
+        input.epicId ?? null
+      )
     ),
+
+  epics: t.procedure
+    .input(
+      z.object({
+        session: z.enum(["s6", "s7", "s8"]),
+        sprintId: z.string().optional(),
+      })
+    )
+    .output(
+      z.array(
+        TaskSchema.and(
+          z.object({
+            ticketCount: z.number(),
+            completedTicketCount: z.number(),
+            totalTimePlanned: z.number(),
+            totalTimeSpent: z.number(),
+          })
+        )
+      )
+    )
+    .query(({ input }) => getEpics(input.session, input.sprintId ?? null)),
 });
 
 export type AppRouter = typeof appRouter;

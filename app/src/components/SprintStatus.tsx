@@ -1,6 +1,8 @@
 import { Component, For, Show, createMemo, createResource } from "solid-js";
 import { client } from "../client";
 import { Fields } from "../resources/fields";
+import { formatTime } from "../utils";
+import Dash from "./Dash";
 
 const statusLabels = {
   open: "Disponible",
@@ -20,20 +22,6 @@ const statusOrder = {
   complete: 4,
   blocked: 5,
   closed: 5,
-};
-
-const formatTime = (timeInMs: number) => {
-  const minutes = Math.floor(timeInMs / 60_000);
-  const hours = Math.floor(minutes / 60);
-  return hours + "h" + (minutes - hours * 60).toString().padStart(2, "0");
-};
-
-const Dash = () => {
-  return (
-    <span class="material-symbols-outlined block h-6 text-lg">
-      horizontal_rule
-    </span>
-  );
 };
 
 const SprintStatus: Component<{ data: Fields }> = (props) => {

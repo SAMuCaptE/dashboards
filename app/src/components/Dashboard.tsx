@@ -52,7 +52,8 @@ const Dashboard: Component = () => {
                 </Page>
 
                 <Page data={f.data}>
-                  <Epics />
+                  <Epics data={f.data} />
+                  <div class="h-2"></div>
                   <SprintStatus data={f.data} />
                 </Page>
               </>

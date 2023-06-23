@@ -71,6 +71,20 @@ export const TaskSchema = ShortTaskSchema.and(
       .transform((str) => new Date(parseInt(str)))
       .or(z.date().nullable()),
     time_estimate: z.number().optional().nullable(),
+    custom_fields: z.array(
+      z.object({
+        id: z.string().uuid(),
+        name: z.string(),
+        type: z.string(),
+        type_config: z.unknown(),
+        date_created: z
+          .string()
+          .transform((str) => new Date(parseInt(str)))
+          .or(z.date()),
+        hide_from_guests: z.boolean(),
+        required: z.boolean(),
+      })
+    ),
     time_spent: z.number().optional().nullable(),
     list: z.object({ id: z.string() }),
     folder: z.object({ id: z.string() }),
