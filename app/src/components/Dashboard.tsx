@@ -2,7 +2,7 @@ import { Component } from "solid-js";
 import { fields } from "../resources/fields";
 import { dueDate, isValidDate, session } from "../stores/params";
 
-import BudgetChart from "./BudgetChart";
+import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
 import Epics from "./Epics";
 import Header from "./Header";
@@ -42,8 +42,8 @@ const Dashboard: Component = () => {
 
                   <Columns>
                     <WorkedHoursChart />
-                    {/* <BurndownChart /> */}
-                    <BudgetChart />
+                    <BurndownChart data={f.data} />
+                    {/* <BudgetChart /> */}
                   </Columns>
 
                   <div class="w-[95%] mx-auto">

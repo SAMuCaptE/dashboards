@@ -1,6 +1,6 @@
-import { Component, For, Show, createMemo, createResource } from "solid-js";
-import { client } from "../client";
+import { Component, For, Show, createMemo } from "solid-js";
 import { Fields } from "../resources/fields";
+import { sprintTasks } from "../resources/tasks";
 import { formatTime } from "../utils";
 import Dash from "./Dash";
 
@@ -25,12 +25,8 @@ const statusOrder = {
 };
 
 const SprintStatus: Component<{ data: Fields }> = (props) => {
-  const [tasks] = createResource(() =>
-    client.tasks.query({ listIds: [props.data.sprint.id] })
-  );
-
   const orderedTasks = createMemo(() =>
-    tasks()?.sort((a, b) =>
+    sprintTasks()?.sort((a, b) =>
       statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1
     )
   );

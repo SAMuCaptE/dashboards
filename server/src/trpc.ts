@@ -2,6 +2,7 @@ import { initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 import { z } from "zod";
 
+import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
@@ -80,6 +81,11 @@ export const appRouter = t.router({
       )
     )
     .query(({ input }) => getEpics(input.session, input.sprintId ?? null)),
+
+  burndown: t.procedure
+    .input(z.object({ sprintId: z.string() }))
+    .output(z.unknown())
+    .query(({ input }) => getBurndown(input.sprintId)),
 });
 
 export type AppRouter = typeof appRouter;

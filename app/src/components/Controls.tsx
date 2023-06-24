@@ -1,5 +1,6 @@
 import { Component } from "solid-js";
 import { fields, refetch as refetchFields } from "../resources/fields";
+import { refetch as refetchTasks } from "../resources/tasks";
 import { refetch as refetchUsers } from "../resources/users";
 import {
   Session,
@@ -21,6 +22,7 @@ const Controls: Component = () => {
           onchange={(e) => {
             setSession(e.currentTarget.value as Session);
             refetchFields();
+            refetchTasks();
           }}
         >
           <option value="s6">s6</option>
@@ -39,6 +41,7 @@ const Controls: Component = () => {
               .map((v) => parseInt(v));
             setDueDate(new Date(year, month - 1, day));
             refetchFields();
+            refetchTasks();
           }}
         />
       </form>
@@ -56,6 +59,7 @@ const Controls: Component = () => {
           onclick={() => {
             refetchFields();
             refetchUsers();
+            refetchTasks();
           }}
         >
           <span class="material-symbols-outlined">update</span>
