@@ -7,9 +7,22 @@ import { client } from "../client";
 import { Fields } from "../resources/fields";
 
 const formatter = new Intl.DateTimeFormat("fr-CA", {
-  month: "short",
+  month: "numeric",
   day: "2-digit",
 });
+
+function makeDatasetFromTimeEntries(timeEntries: Record<number, number>) {
+  return Object.entries(timeEntries)
+    .map(([timestamp, plannedTime]) => ({
+      x: parseInt(timestamp),
+      y: plannedTime,
+    }))
+    .sort((a, b) => a.x - b.x)
+    .map((record) => ({
+      x: new Date(record.x).toISOString(),
+      y: record.y / 3600_000,
+    }));
+}
 
 const BurndownChart: Component<{ data: Fields }> = (props) => {
   const [burndown] = createResource(() =>
@@ -20,24 +33,22 @@ const BurndownChart: Component<{ data: Fields }> = (props) => {
     Chart.register(Title, Tooltip, Legend, Colors, TimeScale);
   });
 
-  const planned = () =>
-    Object.entries(burndown()?.plannedCurve ?? {})
-      .map(([timestamp, plannedTime]) => ({
-        x: parseInt(timestamp),
-        y: plannedTime,
-      }))
-      .sort((a, b) => a.x - b.x)
-      .map((record) => ({
-        x: new Date(record.x).toISOString(),
-        y: record.y / 3600_000,
-      }));
-
   const data = () => ({
     datasets: [
       {
-        label: "Progression prévue",
+        label: "Prévision",
         type: "line",
-        data: planned(),
+        data: makeDatasetFromTimeEntries(burndown()?.plannedCurve ?? {}),
+      },
+      {
+        label: "Réel",
+        type: "line",
+        data: makeDatasetFromTimeEntries(burndown()?.actualCurve ?? {}),
+      },
+      {
+        label: "Idéal",
+        type: "line",
+        data: makeDatasetFromTimeEntries(burndown()?.idealCurve ?? {}),
       },
     ],
   });

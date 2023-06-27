@@ -49,3 +49,5 @@ export const ListSchema = z.object({
   ),
   permission_level: z.string(),
 });
+
+export type List = z.infer<typeof ListSchema>;

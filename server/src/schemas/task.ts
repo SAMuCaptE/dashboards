@@ -92,3 +92,5 @@ export const TaskSchema = ShortTaskSchema.and(
     url: z.string().url(),
   })
 );
+
+export type Task = z.infer<typeof TaskSchema>;
