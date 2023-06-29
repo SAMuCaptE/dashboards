@@ -71,7 +71,7 @@ const SprintStatus: Component<{ data: Fields }> = (props) => {
           }
         >
           {(task) => (
-            <li class="even:bg-gray-200 py-1">
+            <li class="even:bg-gray-200 py-[2px]">
               <a href={task.url} target="_blank">
                 <div class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
                   <div

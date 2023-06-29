@@ -118,7 +118,7 @@ const WorkedHoursChart: Component = () => {
         options={chartOptions}
         plugins={[ChartDataLabels]}
         width={400}
-        height={176}
+        height={206}
       />
     </div>
   );

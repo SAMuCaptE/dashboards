@@ -46,7 +46,7 @@ const Dashboard: Component = () => {
                     {/* <BudgetChart /> */}
                   </Columns>
 
-                  <div class="w-[95%] mx-auto">
+                  <div class="w-[95%] mx-auto pt-10">
                     <Risks data={f.data} />
                   </div>
                 </Page>

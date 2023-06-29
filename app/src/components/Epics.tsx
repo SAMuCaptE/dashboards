@@ -21,7 +21,7 @@ const Epics: Component<{ data: Fields }> = (props) => {
     <>
       <h4 class="text-center font-semibold">État des épics pour la session</h4>
       <ul class="w-[95%] mx-auto">
-        <li class="grid grid-cols-[1fr_120px_70px_70px_70px_70px] items-center text-center">
+        <li class="grid grid-cols-[1fr_120px_70px_70px_70px_80px] items-center text-center">
           <p>
             <strong>Épic</strong>
           </p>
@@ -55,7 +55,7 @@ const Epics: Component<{ data: Fields }> = (props) => {
           {(epic) => (
             <li class="even:bg-gray-200 py-1">
               <a href={epic.url} target="_blank">
-                <div class="grid grid-cols-[1fr_120px_70px_70px_70px_70px] items-center">
+                <div class="grid grid-cols-[1fr_120px_70px_70px_70px_80px] items-center">
                   <div class="text-sm">{epic.name}</div>
 
                   <div class="flex text-sm items-center justify-center">
@@ -91,7 +91,15 @@ const Epics: Component<{ data: Fields }> = (props) => {
 
                   <div class="text-sm text-center">
                     <span>{formatTime(epic.totalTimeSpent)}</span>
-                    <span class="font-semibold text-xs pl-1">
+                    <span
+                      class={`text-xs pl-1 ${
+                        epic.totalTimeSpent /
+                          Math.max(epic.totalTimePlanned, 1) >
+                        1
+                          ? "text-red-600 font-bold"
+                          : "font-semibold"
+                      }`}
+                    >
                       (
                       {Math.round(
                         (100 * epic.totalTimeSpent) /

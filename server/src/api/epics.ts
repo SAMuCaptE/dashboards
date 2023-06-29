@@ -8,8 +8,8 @@ export async function getEpics(sessionTag: string, sprintId: string | null) {
   const epicSpaceId = "90110010916";
   const epicTasks = await getTasks([sessionTag], [], [], [epicSpaceId], null);
 
+  const listIds = sprintId ? [sprintId] : [];
   const promises = epicTasks.map(async (epic) => {
-    const listIds = sprintId ? [sprintId] : [];
     const associatedTasks = await getTasks([], [], listIds, [], epic.id);
     return { epic, associatedTasks };
   });
