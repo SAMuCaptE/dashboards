@@ -1,6 +1,6 @@
 import { Component } from "solid-js";
 import { fields } from "../resources/fields";
-import { dueDate, isValidDate, session } from "../stores/params";
+import { isValidDate } from "../stores/params";
 
 import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
@@ -14,7 +14,7 @@ import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
 
 const Dashboard: Component = () => {
-  const formattedDate = () => dueDate().toLocaleDateString("en-CA");
+  // const formattedDate = () => dueDate().toLocaleDateString("en-CA");
 
   return (
     <>
@@ -33,12 +33,12 @@ const Dashboard: Component = () => {
                   <Members data={f.data} />
                   <div class="h-2"></div>
 
-                  <div>
+                  {/* <div>
                     <img
                       src={`/fields/${session()}/${formattedDate()}/horaire.png`}
                       alt="Horaire manquante"
                     />
-                  </div>
+                  </div> */}
 
                   <Columns>
                     <WorkedHoursChart />
@@ -53,7 +53,7 @@ const Dashboard: Component = () => {
 
                 <Page data={f.data}>
                   <Epics data={f.data} />
-                  <div class="h-2"></div>
+                  {/* <div class="h-2"></div> */}
                   <SprintStatus data={f.data} />
                 </Page>
               </>
