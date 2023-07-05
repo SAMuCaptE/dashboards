@@ -35,6 +35,7 @@ const Members: Component<{ data: Fields }> = (props) => {
 
                 <div class="flex w-4/5 mx-auto relative justify-evenly">
                   <Editable
+                    initialValue={member.disponibility.lastWeek.toString()}
                     onEdit={async (v) => {
                       await client.fields.disponibilities.edit.mutate({
                         session: session(),
@@ -56,6 +57,7 @@ const Members: Component<{ data: Fields }> = (props) => {
                   </Editable>
                   <span>|</span>
                   <Editable
+                    initialValue={member.disponibility.nextWeek.toString()}
                     onEdit={async (v) => {
                       await client.fields.disponibilities.edit.mutate({
                         session: session(),

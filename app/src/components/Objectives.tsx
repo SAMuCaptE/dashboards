@@ -8,10 +8,11 @@ import AddButton from "./AddButton";
 import Editable from "./Editable";
 
 const Objectives: Component<{ data: Fields }> = (props) => {
-  const rows = [
-    ["Ordre du jour:", props.data.meeting.agenda.items],
-    ["Plan technique:", props.data.meeting.technical.items],
-  ] as const;
+  const rows = () =>
+    [
+      ["Ordre du jour:", props.data.meeting.agenda.items],
+      ["Plan technique:", props.data.meeting.technical.items],
+    ] as const;
 
   const objectives = () =>
     [
@@ -24,7 +25,7 @@ const Objectives: Component<{ data: Fields }> = (props) => {
 
   return (
     <div class="w-[95%] mx-auto">
-      <For each={rows}>
+      <For each={rows()}>
         {([title, items], index) => (
           <div class="grid grid-cols-[120px_1fr] items-center my-1">
             <p>

@@ -1,4 +1,5 @@
-import { Component } from "solid-js";
+import { Fields } from "dashboards-server";
+import { Component, createMemo } from "solid-js";
 import { fields } from "../resources/fields";
 import { isValidDate } from "../stores/params";
 
@@ -14,52 +15,44 @@ import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
 
 const Dashboard: Component = () => {
-  // const formattedDate = () => dueDate().toLocaleDateString("en-CA");
+  const validFields = createMemo((): Fields => {
+    const f = fields();
+    if (!f || !f.success) {
+      return null as any;
+    }
+    return f.data;
+  });
 
   return (
     <>
-      {isValidDate() &&
-        (() => {
-          const f = fields();
-          return (
-            f?.success && (
-              <>
-                <Page data={f.data}>
-                  <Header />
+      {isValidDate() && validFields() && (
+        <>
+          <Page data={validFields()}>
+            <Header />
 
-                  <Objectives data={f.data} />
-                  <div class="h-2"></div>
+            <Objectives data={validFields()} />
+            <div class="h-2"></div>
 
-                  <Members data={f.data} />
-                  <div class="h-2"></div>
+            <Members data={validFields()} />
+            <div class="h-2"></div>
 
-                  {/* <div>
-                    <img
-                      src={`/fields/${session()}/${formattedDate()}/horaire.png`}
-                      alt="Horaire manquante"
-                    />
-                  </div> */}
+            <Columns>
+              <WorkedHoursChart />
+              <BurndownChart data={validFields()} />
+              {/* <BudgetChart /> */}
+            </Columns>
 
-                  <Columns>
-                    <WorkedHoursChart />
-                    <BurndownChart data={f.data} />
-                    {/* <BudgetChart /> */}
-                  </Columns>
+            <div class="w-[95%] mx-auto pt-10">
+              <Risks data={validFields()} />
+            </div>
+          </Page>
 
-                  <div class="w-[95%] mx-auto pt-10">
-                    <Risks data={f.data} />
-                  </div>
-                </Page>
-
-                <Page data={f.data}>
-                  <Epics data={f.data} />
-                  {/* <div class="h-2"></div> */}
-                  <SprintStatus data={f.data} />
-                </Page>
-              </>
-            )
-          );
-        })}
+          <Page data={validFields()}>
+            <Epics data={validFields()} />
+            <SprintStatus data={validFields()} />
+          </Page>
+        </>
+      )}
     </>
   );
 };
