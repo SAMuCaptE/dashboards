@@ -1,14 +1,21 @@
 import { Component, JSX } from "solid-js";
 
 type EditableProps = {
+  class?: string;
   children: JSX.Element;
   initialValue?: string;
-  onEdit: (value: string) => Promise<void>;
+  complexEdit?: boolean;
+  onEdit: (value: string) => void | Promise<void>;
   onDelete?: () => Promise<void>;
 };
 
 const Editable: Component<EditableProps> = (props) => {
   const edit = async () => {
+    if (props.complexEdit) {
+      await props.onEdit("");
+      return;
+    }
+
     const value = window.prompt(
       "Saisir la nouvelle valeur",
       props.initialValue
@@ -19,7 +26,12 @@ const Editable: Component<EditableProps> = (props) => {
   };
 
   return (
-    <div onclick={edit} class="relative group hover:cursor-pointer">
+    <div
+      onclick={edit}
+      class={`relative group hover:cursor-pointer hover:border-4 border-black ${
+        props.class ?? ""
+      }`}
+    >
       {props.children}
       {props.onDelete && (
         <div class="hidden group-hover:block absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-white border-2 border-black z-10 rounded-sm">

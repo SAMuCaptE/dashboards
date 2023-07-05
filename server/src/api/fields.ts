@@ -4,6 +4,13 @@ import { join } from "path";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
 
+const RiskSchema = z.object({
+  description: z.string(),
+  mitigation: z.string(),
+  gravity: z.number().min(1),
+  ticketUrl: z.string().url().optional(),
+});
+
 const schema = z.object({
   sessions: z.record(
     z.enum(["s6", "s7", "s8"]),
@@ -32,14 +39,7 @@ const schema = z.object({
       items: z.array(z.string()),
     }),
   }),
-  risks: z.array(
-    z.object({
-      description: z.string(),
-      mitigation: z.string(),
-      gravity: z.number().min(1),
-      ticketUrl: z.string().url().optional(),
-    })
-  ),
+  risks: z.array(RiskSchema),
   sprint: z.object({
     id: z.string(),
     objective: z.string(),
@@ -134,6 +134,17 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         }
       }),
 
+    date: t.router({
+      edit: t.procedure
+        .input(SelectedDashboard.and(z.object({ date: z.string() })))
+        .mutation(({ input }) =>
+          editFields(input, (original) => {
+            original.meeting.date = input.date;
+            return original;
+          })
+        ),
+    }),
+
     daily: t.router({
       add: t.procedure
         .input(SelectedDashboard.and(z.object({ objective: z.string() })))
@@ -223,6 +234,44 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.members[input.memberIndex].disponibility[input.selected] =
               input.disponibility;
+            return original;
+          })
+        ),
+    }),
+
+    risks: t.router({
+      add: t.procedure
+        .input(SelectedDashboard.and(z.object({ risk: RiskSchema })))
+        .mutation(({ input }) =>
+          editFields(input, (original) => {
+            original.risks.push(input.risk);
+            return original;
+          })
+        ),
+
+      update: t.procedure
+        .input(
+          SelectedDashboard.and(
+            z.object({ originalRisk: RiskSchema, updatedRisk: RiskSchema })
+          )
+        )
+        .mutation(async ({ input }) =>
+          editFields(input, (original) => {
+            const riskIndex = original.risks.findIndex(
+              (risk) => risk.description === input.originalRisk.description
+            );
+            original.risks[riskIndex] = input.updatedRisk;
+            return original;
+          })
+        ),
+
+      delete: t.procedure
+        .input(SelectedDashboard.and(z.object({ risk: RiskSchema })))
+        .mutation(({ input }) =>
+          editFields(input, (original) => {
+            original.risks = original.risks.filter(
+              (risk) => risk.description !== input.risk.description
+            );
             return original;
           })
         ),

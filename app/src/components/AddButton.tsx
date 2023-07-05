@@ -2,9 +2,15 @@ import { Component } from "solid-js";
 import NoPrint from "./NoPrint";
 
 const AddButton: Component<{
-  onAdd: (value: string) => Promise<void>;
+  complexAdd?: boolean;
+  onAdd: (value: string) => void | Promise<void>;
 }> = (props) => {
   const handleClick = async () => {
+    if (props.complexAdd) {
+      await props.onAdd("");
+      return;
+    }
+
     const value = window.prompt("Saisir la nouvelle valeur");
     if (value) {
       await props.onAdd(value);
