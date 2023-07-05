@@ -4,7 +4,7 @@ type EditableProps = {
   children: JSX.Element;
   initialValue?: string;
   onEdit: (value: string) => Promise<void>;
-  onDelete: () => Promise<void>;
+  onDelete?: () => Promise<void>;
 };
 
 const Editable: Component<EditableProps> = (props) => {
@@ -21,16 +21,18 @@ const Editable: Component<EditableProps> = (props) => {
   return (
     <div onclick={edit} class="relative group hover:cursor-pointer">
       {props.children}
-      <div class="hidden group-hover:block absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-white border-2 border-black z-10 rounded-sm">
-        <button
-          onclick={async (e) => {
-            e.stopPropagation();
-            await props.onDelete();
-          }}
-        >
-          <span class="material-symbols-outlined ">delete</span>
-        </button>
-      </div>
+      {props.onDelete && (
+        <div class="hidden group-hover:block absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full bg-white border-2 border-black z-10 rounded-sm">
+          <button
+            onclick={async (e) => {
+              e.stopPropagation();
+              await props.onDelete!();
+            }}
+          >
+            <span class="material-symbols-outlined ">delete</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

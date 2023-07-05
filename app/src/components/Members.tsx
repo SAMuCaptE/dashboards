@@ -1,5 +1,9 @@
 import { Fields } from "dashboards-server";
 import { Component, For } from "solid-js";
+import { client } from "../client";
+import { refetch as refetchFields } from "../resources/fields";
+import { dueDate, session } from "../stores/params";
+import Editable from "./Editable";
 
 const colors = [
   "bg-red-600",
@@ -13,7 +17,7 @@ const Members: Component<{ data: Fields }> = (props) => {
   return (
     <ul class="flex justify-evenly">
       <For each={props.data.members}>
-        {(member) => (
+        {(member, memberIndex) => (
           <li class="w-[1in] overflow-hidden">
             <figure>
               <img
@@ -30,21 +34,47 @@ const Members: Component<{ data: Fields }> = (props) => {
                 <p class="text-sm mt-[-5px]">{member.role}</p>
 
                 <div class="flex w-4/5 mx-auto relative justify-evenly">
-                  <span
-                    class={`material-symbols-outlined block h-4/5 aspect-square rounded-full bg-red ${
-                      colors[member.disponibility.lastWeek - 1]
-                    }`}
+                  <Editable
+                    onEdit={async (v) => {
+                      await client.fields.disponibilities.edit.mutate({
+                        session: session(),
+                        dueDate: dueDate(),
+                        selected: "lastWeek",
+                        memberIndex: memberIndex(),
+                        disponibility: parseInt(v),
+                      });
+                      refetchFields();
+                    }}
                   >
-                    schedule
-                  </span>
+                    <span
+                      class={`material-symbols-outlined block h-full aspect-square rounded-full bg-red ${
+                        colors[member.disponibility.lastWeek - 1]
+                      }`}
+                    >
+                      schedule
+                    </span>
+                  </Editable>
                   <span>|</span>
-                  <span
-                    class={`material-symbols-outlined block h-4/5 aspect-square rounded-full bg-red ${
-                      colors[member.disponibility.nextWeek - 1]
-                    }`}
+                  <Editable
+                    onEdit={async (v) => {
+                      await client.fields.disponibilities.edit.mutate({
+                        session: session(),
+                        dueDate: dueDate(),
+                        selected: "nextWeek",
+                        memberIndex: memberIndex(),
+                        disponibility: parseInt(v),
+                      });
+                      refetchFields();
+                    }}
                   >
-                    schedule
-                  </span>
+                    <span
+                      class={`material-symbols-outlined block h-full aspect-square rounded-full bg-red ${
+                        colors[member.disponibility.nextWeek - 1]
+                      }`}
+                    >
+                      schedule
+                    </span>
+                  </Editable>
                 </div>
               </figcaption>
             </figure>

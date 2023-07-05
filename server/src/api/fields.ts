@@ -207,5 +207,25 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           })
         ),
     }),
+
+    disponibilities: t.router({
+      edit: t.procedure
+        .input(
+          SelectedDashboard.and(
+            z.object({
+              selected: z.enum(["lastWeek", "nextWeek"]),
+              memberIndex: z.number().int(),
+              disponibility: z.number().int().min(1).max(5),
+            })
+          )
+        )
+        .mutation(({ input }) =>
+          editFields(input, (original) => {
+            original.members[input.memberIndex].disponibility[input.selected] =
+              input.disponibility;
+            return original;
+          })
+        ),
+    }),
   });
 }
