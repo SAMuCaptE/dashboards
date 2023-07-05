@@ -1,5 +1,5 @@
+import { Fields } from "dashboards-server";
 import { Component, For, Show, createMemo } from "solid-js";
-import { Fields } from "../resources/fields";
 import { sprintTasks } from "../resources/tasks";
 import { formatTime } from "../utils";
 import Dash from "./Dash";

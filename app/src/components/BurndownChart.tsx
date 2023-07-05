@@ -1,10 +1,10 @@
 import "chartjs-adapter-moment";
 
 import { Chart, Colors, Legend, TimeScale, Title, Tooltip } from "chart.js";
+import { Fields } from "dashboards-server";
 import { Line } from "solid-chartjs";
 import { Component, createResource, onMount } from "solid-js";
 import { client } from "../client";
-import { Fields } from "../resources/fields";
 
 const formatter = new Intl.DateTimeFormat("fr-CA", {
   month: "numeric",

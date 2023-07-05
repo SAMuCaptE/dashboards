@@ -1,5 +1,5 @@
+import { Fields } from "dashboards-server";
 import { Component, For } from "solid-js";
-import { Fields } from "../resources/fields";
 
 const colors = [
   "bg-red-600",

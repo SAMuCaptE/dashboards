@@ -1,5 +1,5 @@
+import { Fields } from "dashboards-server";
 import { Component, For } from "solid-js";
-import { Fields } from "../resources/fields";
 
 const columns = ["Risque", "Mitigation", "Poids", "Ticket"];
 const rowClasses =

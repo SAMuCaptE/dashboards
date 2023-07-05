@@ -1,7 +1,7 @@
 import { Component, For } from "solid-js";
 
-import { Fields } from "../resources/fields";
 import { session } from "../stores/params";
+import { Fields } from "dashboards-server";
 
 const Objectives: Component<{ data: Fields }> = (props) => {
   const rows = [

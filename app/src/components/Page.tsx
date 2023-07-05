@@ -1,5 +1,5 @@
+import { Fields } from "dashboards-server";
 import { Component, JSX } from "solid-js";
-import { Fields } from "../resources/fields";
 
 const Page: Component<{ children: JSX.Element; data: Fields }> = (props) => {
   return (

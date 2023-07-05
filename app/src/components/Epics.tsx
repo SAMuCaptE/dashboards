@@ -1,6 +1,6 @@
+import { Fields } from "dashboards-server";
 import { Component, For, createResource } from "solid-js";
 import { client } from "../client";
-import { Fields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import { formatTime } from "../utils";
 import Dash from "./Dash";
