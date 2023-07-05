@@ -16,7 +16,8 @@ HOURS_WEEKLY_OFFSET=0           # Le nombre de semaines à soustraire depuis la 
 ## Pour générer un dashboard
 
 - Remplir le document JSON avec les données appropriées (`./fields/[session]/[AAAA-MM-JJ]/data.json`).
-- Ajouter les images requises avec le nom approprié.
+- Les champs communs peuvent être édités directement sur le site web.
+- ~~Ajouter les images requises avec le nom approprié.~~
 - Sélectionner la date de remise sur le site.
 - Imprimer en pdf.
 
@@ -58,16 +59,16 @@ Ceci démarrera le serveur pour obtenir les données sur [http://localhost:16987
   - [ ] ~~Donner un pourcentage de l’état d’avancement de chaque partie de votre système en construction. Vous pouvez le faire avec du texte, texte et graphique ou sur le diagramme de votre système~~
   - [ ] ~~Tâches accomplies dans la semaine~~
   - [ ] ~~Tâches à faire dans la prochaine semaine~~
-- [ ] Gestion agile
-  - [ ] Burndown chart (sprint, release)
-  - [ ] Tâches accomplies dans la semaine ou dans le sprint
-  - [ ] Tâches à faire dans la prochaine semaine ou dans le sprint
+- [x] Gestion agile
+  - [x] Burndown chart (sprint, release)
+  - [x] Tâches accomplies dans la semaine ou dans le sprint
+  - [x] Tâches à faire dans la prochaine semaine ou dans le sprint
 - [x] Sommaire des heures de la semaine et en moyenne faites par chaque membre
   - [x] Séparation des heures selon chaque catégorie (élec, info, mec, gestion,autre)
 - [ ] ~~Répartition du temps passé par chaque membre à réaliser les activités rattachées à ses responsabilités dans l’équipe, avec une description/explication justifiant l’ampleur du travail réalisé~~
-- [ ] Taux d’atteinte des objectifs du projet pour la session
-- [ ] Suivi des risques avec les moyens pour les annuler ou les atténuer
+- [x] Taux d’atteinte des objectifs du projet pour la session (** --> via les epics**)
+- [x] Suivi des risques avec les moyens pour les annuler ou les atténuer
 - [ ] Suivi sur les protocoles d’essais (à rédiger, en révision, réalisé)
 - [x] État des dépenses
-- [ ] Problèmes rencontrés
+- [x] Problèmes rencontrés
 - [x] Identification des sujets et des présentateurs pour la rencontre hebdomadaire technique de la semaine
