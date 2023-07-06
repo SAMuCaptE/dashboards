@@ -78,7 +78,7 @@ const Risks: Component<{ data: Fields }> = (props) => {
       {selectedRisk() && (
         <Portal>
           <div
-            class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-60"
+            class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-black bg-opacity-60"
             onclick={() => formElement?.reset()}
           >
             <form

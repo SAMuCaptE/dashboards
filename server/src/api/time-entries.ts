@@ -21,6 +21,8 @@ export async function getAllTimeEntries() {
 
 export async function getTimeEntriesForUser(userId: number) {
   const params = new URLSearchParams({
+    start_date: new Date(process.env.HOURS_START_DATE!).getTime().toString(),
+    end_date: new Date().getTime().toString(),
     assignee: userId.toString(),
     include_task_tags: "true",
   });
