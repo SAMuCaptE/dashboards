@@ -12,6 +12,7 @@ const statusLabels = {
   complete: "Complétée",
   blocked: "Bloquée",
   closed: "Fermée",
+  shipping: "Commande",
 };
 
 const statusOrder = {
@@ -20,11 +21,16 @@ const statusOrder = {
   "in progress": 2,
   review: 3,
   complete: 4,
-  blocked: 5,
-  closed: 5,
+  shipping: 5,
+  blocked: 6,
+  closed: 6,
 };
 
-const SprintStatus: Component<{ data: Fields }> = (props) => {
+const SprintStatus: Component<{
+  data: Fields;
+  itemCount: number;
+  offset?: number;
+}> = (props) => {
   const orderedTasks = createMemo(() =>
     sprintTasks()?.sort((a, b) =>
       statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1
@@ -39,9 +45,17 @@ const SprintStatus: Component<{ data: Fields }> = (props) => {
       return { ...task, problems: associatedProblems };
     });
 
+  const selectedTasks = () => {
+    const t = tasksWithProblems();
+    return t?.slice(
+      props.offset ?? 0,
+      (props.offset ?? 0) + props.itemCount ?? t?.length ?? 0
+    );
+  };
+
   return (
     <>
-      <h4 class="text-center font-semibold">État du sprint en cours</h4>
+      <h4 class="mt-2 text-center font-semibold">État du sprint en cours</h4>
       <ul class="w-[95%] mx-auto">
         <li class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
           <div> </div>
@@ -60,7 +74,7 @@ const SprintStatus: Component<{ data: Fields }> = (props) => {
         </li>
 
         <For
-          each={tasksWithProblems()}
+          each={selectedTasks()}
           fallback={
             <li>
               <p class="font-bold text-center mt-6">

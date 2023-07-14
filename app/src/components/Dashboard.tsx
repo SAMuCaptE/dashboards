@@ -3,6 +3,7 @@ import { Component, createMemo } from "solid-js";
 import { fields } from "../resources/fields";
 import { isValidDate } from "../stores/params";
 
+import { sprintTasks } from "../resources/tasks";
 import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
 import Epics from "./Epics";
@@ -13,6 +14,8 @@ import Page from "./Page";
 import Risks from "./Risks";
 import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
+
+const tasksInFirstPage = 27;
 
 const Dashboard: Component = () => {
   const validFields = createMemo((): Fields => {
@@ -49,8 +52,18 @@ const Dashboard: Component = () => {
 
           <Page data={validFields()}>
             <Epics data={validFields()} />
-            <SprintStatus data={validFields()} />
+            <SprintStatus data={validFields()} itemCount={tasksInFirstPage} />
           </Page>
+
+          {(sprintTasks()?.length ?? 0) > tasksInFirstPage && (
+            <Page data={validFields()}>
+              <SprintStatus
+                data={validFields()}
+                itemCount={30}
+                offset={tasksInFirstPage}
+              />
+            </Page>
+          )}
         </>
       )}
     </>
