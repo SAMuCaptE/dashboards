@@ -10,6 +10,7 @@ export const TaskStatus = z.enum([
   "blocked",
   "complete",
   "closed",
+  "shipping",
 ]);
 
 export const ShortTaskSchema = z.object({

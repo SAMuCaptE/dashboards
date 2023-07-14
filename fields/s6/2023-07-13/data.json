@@ -1,0 +1,72 @@
+{
+  "members": [
+    { "disponibility": { "lastWeek": 5, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 5, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 4 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 3 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 3 } },
+    { "disponibility": { "lastWeek": 4, "nextWeek": 2 } },
+    { "disponibility": { "lastWeek": 4, "nextWeek": 4 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 3 } }
+  ],
+  "meeting": {
+    "date": "13 juillet 2023 - 10h20",
+    "agenda": {
+      "items": [
+        "Retour MIP",
+        "Retour Myriota",
+        "Retour sonar",
+        "Transferts thermiques",
+        "Architecture info"
+      ]
+    },
+    "technical": {
+      "items": ["Architecture", "MCU", "Cutoff", "Consommation batteries"]
+    }
+  },
+  "risks": [
+    {
+      "description": "Les composants utilisés ne sont pas adaptés pour les températures nordiques. (-40C sur datasheet)",
+      "mitigation": "Effectuer des tests au 3IT. Analyser les solutions mécaniques possibles.",
+      "gravity": 8,
+      "ticketUrl": "https://app.clickup.com/t/8684w9ny8"
+    },
+    {
+      "description": "Gestion des pertes (alimentation)",
+      "mitigation": "Design de cutoff électrique pour tous les périphériques (rencontre technique)",
+      "gravity": 8
+    },
+    {
+      "description": "La communication sous l'eau n'est pas réalisable",
+      "mitigation": "Rechercher des solutions existantes",
+      "gravity": 10,
+      "ticketUrl": "https://app.clickup.com/t/8684y1gu2"
+    },
+    {
+      "description": "Déplacement de la base submergée",
+      "mitigation": "Simuler et tester le comportement du lest",
+      "gravity": 3
+    },
+    {
+      "description": "La base submergée n'est pas étanche",
+      "mitigation": "Utiliser une solution commercialisée et l'améliorer selon nos besoins",
+      "gravity": 8,
+      "ticketUrl": "https://app.clickup.com/t/8684w9tf5"
+    },
+    {
+      "description": "Échec du système de flottabilité",
+      "mitigation": "Surdimensionner les flotteurs",
+      "gravity": 5
+    }
+  ],
+  "sprint": {
+    "id": "901100235038",
+    "objective": "Faire le CAD de la base extérieure. Développer une architecture complète du projet. Choix final pour communication.",
+    "problems": [
+      {
+        "taskId": "8684w9ta4",
+        "description": "Dépend de la batterie et des PCBs."
+      }
+    ]
+  }
+}
