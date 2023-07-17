@@ -2,6 +2,7 @@ import { createEffect, type Component } from "solid-js";
 
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
+import ExtraData from "./components/ExtraData";
 import { dueDate } from "./stores/params";
 
 const App: Component = () => {
@@ -15,6 +16,7 @@ const App: Component = () => {
     <>
       <aside>
         <Controls />
+        <ExtraData />
       </aside>
       <Dashboard />
     </>

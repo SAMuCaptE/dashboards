@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
+import { getExtraData } from "./api/extraData";
 import { makeFieldsRouter } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
@@ -89,6 +90,8 @@ export const appRouter = t.router({
     .query(({ input }) => getBurndown(input.sprintId)),
 
   fields: makeFieldsRouter(t as any),
+
+  extraData: t.procedure.query(getExtraData),
 });
 
 export type AppRouter = typeof appRouter;
