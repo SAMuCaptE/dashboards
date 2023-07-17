@@ -1,5 +1,5 @@
 import { Fields } from "dashboards-server";
-import { Component, For, createResource } from "solid-js";
+import { Component, For, Show, createResource } from "solid-js";
 import { client } from "../client";
 import { dueDate, session } from "../stores/params";
 import { formatTime } from "../utils";
@@ -78,11 +78,12 @@ const Epics: Component<{ data: Fields }> = (props) => {
                   <div class="text-sm text-center">{epic.ticketCount}</div>
 
                   <div class="text-sm text-center">
-                    {Math.round(
-                      (100 * epic.completedTicketCount) /
-                        Math.max(epic.ticketCount, 1)
-                    )}
-                    %
+                    <Show when={epic.ticketCount > 0} fallback={"N/A"}>
+                      {Math.round(
+                        (100 * epic.completedTicketCount) / epic.ticketCount
+                      )}
+                      %
+                    </Show>
                   </div>
 
                   <div class="text-sm text-center">
@@ -101,11 +102,13 @@ const Epics: Component<{ data: Fields }> = (props) => {
                       }`}
                     >
                       (
-                      {Math.round(
-                        (100 * epic.totalTimeSpent) /
-                          Math.max(epic.totalTimePlanned, 1)
-                      )}
-                      %)
+                      <Show when={epic.totalTimePlanned > 0} fallback={"N/A"}>
+                        {Math.round(
+                          (100 * epic.totalTimeSpent) / epic.totalTimePlanned
+                        )}
+                        %
+                      </Show>
+                      )
                     </span>
                   </div>
                 </div>

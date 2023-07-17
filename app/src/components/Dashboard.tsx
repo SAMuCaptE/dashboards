@@ -1,5 +1,5 @@
 import { Fields } from "dashboards-server";
-import { Component, createMemo } from "solid-js";
+import { Component, Show, createMemo } from "solid-js";
 import { fields } from "../resources/fields";
 import { isValidDate } from "../stores/params";
 
@@ -55,7 +55,7 @@ const Dashboard: Component = () => {
             <SprintStatus data={validFields()} itemCount={tasksInFirstPage} />
           </Page>
 
-          {(sprintTasks()?.length ?? 0) > tasksInFirstPage && (
+          <Show when={(sprintTasks()?.length ?? 0) > tasksInFirstPage}>
             <Page data={validFields()}>
               <SprintStatus
                 data={validFields()}
@@ -63,7 +63,7 @@ const Dashboard: Component = () => {
                 offset={tasksInFirstPage}
               />
             </Page>
-          )}
+          </Show>
         </>
       )}
     </>
