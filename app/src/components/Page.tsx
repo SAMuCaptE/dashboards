@@ -9,7 +9,7 @@ const Page: Component<{ children: JSX.Element; data: Fields }> = (props) => {
   return (
     <main class="w-[8.5in] h-[11in] border-black border-2 mx-auto block my-5 relative">
       {props.children}
-      <footer class="opacity-80 absolute bottom-3 left-1/2 -translate-x-1/2">
+      <footer class="opacity-80 absolute bottom-4 left-1/2 -translate-x-1/2">
         <Editable
           initialValue={props.data.meeting.date}
           onEdit={async (v) => {
