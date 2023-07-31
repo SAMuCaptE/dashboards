@@ -1,0 +1,67 @@
+{
+  "members": [
+    { "disponibility": { "lastWeek": 1, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 1, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 2, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 1, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 2, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 1 } },
+    { "disponibility": { "lastWeek": 3, "nextWeek": 1 } }
+  ],
+  "meeting": {
+    "date": "3 août 2023 - 12h45",
+    "agenda": {
+      "items": ["Audit 1"]
+    },
+    "technical": {
+      "items": ["Aucune rencontre technique"]
+    }
+  },
+  "risks": [
+    {
+      "description": "Les composants utilisés ne sont pas adaptés pour les températures nordiques. (-40C sur datasheet)",
+      "mitigation": "Effectuer des tests au 3IT. Analyser les solutions mécaniques possibles.",
+      "gravity": 8,
+      "ticketUrl": "https://app.clickup.com/t/8684w9ny8"
+    },
+    {
+      "description": "Gestion des pertes (alimentation)",
+      "mitigation": "Design de cutoff électrique pour tous les périphériques (rencontre technique)",
+      "gravity": 9
+    },
+    {
+      "description": "La communication sous l'eau n'est pas réalisable",
+      "mitigation": "Rechercher des solutions existantes",
+      "gravity": 10,
+      "ticketUrl": "https://app.clickup.com/t/8684y1gu2"
+    },
+    {
+      "description": "Déplacement de la base submergée",
+      "mitigation": "Simuler et tester le comportement du lest",
+      "gravity": 3
+    },
+    {
+      "description": "La base submergée n'est pas étanche",
+      "mitigation": "Utiliser une solution commercialisée et l'améliorer selon nos besoins",
+      "gravity": 7,
+      "ticketUrl": "https://app.clickup.com/t/8684w9tf5"
+    },
+    {
+      "description": "Échec du système de flottabilité",
+      "mitigation": "Surdimensionner les flotteurs",
+      "gravity": 5
+    }
+  ],
+  "sprint": {
+    "id": "901100391231",
+    "objective": "RPC + Audit",
+    "problems": [
+      {
+        "taskId": "8684xxv98",
+        "description": "Nécessite les spécifications exactes des composantes"
+      },
+      { "taskId": "86850a74n", "description": "Dépend de sonar" }
+    ]
+  }
+}

@@ -23,6 +23,8 @@ export async function getUsers() {
   }
 
   return {
-    members: users.members.filter((member) => member.initials !== "JG"),
+    members: users.members.filter(
+      (member) => !["JG", "TE"].includes(member.initials)
+    ),
   };
 }
