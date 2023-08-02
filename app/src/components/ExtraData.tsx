@@ -2,9 +2,14 @@ import { Component, For, Show, createResource, createSignal } from "solid-js";
 import { client } from "../client";
 import { users } from "../resources/users";
 
+const hourCategories: Array<
+  keyof Awaited<
+    ReturnType<(typeof client)["extraData"]["query"]>
+  >["workedHours"][number]
+> = ["unknown", "admin", "mec", "elec", "info"];
+
 const ExtraData: Component = () => {
   const [show, setShow] = createSignal(false);
-
   const [extraData] = createResource(() => client.extraData.query());
 
   return (
@@ -23,26 +28,46 @@ const ExtraData: Component = () => {
           <h3 class="font-semibold text-center">
             Heures travaillées par personne
           </h3>
-          <ul>
-            <For each={Object.entries(extraData()?.workedHours ?? {})}>
-              {([userId, hours]) => (
-                <li class="grid grid-cols-[1fr_110px] hover:font-semibold">
-                  <span class="text-right pr-2">
-                    {
-                      users()?.members.find(
-                        (user) => user.id === parseInt(userId)
-                      )?.username
-                    }{" "}
-                    :
-                  </span>
-                  <span>
-                    {Math.floor(hours)}h{" "}
-                    {Math.floor((hours - Math.floor(hours)) * 60)}min
-                  </span>
-                </li>
-              )}
-            </For>
-          </ul>
+
+          <table>
+            <thead>
+              <tr>
+                <td></td>
+                <For each={hourCategories}>
+                  {(title) => (
+                    <td class="w-20 text-center font-semibold">
+                      <span>{title}</span>
+                    </td>
+                  )}
+                </For>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={Object.entries(extraData()?.workedHours ?? {})}>
+                {([userId, hours]) => (
+                  <tr>
+                    <td>
+                      <span>
+                        {
+                          users()?.members.find(
+                            (user) => user.id === parseInt(userId)
+                          )?.username
+                        }
+                      </span>
+                    </td>
+
+                    <For each={hourCategories}>
+                      {(category) => (
+                        <td class="w-20 text-center">
+                          <span>{Math.round(hours[category] * 100) / 100}</span>
+                        </td>
+                      )}
+                    </For>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
         </div>
       </Show>
     </div>

@@ -1,26 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import { TimeEntry } from "schemas/time-entry";
 import { User } from "../schemas/user";
+import { convertTags } from "../utils";
 import { getAllTimeEntries } from "./time-entries";
 
 type WorkedHoursResult = Record<
-  "admin" | "elec" | "info" | "mec" | "unknown" | "average",
+  ReturnType<typeof convertTags> | "average",
   Record<User["id"], number>
 >;
-
-function convertTags(tags: TimeEntry["task_tags"]) {
-  const names = tags.map((t) => t.name);
-  if (names.includes("admin")) {
-    return "admin";
-  } else if (names.includes("élec")) {
-    return "elec";
-  } else if (names.includes("info")) {
-    return "info";
-  } else if (names.includes("mec")) {
-    return "mec";
-  }
-  return "unknown";
-}
 
 export async function getWorkedHours(start: Date, end: Date) {
   const timeEntries = await getAllTimeEntries();

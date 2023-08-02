@@ -1,3 +1,5 @@
+import { TimeEntry } from "./schemas/time-entry";
+
 export function mergeDeep(...objects: Record<string, unknown>[]) {
   const isObject = (obj: any) => obj && typeof obj === "object";
 
@@ -20,4 +22,18 @@ export function mergeDeep(...objects: Record<string, unknown>[]) {
 
     return prev;
   }, {});
+}
+
+export function convertTags(tags: TimeEntry["task_tags"]) {
+  const names = tags.map((t) => t.name);
+  if (names.includes("admin")) {
+    return "admin";
+  } else if (names.includes("élec")) {
+    return "elec";
+  } else if (names.includes("info")) {
+    return "info";
+  } else if (names.includes("mec")) {
+    return "mec";
+  }
+  return "unknown";
 }
