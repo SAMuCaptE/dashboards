@@ -7,7 +7,7 @@ import { endDate } from "../stores/params";
 
 const BudgetChart: Component = () => {
   const [budget] = createResource(() =>
-    client.budget.query({ date: endDate().getTime() })
+    client.budget.query({ date: endDate().getTime() }),
   );
 
   onMount(() => {
@@ -21,7 +21,7 @@ const BudgetChart: Component = () => {
     }
 
     return {
-      labels: ["Boitier", "PCB", "Données", "Services", "Disponible"],
+      labels: ["Boitier", "Pièces", "Données", "Services", "Disponible"],
       datasets: [
         {
           label: "Dépenses",
@@ -76,20 +76,20 @@ const BudgetChart: Component = () => {
           {
             dataIndex,
             datasetIndex,
-          }: { dataIndex: number; datasetIndex: number }
+          }: { dataIndex: number; datasetIndex: number },
         ) => {
           if (datasetIndex === 1) {
             return `S${dataIndex + 6}`;
           }
-          return parseInt(label) >= 100 ? label : "";
+          return parseInt(label) >= 200 ? label : "";
         },
       },
     },
   };
 
   return (
-    <div class="w-[350px] h-[220px] block mx-auto overflow-hidden">
-      <h4 class="text-center font-semibold">Budget (exemple)</h4>
+    <div class="w-[350px] h-[184px] block mx-auto overflow-hidden">
+      <h4 class="text-center font-semibold">Budget</h4>
       <div class="h-[160px] mt-[10px]">
         <Doughnut
           data={chartData()}

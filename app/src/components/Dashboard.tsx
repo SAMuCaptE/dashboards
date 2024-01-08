@@ -1,9 +1,10 @@
 import { Fields } from "dashboards-server";
-import { Component, Show, createMemo } from "solid-js";
+import { Component, createMemo, Show } from "solid-js";
 import { fields } from "../resources/fields";
+import { sprintTasks } from "../resources/tasks";
 import { isValidDate } from "../stores/params";
 
-import { sprintTasks } from "../resources/tasks";
+import BudgetChart from "./BudgetChart";
 import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
 import Epics from "./Epics";
@@ -41,8 +42,10 @@ const Dashboard: Component = () => {
 
             <Columns>
               <WorkedHoursChart />
-              <BurndownChart data={validFields()} />
-              {/* <BudgetChart /> */}
+              {
+                // <BurndownChart data={validFields()} /> )
+              }
+              <BudgetChart />
             </Columns>
 
             <div class="w-[95%] mx-auto pt-10">

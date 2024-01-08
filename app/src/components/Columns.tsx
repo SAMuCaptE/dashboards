@@ -1,10 +1,12 @@
 import { Component, JSX } from "solid-js";
 
 const Columns: Component<{ children: JSX.Element; cols?: number }> = (
-  props
+  props,
 ) => {
   return (
-    <div class={`grid grid-cols-${props.cols ?? 2}`}>{props.children}</div>
+    <div class={`items-center grid grid-cols-${props.cols ?? 2}`}>
+      {props.children}
+    </div>
   );
 };
 

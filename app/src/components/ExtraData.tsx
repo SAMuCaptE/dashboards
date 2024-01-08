@@ -6,7 +6,7 @@ const hourCategories: Array<
   keyof Awaited<
     ReturnType<(typeof client)["extraData"]["query"]>
   >["workedHours"][number]
-> = ["unknown", "admin", "mec", "elec", "info"];
+> = ["unknown", "admin", "mec", "elec", "info", "livrables"];
 
 const ExtraData: Component = () => {
   const [show, setShow] = createSignal(false);
@@ -50,7 +50,7 @@ const ExtraData: Component = () => {
                       <span>
                         {
                           users()?.members.find(
-                            (user) => user.id === parseInt(userId)
+                            (user) => user.id === parseInt(userId),
                           )?.username
                         }
                       </span>

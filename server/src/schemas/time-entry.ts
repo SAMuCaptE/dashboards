@@ -14,7 +14,7 @@ export const TimeEntrySchema = z.object({
   duration: z.string().transform((str) => parseInt(str)),
   description: z.string(),
   tags: z.array(z.string()),
-  source: z.literal("clickup").or(z.literal("clickup_mobile")),
+  source: z.enum(["clickup", "clickup_mobile", "clickup_automatic"]),
   at: z.string().transform((str) => parseInt(str)),
   task_location: z.object({
     list_id: z.string(),
@@ -27,7 +27,7 @@ export const TimeEntrySchema = z.object({
       tag_fg: ColorSchema,
       tag_bg: ColorSchema,
       creator: z.number(),
-    })
+    }),
   ),
   task_url: z.string().url(),
 });

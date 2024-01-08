@@ -1,16 +1,16 @@
 export function getBudget(date: Date) {
   return {
     planned: {
-      s6: 1000,
+      s6: 500,
       s7: 3000,
-      s8: 1000,
+      s8: 500,
     },
     spent: {
-      casing: 500,
-      pcb: 200,
-      communication: 75,
-      services: 100,
+      casing: 104.97,
+      composantes: 144.65,
+      communication: 0,
+      services: 0,
     },
-    available: 5000 - 875,
+    available: 4000 - 249.62,
   };
 }

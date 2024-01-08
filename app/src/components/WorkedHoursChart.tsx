@@ -11,6 +11,7 @@ const alternateLabels: Record<string, string> = {
   mec: "Mec",
   elec: "Élec",
   info: "Info",
+  livrables: "Livrables",
   unknown: "Autre",
 };
 
@@ -19,7 +20,7 @@ const WorkedHoursChart: Component = () => {
     client.hours.query({
       start: startDate().getTime(),
       end: endDate().getTime(),
-    })
+    }),
   );
 
   onMount(() => {
@@ -28,8 +29,8 @@ const WorkedHoursChart: Component = () => {
 
   const sortedUsers = createMemo(() =>
     (users()?.members ?? []).sort((a, b) =>
-      a.username.split(" ")[1].localeCompare(b.username.split(" ")[1])
-    )
+      a.username.split(" ")[1].localeCompare(b.username.split(" ")[1]),
+    ),
   );
 
   const sortedHours = createMemo(() => {
@@ -73,7 +74,7 @@ const WorkedHoursChart: Component = () => {
         })),
       {
         type: "line",
-        label: "Moyenne",
+        label: "Moy",
         data: sortedHours().average,
       },
     ],
@@ -91,7 +92,7 @@ const WorkedHoursChart: Component = () => {
         anchor: "end",
         formatter: (
           value: number,
-          metadata: { datasetIndex: number; dataIndex: number }
+          metadata: { datasetIndex: number; dataIndex: number },
         ) => {
           const datasetCount = Object.keys(workedHours() ?? {}).length;
           if (metadata.datasetIndex === datasetCount - 2) {

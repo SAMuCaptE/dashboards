@@ -9,6 +9,7 @@ const emptyHours: HourRecord = {
   elec: 0,
   info: 0,
   mec: 0,
+  livrables: 0,
   unknown: 0,
 };
 

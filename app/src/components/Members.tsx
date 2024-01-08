@@ -9,8 +9,8 @@ const colors = [
   "bg-red-600",
   "bg-orange-600",
   "bg-yellow-400",
-  "bg-green-400",
   "bg-lime-200",
+  "bg-green-400",
 ];
 
 const Members: Component<{ data: Fields }> = (props) => {

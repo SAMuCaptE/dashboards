@@ -14,7 +14,7 @@ if (defaultDate === undefined) {
   defaultDate = thursday.toLocaleDateString("fr-CA");
 }
 
-const [session, setSession] = createSignal<Session>("s6");
+const [session, setSession] = createSignal<Session>("s7");
 const [dueDate, setDueDate] = createSignal<Date>(new Date(defaultDate));
 
 const isValidDate = () => dueDate().getDay() === 4;
@@ -26,7 +26,7 @@ const startDate = () =>
     dueDate().getDate() - 7,
     10,
     0,
-    0
+    0,
   );
 
 const endDate = () =>
@@ -36,7 +36,7 @@ const endDate = () =>
     dueDate().getDate(),
     9,
     59,
-    59
+    59,
   );
 
 export {

@@ -13,7 +13,7 @@ export function mergeDeep(...objects: Record<string, unknown>[]) {
       } else if (isObject(pVal) && isObject(oVal)) {
         prev[key] = mergeDeep(
           pVal as Record<string, unknown>,
-          oVal as Record<string, unknown>
+          oVal as Record<string, unknown>,
         );
       } else {
         prev[key] = oVal;
@@ -34,6 +34,8 @@ export function convertTags(tags: TimeEntry["task_tags"]) {
     return "info";
   } else if (names.includes("mec")) {
     return "mec";
+  } else if (names.includes("livrables")) {
+    return "livrables";
   }
   return "unknown";
 }

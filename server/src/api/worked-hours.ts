@@ -23,6 +23,7 @@ export async function getWorkedHours(start: Date, end: Date) {
     elec: {},
     info: {},
     mec: {},
+    livrables: {},
     unknown: {},
     average: {},
   };
