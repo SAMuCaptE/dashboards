@@ -61,7 +61,7 @@ export const TaskSchema = ShortTaskSchema.and(
       .transform((users) => users.filter((user) => user.initials !== "JG")),
     checklists: z.array(z.unknown()),
     tags: z.array(z.object({ name: z.string(), tag_fg: z.string() })),
-    parent: z.unknown().nullable(),
+    parent: z.string().nullable(),
     priority: z.unknown().nullable(),
     due_date: z
       .string()
