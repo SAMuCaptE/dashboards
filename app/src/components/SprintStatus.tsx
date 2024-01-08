@@ -1,7 +1,7 @@
 import { Fields } from "dashboards-server";
-import { Component, For, Show, createMemo } from "solid-js";
+import { Component, createMemo, For, Show } from "solid-js";
 import { sprintTasks } from "../resources/tasks";
-import { formatTime } from "../utils";
+import { domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import Dash from "./Dash";
 
 const statusLabels = {
@@ -31,16 +31,17 @@ const SprintStatus: Component<{
   itemCount: number;
   offset?: number;
 }> = (props) => {
-  const orderedTasks = createMemo(() =>
-    sprintTasks()?.sort((a, b) =>
-      statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1
-    )
+  const orderedTasks = createMemo(
+    () =>
+      sprintTasks()?.sort((a, b) =>
+        statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1,
+      ),
   );
 
   const tasksWithProblems = () =>
     orderedTasks()?.map((task) => {
       const associatedProblems = props.data.sprint.problems.filter(
-        (problem) => problem.taskId === task.id
+        (problem) => problem.taskId === task.id,
       );
       return { ...task, problems: associatedProblems };
     });
@@ -49,7 +50,7 @@ const SprintStatus: Component<{
     const t = tasksWithProblems();
     return t?.slice(
       props.offset ?? 0,
-      (props.offset ?? 0) + props.itemCount ?? t?.length ?? 0
+      (props.offset ?? 0) + props.itemCount ?? t?.length ?? 0,
     );
   };
 
@@ -97,14 +98,32 @@ const SprintStatus: Component<{
                     </p>
                   </div>
 
-                  <div class="text-sm">{task.name}</div>
+                  <div class="flex text-sm items-center">
+                    <For
+                      each={
+                        task.tags.length > 0
+                          ? task.tags
+                          : [{ name: "unknown", tag_fg: "#ff80f4" }]
+                      }
+                    >
+                      {(tag) => (
+                        <span
+                          style={{ color: tag.tag_fg }}
+                          class="material-symbols-outlined text-sm font-bold pr-1"
+                        >
+                          {tagToDomainIcon(tag) || domainIcons.unknown}
+                        </span>
+                      )}
+                    </For>
+                    <span>{task.name}</span>
+                  </div>
 
                   <ul class="flex flex-wrap justify-evenly w-24">
                     <For
                       each={task.assignees.sort((a, b) =>
                         a.username
                           .split(" ")[1]
-                          .localeCompare(b.username.split(" ")[1])
+                          .localeCompare(b.username.split(" ")[1]),
                       )}
                       fallback={
                         <li>

@@ -2,15 +2,8 @@ import { Fields } from "dashboards-server";
 import { Component, createResource, For, Show } from "solid-js";
 import { client } from "../client";
 import { dueDate, session } from "../stores/params";
-import { formatTime } from "../utils";
+import { domainIcons, formatTime } from "../utils";
 import Dash from "./Dash";
-
-const icons = {
-  Informatique: "laptop_mac",
-  Électrique: "battery_charging_full",
-  Mécanique: "carpenter",
-  unknown: "question_mark",
-};
 
 const Epics: Component<{ data: Fields }> = (props) => {
   const [epics] = createResource(() =>
@@ -65,8 +58,8 @@ const Epics: Component<{ data: Fields }> = (props) => {
                 <div class="grid grid-cols-[1fr_120px_70px_70px_70px_80px] items-center">
                   <div class="flex text-sm items-center">
                     <span class="material-symbols-outlined text-sm font-bold pr-1">
-                      {icons[epic.domain as keyof typeof icons] ||
-                        icons.unknown}
+                      {domainIcons[epic.domain as keyof typeof domainIcons] ||
+                        domainIcons.unknown}
                     </span>
                     <span>{epic.name}</span>
                   </div>

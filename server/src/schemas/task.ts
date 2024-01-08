@@ -60,7 +60,7 @@ export const TaskSchema = ShortTaskSchema.and(
       .array(UserSchema)
       .transform((users) => users.filter((user) => user.initials !== "JG")),
     checklists: z.array(z.unknown()),
-    tags: z.array(z.unknown()),
+    tags: z.array(z.object({ name: z.string(), tag_fg: z.string() })),
     parent: z.unknown().nullable(),
     priority: z.unknown().nullable(),
     due_date: z
@@ -84,14 +84,14 @@ export const TaskSchema = ShortTaskSchema.and(
           .or(z.date()),
         hide_from_guests: z.boolean(),
         required: z.boolean(),
-      })
+      }),
     ),
     time_spent: z.number().optional().nullable(),
     list: z.object({ id: z.string() }),
     folder: z.object({ id: z.string() }),
     space: z.object({ id: z.string() }),
     url: z.string().url(),
-  })
+  }),
 );
 
 export type Task = z.infer<typeof TaskSchema>;
