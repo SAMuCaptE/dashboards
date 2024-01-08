@@ -16,7 +16,7 @@ import Risks from "./Risks";
 import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
 
-const tasksInFirstPage = 27;
+const tasksInFirstPage = 18;
 
 const Dashboard: Component = () => {
   const validFields = createMemo((): Fields => {
@@ -42,10 +42,7 @@ const Dashboard: Component = () => {
 
             <Columns>
               <WorkedHoursChart />
-              {
-                // <BurndownChart data={validFields()} /> )
-              }
-              <BudgetChart />
+              <BurndownChart data={validFields()} />
             </Columns>
 
             <div class="w-[95%] mx-auto pt-10">
@@ -54,6 +51,8 @@ const Dashboard: Component = () => {
           </Page>
 
           <Page data={validFields()}>
+            <BudgetChart />
+
             <Epics data={validFields()} />
             <SprintStatus data={validFields()} itemCount={tasksInFirstPage} />
           </Page>

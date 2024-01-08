@@ -6,6 +6,11 @@
         "Informatique: Architecture globale avec une solution pour la communication",
         "Mécanique: Avoir toutes les parties du système dans un environnement simulé (CAD)"
       ]
+    },
+    "s7": {
+      "objective": [
+        "Possibilité de déployer un prototype à l'été - MVP1 complet, MVP2 bien avancé / complet"
+      ]
     }
   },
   "members": [
