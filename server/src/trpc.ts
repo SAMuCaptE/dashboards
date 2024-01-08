@@ -3,7 +3,7 @@ import SuperJSON from "superjson";
 import { z } from "zod";
 
 import { getBurndown } from "./api/burndown";
-import { getEpics } from "./api/epics";
+import { EpicSchema, getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import { makeFieldsRouter } from "./api/fields";
 import { getBudget } from "./api/money";
@@ -27,13 +27,13 @@ export const appRouter = t.router({
       z.object({
         start: z.number().transform((num) => new Date(num)),
         end: z.number().transform((num) => new Date(num)),
-      })
+      }),
     )
     .output(
       z.record(
         z.string().or(z.literal("average")),
-        z.record(z.string(), z.number())
-      )
+        z.record(z.string(), z.number()),
+      ),
     )
     .query(({ input }) => getWorkedHours(input.start, input.end)),
 
@@ -50,7 +50,7 @@ export const appRouter = t.router({
         spaceIds: z.array(z.string()).optional(),
         associatedWithAnEpic: z.boolean().optional(),
         epicId: z.string().optional(),
-      })
+      }),
     )
     .output(z.array(TaskSchema))
     .query(({ input }) =>
@@ -59,8 +59,8 @@ export const appRouter = t.router({
         input.assigneeIds ?? [],
         input.listIds ?? [],
         input.spaceIds ?? [],
-        input.epicId ?? null
-      )
+        input.epicId ?? null,
+      ),
     ),
 
   epics: t.procedure
@@ -68,20 +68,9 @@ export const appRouter = t.router({
       z.object({
         session: z.enum(["s6", "s7", "s8"]),
         sprintId: z.string().optional(),
-      })
+      }),
     )
-    .output(
-      z.array(
-        TaskSchema.and(
-          z.object({
-            ticketCount: z.number(),
-            completedTicketCount: z.number(),
-            totalTimePlanned: z.number(),
-            totalTimeSpent: z.number(),
-          })
-        )
-      )
-    )
+    .output(z.array(EpicSchema))
     .query(({ input }) => getEpics(input.session, input.sprintId ?? null)),
 
   burndown: t.procedure

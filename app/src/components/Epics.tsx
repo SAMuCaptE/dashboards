@@ -1,20 +1,27 @@
 import { Fields } from "dashboards-server";
-import { Component, For, Show, createResource } from "solid-js";
+import { Component, createResource, For, Show } from "solid-js";
 import { client } from "../client";
 import { dueDate, session } from "../stores/params";
 import { formatTime } from "../utils";
 import Dash from "./Dash";
 
+const icons = {
+  Informatique: "laptop_mac",
+  Électrique: "battery_charging_full",
+  Mécanique: "carpenter",
+  unknown: "question_mark",
+};
+
 const Epics: Component<{ data: Fields }> = (props) => {
   const [epics] = createResource(() =>
-    client.epics.query({ session: session() })
+    client.epics.query({ session: session() }),
   );
 
   const sortedEpics = () =>
     epics()?.sort(
       (a, b) =>
         (a.due_date?.getTime() ?? Number.MAX_VALUE) -
-        (b.due_date?.getTime() ?? Number.MAX_VALUE)
+        (b.due_date?.getTime() ?? Number.MAX_VALUE),
     );
 
   return (
@@ -56,7 +63,13 @@ const Epics: Component<{ data: Fields }> = (props) => {
             <li class="even:bg-gray-200 py-1">
               <a href={epic.url} target="_blank">
                 <div class="grid grid-cols-[1fr_120px_70px_70px_70px_80px] items-center">
-                  <div class="text-sm">{epic.name}</div>
+                  <div class="flex text-sm items-center">
+                    <span class="material-symbols-outlined text-sm font-bold pr-1">
+                      {icons[epic.domain as keyof typeof icons] ||
+                        icons.unknown}
+                    </span>
+                    <span>{epic.name}</span>
+                  </div>
 
                   <div class="flex text-sm items-center justify-center">
                     {epic.due_date ? (
@@ -80,7 +93,7 @@ const Epics: Component<{ data: Fields }> = (props) => {
                   <div class="text-sm text-center">
                     <Show when={epic.ticketCount > 0} fallback={"N/A"}>
                       {Math.round(
-                        (100 * epic.completedTicketCount) / epic.ticketCount
+                        (100 * epic.completedTicketCount) / epic.ticketCount,
                       )}
                       %
                     </Show>
@@ -104,7 +117,7 @@ const Epics: Component<{ data: Fields }> = (props) => {
                       (
                       <Show when={epic.totalTimePlanned > 0} fallback={"N/A"}>
                         {Math.round(
-                          (100 * epic.totalTimeSpent) / epic.totalTimePlanned
+                          (100 * epic.totalTimeSpent) / epic.totalTimePlanned,
                         )}
                         %
                       </Show>
