@@ -1,7 +1,5 @@
 import { Fields } from "dashboards-server";
-import { Component, createMemo } from "solid-js";
-import { fields } from "../resources/fields";
-import { isValidDate } from "../stores/params";
+import { Accessor, Component } from "solid-js";
 
 import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
@@ -16,56 +14,44 @@ import WorkedHoursChart from "./WorkedHoursChart";
 
 const tasksInFirstPage = 27;
 
-const Dashboard: Component = () => {
-  const validFields = createMemo((): Fields => {
-    const f = fields();
-    if (!f || !f.success) {
-      return null as any;
-    }
-    return f.data;
-  });
-
+const Dashboard: Component<{ fields: Accessor<Fields> }> = (props) => {
   return (
     <>
-      {isValidDate() && validFields() && (
-        <>
-          <Page data={validFields()}>
-            <Header />
+      <Page data={props.fields()}>
+        <Header />
 
-            <Objectives data={validFields()} />
-            <div class="h-2"></div>
+        <Objectives data={props.fields()} />
+        <div class="h-2"></div>
 
-            <Members data={validFields()} />
-            <div class="h-2"></div>
+        <Members data={props.fields()} />
+        <div class="h-2"></div>
 
-            <Columns>
-              <WorkedHoursChart />
-              <BurndownChart data={validFields()} />
-            </Columns>
+        <Columns>
+          <WorkedHoursChart />
+          <BurndownChart data={props.fields()} />
+        </Columns>
 
-            <div class="w-[95%] mx-auto pt-10">
-              <Risks data={validFields()} />
-            </div>
-          </Page>
+        <div class="w-[95%] mx-auto pt-10">
+          <Risks data={props.fields()} />
+        </div>
+      </Page>
 
-          <Page data={validFields()}>
-            <Epics data={validFields()} />
-            <SprintStatus data={validFields()} itemCount={tasksInFirstPage} />
-          </Page>
+      <Page data={props.fields()}>
+        <Epics data={props.fields()} />
+        <SprintStatus data={props.fields()} itemCount={tasksInFirstPage} />
+      </Page>
 
-          {
-            // <Show when={(sprintTasks()?.length ?? 0) > tasksInFirstPage}>
-            //   <Page data={validFields()}>
-            //     <SprintStatus
-            //       data={validFields()}
-            //       itemCount={30}
-            //       offset={tasksInFirstPage}
-            //     />
-            //   </Page>
-            // </Show>
-          }
-        </>
-      )}
+      {
+        // <Show when={(sprintTasks()?.length ?? 0) > tasksInFirstPage}>
+        //   <Page data={validFields()}>
+        //     <SprintStatus
+        //       data={validFields()}
+        //       itemCount={30}
+        //       offset={tasksInFirstPage}
+        //     />
+        //   </Page>
+        // </Show>
+      }
     </>
   );
 };

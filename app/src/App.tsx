@@ -1,9 +1,11 @@
-import { createEffect, type Component } from "solid-js";
+import { createEffect, createMemo, Show, type Component } from "solid-js";
 
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
-import { dueDate } from "./stores/params";
+import { fields } from "./resources/fields";
+import { dueDate, session } from "./stores/params";
+import { client } from "./client";
 
 const App: Component = () => {
   createEffect(() => {
@@ -12,13 +14,44 @@ const App: Component = () => {
       .replaceAll("-", "_")}`;
   });
 
+  const fieldResults = createMemo(fields);
+  const f = () => {
+    const result = fieldResults();
+    if (result?.success) {
+      return result.data;
+    }
+    return null as never;
+  };
+
+  async function handleNewWeek() {
+    await client.fields.init.mutate({ session: session(), dueDate: dueDate() });
+  }
+
   return (
     <>
       <aside>
         <Controls />
         <ExtraData />
       </aside>
-      <Dashboard />
+
+      <Show
+        when={fieldResults()?.success}
+        fallback={
+          <div class="pt-4">
+            <button
+              class="w-fit block mx-auto border-black border-2"
+              onClick={handleNewWeek}
+            >
+              Créer le fichier de la semaine
+            </button>
+            <pre class="w-fit mx-auto">
+              {JSON.stringify(fieldResults(), null, 2)}
+            </pre>
+          </div>
+        }
+      >
+        <Dashboard fields={f} />
+      </Show>
     </>
   );
 };

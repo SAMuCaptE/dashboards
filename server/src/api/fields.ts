@@ -1,5 +1,12 @@
 import { initTRPC } from "@trpc/server";
-import { readFileSync, writeFileSync } from "fs";
+import {
+  constants,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "fs";
 import { join } from "path";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
@@ -16,7 +23,7 @@ const schema = z.object({
     z.enum(["s6", "s7", "s8"]),
     z.object({
       objective: z.array(z.string()),
-    })
+    }),
   ),
   members: z.array(
     z.object({
@@ -28,7 +35,7 @@ const schema = z.object({
         lastWeek: z.number().min(1).max(5),
         nextWeek: z.number().min(1).max(5),
       }),
-    })
+    }),
   ),
   meeting: z.object({
     date: z.string(),
@@ -47,7 +54,7 @@ const schema = z.object({
       z.object({
         taskId: z.string(),
         description: z.string(),
-      })
+      }),
     ),
   }),
 });
@@ -62,7 +69,7 @@ const SelectedDashboard = z.object({
 const getDefaults = () => {
   const response = readFileSync(
     join(process.cwd(), "..", "fields", "defaults.json"),
-    "utf-8"
+    "utf-8",
   );
   return JSON.parse(response);
 };
@@ -71,14 +78,41 @@ const getFields = (session: string, dueDate: Date): Fields => {
   const date = dueDate.toLocaleDateString("fr-CA");
   const response = readFileSync(
     join(process.cwd(), "..", "fields", session, date, "data.json"),
-    "utf-8"
+    "utf-8",
   );
   return JSON.parse(response);
 };
 
+function copyPreviousFields(
+  session: z.infer<typeof SelectedDashboard>["session"],
+  dueDate: Date,
+) {
+  const oneWeekBefore = new Date(dueDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const sourceDateStr = oneWeekBefore.toLocaleDateString("fr-CA");
+  const targetDateStr = dueDate.toLocaleDateString("fr-CA");
+
+  const fieldsDir = join(process.cwd(), "..", "fields");
+  const sourcePath = join(fieldsDir, session, sourceDateStr, "data.json");
+  const defaultSourcePath = join(fieldsDir, "empty_data.json");
+
+  const targetDir = join(fieldsDir, session, targetDateStr);
+  const targetPath = join(targetDir, "data.json");
+
+  if (!existsSync(targetDir)) {
+    mkdirSync(targetDir);
+  }
+
+  try {
+    copyFileSync(sourcePath, targetPath, constants.COPYFILE_EXCL);
+  } catch {
+    copyFileSync(defaultSourcePath, targetPath, constants.COPYFILE_EXCL);
+  }
+}
+
 function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
-  modify: (original: Fields) => Fields
+  modify: (original: Fields) => Fields,
 ) {
   const fields = getFields(session, dueDate);
   const modifiedFields = modify(fields);
@@ -89,8 +123,9 @@ function editFields(
     "fields",
     session,
     dueDate.toLocaleDateString("fr-CA"),
-    "data.json"
+    "data.json",
   );
+
   writeFileSync(filePath, JSON.stringify(modifiedFields), "utf-8");
 }
 
@@ -98,7 +133,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
   return t.router({
     get: t.procedure
       .input(
-        z.object({ dueDate: z.date(), session: z.enum(["s6", "s7", "s8"]) })
+        z.object({ dueDate: z.date(), session: z.enum(["s6", "s7", "s8"]) }),
       )
       .output(
         z
@@ -110,8 +145,8 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
             z.object({
               success: z.literal(false),
               error: z.string().or(z.array(z.any())),
-            })
-          )
+            }),
+          ),
       )
       .query(async ({ input }) => {
         try {
@@ -134,6 +169,14 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         }
       }),
 
+    init: t.procedure
+      .input(
+        z.object({ dueDate: z.date(), session: z.enum(["s6", "s7", "s8"]) }),
+      )
+      .mutation(async ({ input }) => {
+        copyPreviousFields(input.session, input.dueDate);
+      }),
+
     date: t.router({
       edit: t.procedure
         .input(SelectedDashboard.and(z.object({ date: z.string() })))
@@ -141,7 +184,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.meeting.date = input.date;
             return original;
-          })
+          }),
         ),
     }),
 
@@ -152,22 +195,22 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.meeting.agenda.items.push(input.objective);
             return original;
-          })
+          }),
         ),
       update: t.procedure
         .input(
           SelectedDashboard.and(
-            z.object({ target: z.string(), updated: z.string() })
-          )
+            z.object({ target: z.string(), updated: z.string() }),
+          ),
         )
         .mutation(({ input }) =>
           editFields(input, (original) => {
             const targetIndex = original.meeting.agenda.items.findIndex(
-              (item) => item === input.target
+              (item) => item === input.target,
             );
             original.meeting.agenda.items[targetIndex] = input.updated;
             return original;
-          })
+          }),
         ),
       delete: t.procedure
         .input(SelectedDashboard.and(z.object({ objective: z.string() })))
@@ -175,10 +218,10 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.meeting.agenda.items =
               original.meeting.agenda.items.filter(
-                (item) => item !== input.objective
+                (item) => item !== input.objective,
               );
             return original;
-          })
+          }),
         ),
     }),
 
@@ -189,22 +232,22 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.meeting.technical.items.push(input.objective);
             return original;
-          })
+          }),
         ),
       update: t.procedure
         .input(
           SelectedDashboard.and(
-            z.object({ target: z.string(), updated: z.string() })
-          )
+            z.object({ target: z.string(), updated: z.string() }),
+          ),
         )
         .mutation(({ input }) =>
           editFields(input, (original) => {
             const targetIndex = original.meeting.technical.items.findIndex(
-              (item) => item === input.target
+              (item) => item === input.target,
             );
             original.meeting.technical.items[targetIndex] = input.updated;
             return original;
-          })
+          }),
         ),
       delete: t.procedure
         .input(SelectedDashboard.and(z.object({ objective: z.string() })))
@@ -212,10 +255,10 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.meeting.technical.items =
               original.meeting.technical.items.filter(
-                (item) => item !== input.objective
+                (item) => item !== input.objective,
               );
             return original;
-          })
+          }),
         ),
     }),
 
@@ -227,15 +270,15 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
               selected: z.enum(["lastWeek", "nextWeek"]),
               memberIndex: z.number().int(),
               disponibility: z.number().int().min(1).max(5),
-            })
-          )
+            }),
+          ),
         )
         .mutation(({ input }) =>
           editFields(input, (original) => {
             original.members[input.memberIndex].disponibility[input.selected] =
               input.disponibility;
             return original;
-          })
+          }),
         ),
     }),
 
@@ -246,23 +289,23 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           editFields(input, (original) => {
             original.risks.push(input.risk);
             return original;
-          })
+          }),
         ),
 
       update: t.procedure
         .input(
           SelectedDashboard.and(
-            z.object({ originalRisk: RiskSchema, updatedRisk: RiskSchema })
-          )
+            z.object({ originalRisk: RiskSchema, updatedRisk: RiskSchema }),
+          ),
         )
         .mutation(async ({ input }) =>
           editFields(input, (original) => {
             const riskIndex = original.risks.findIndex(
-              (risk) => risk.description === input.originalRisk.description
+              (risk) => risk.description === input.originalRisk.description,
             );
             original.risks[riskIndex] = input.updatedRisk;
             return original;
-          })
+          }),
         ),
 
       delete: t.procedure
@@ -270,10 +313,10 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         .mutation(({ input }) =>
           editFields(input, (original) => {
             original.risks = original.risks.filter(
-              (risk) => risk.description !== input.risk.description
+              (risk) => risk.description !== input.risk.description,
             );
             return original;
-          })
+          }),
         ),
     }),
   });

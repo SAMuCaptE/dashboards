@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { fields, refetch as refetchFields } from "../resources/fields";
+import { refetch as refetchFields } from "../resources/fields";
 import { refetch as refetchUsers } from "../resources/users";
 import {
   dueDate,
@@ -64,11 +64,8 @@ const Controls: Component = () => {
 
       {!isValidDate() && (
         <p class="font-bold text-red-600 text-center">
-          La date choisie n'est pas un jeudi
+          La date choisie n'est pas un lundi
         </p>
-      )}
-      {!fields()?.success && (
-        <pre class="w-fit mx-auto">{JSON.stringify(fields(), null, 2)}</pre>
       )}
     </>
   );
