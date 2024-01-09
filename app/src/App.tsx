@@ -23,8 +23,8 @@ const App: Component = () => {
     return null as never;
   };
 
-  async function handleNewWeek() {
-    await client.fields.init.mutate({ session: session(), dueDate: dueDate() });
+  function handleNewWeek() {
+    client.fields.init.mutate({ session: session(), dueDate: dueDate() });
   }
 
   return (

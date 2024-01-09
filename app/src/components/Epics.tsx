@@ -1,5 +1,5 @@
 import { Fields } from "dashboards-server";
-import { Component, createResource, For, Show } from "solid-js";
+import { Component, createEffect, createResource, For, Show } from "solid-js";
 import { client } from "../client";
 import { dueDate, session } from "../stores/params";
 import { domainIcons, formatTime } from "../utils";
@@ -10,8 +10,11 @@ const Epics: Component<{ data: Fields }> = (props) => {
     client.epics.query({ session: session() }),
   );
 
+  const shownEpics = () =>
+    epics()?.filter((epic) => !epic.tags.some((tag) => tag.name === "no-show"));
+
   const sortedEpics = () =>
-    epics()?.sort(
+    shownEpics()?.sort(
       (a, b) =>
         (a.due_date?.getTime() ?? Number.MAX_VALUE) -
         (b.due_date?.getTime() ?? Number.MAX_VALUE),
