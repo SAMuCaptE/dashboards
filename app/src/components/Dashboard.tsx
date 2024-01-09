@@ -1,7 +1,6 @@
 import { Fields } from "dashboards-server";
-import { Component, createMemo, Show } from "solid-js";
+import { Component, createMemo } from "solid-js";
 import { fields } from "../resources/fields";
-import { sprintTasks } from "../resources/tasks";
 import { isValidDate } from "../stores/params";
 
 import BurndownChart from "./BurndownChart";

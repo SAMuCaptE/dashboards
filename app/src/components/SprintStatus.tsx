@@ -1,13 +1,15 @@
 import { Fields } from "dashboards-server";
 import {
-    Accessor,
-    Component,
-    createMemo,
-    createSignal,
-    For,
-    Show
+  Accessor,
+  Component,
+  createMemo,
+  createResource,
+  createSignal,
+  For,
+  Show,
 } from "solid-js";
-import { sprintTasks } from "../resources/tasks";
+import { client } from "../client";
+import { fields } from "../resources/fields";
 import { domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import Dash from "./Dash";
 import NoPrint from "./NoPrint";
@@ -15,7 +17,9 @@ import NoPrint from "./NoPrint";
 type Defined<T> = Exclude<T, undefined>;
 
 type Problem = { description: string; taskId: string };
-type Task = Defined<ReturnType<typeof sprintTasks>>[number];
+type Task = Defined<
+  Awaited<ReturnType<(typeof client)["tasks"]["query"]>>
+>[number];
 type TaskWithProblem = Task & {
   problems: Problem[];
 };
@@ -47,6 +51,13 @@ const SprintStatus: Component<{
   itemCount: number;
   offset?: number;
 }> = (props) => {
+  const [sprintTasks] = createResource(fields, (f) => {
+    if (f.success) {
+      return client.tasks.query({ listIds: [f.data.sprint.id] });
+    }
+    return [];
+  });
+
   const parentTasks = createMemo(
     () => sprintTasks()?.filter((task) => task.parent === null) ?? [],
   );
