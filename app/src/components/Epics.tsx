@@ -1,5 +1,5 @@
 import { Fields } from "dashboards-server";
-import { Component, createEffect, createResource, For, Show } from "solid-js";
+import { Component, createResource, For, Show } from "solid-js";
 import { client } from "../client";
 import { dueDate, session } from "../stores/params";
 import { domainIcons, formatTime } from "../utils";

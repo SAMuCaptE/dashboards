@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const Budget = z.object({
-  planned: z.record(z.enum(["s6", "s7", "s8"]), z.number()),
   spent: z.record(
-    z.enum(["casing", "pcb", "communication", "services"]),
+    z.enum(["casing", "pcb", "communication", "services", "nature"]),
     z.number(),
   ),
   available: z.number(),
+  planned: z.number(),
 });

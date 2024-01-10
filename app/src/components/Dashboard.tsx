@@ -1,5 +1,6 @@
 import { Fields } from "dashboards-server";
 import { Accessor, Component } from "solid-js";
+import BudgetChart from "./BudgetChart";
 
 import BurndownChart from "./BurndownChart";
 import Columns from "./Columns";
@@ -31,7 +32,8 @@ const Dashboard: Component<{ fields: Accessor<Fields> }> = (props) => {
           <BurndownChart data={props.fields()} />
         </Columns>
 
-        <div class="w-[95%] mx-auto pt-10">
+        <div class="w-[95%] mx-auto">
+          <BudgetChart />
           <Risks data={props.fields()} />
         </div>
       </Page>

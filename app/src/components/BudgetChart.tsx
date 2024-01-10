@@ -1,101 +1,63 @@
-import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import { Doughnut } from "solid-chartjs";
-import { Component, createResource, onMount } from "solid-js";
+import { Component, createResource, For, Show } from "solid-js";
 import { client } from "../client";
 import { endDate } from "../stores/params";
+import { Chip } from "./Chip";
+
+const availableColor = "#999896";
+const stripeColor = availableColor + "a0";
+const stripeColorFade = availableColor + "60";
+const availableStripe = `repeating-linear-gradient(-55deg, ${stripeColor}, ${stripeColor} 10px, ${stripeColorFade} 10px, ${stripeColorFade} 20px)`;
+
+const categories: Array<{ label: string; color: string }> = [
+  { label: "Boitier", color: "#ed21dc" },
+  { label: "Pièces", color: "#12a308" },
+  { label: "Données", color: "#5fdae8" },
+  { label: "Services", color: "#faaf37" },
+  { label: "Nature", color: "#dbd51a" },
+  { label: "Disponible", color: availableStripe },
+];
 
 const BudgetChart: Component = () => {
-  const [budget] = createResource(() =>
-    client.budget.query({ date: endDate().getTime() }),
-  );
-
-  onMount(() => {
-    Chart.register(Title, Tooltip, Legend, Colors);
+  const [budget] = createResource(() => {
+    return client.budget.query({ date: endDate().getTime() });
   });
 
-  const chartData = () => {
-    const b = budget();
-    if (!b) {
-      return {};
-    }
-
-    return {
-      labels: ["Boitier", "Pièces", "Données", "Services", "Disponible"],
-      datasets: [
-        {
-          label: "Dépenses",
-          data: [...Object.values(b.spent), b.available],
-          backgroundColor: [
-            "#ed21dc",
-            "#12a308",
-            "#5fdae8",
-            "#faaf37",
-            "#99989610",
-          ],
-          hoverOffset: 4,
-          weight: 4,
-          borderWidth: 1,
-          borderColor: "#30303030",
-        },
-        {
-          label: "Planification",
-          data: Object.values(b.planned),
-          backgroundColor: ["#a6fff0", "#dfbaff", "#b6aafa"],
-          hoverOffset: 4,
-          weight: 3,
-        },
-      ],
-    };
-  };
-
-  const chartOptions = {
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { display: false },
-        grid: { display: false },
-      },
-      x: {
-        grid: { display: false },
-        ticks: { display: false },
-      },
-    },
-    plugins: {
-      legend: {
-        position: "right",
-        labels: {
-          usePointStyle: true,
-        },
-      },
-      datalabels: {
-        font: { weight: "bold" },
-        formatter: (
-          label: string,
-          {
-            dataIndex,
-            datasetIndex,
-          }: { dataIndex: number; datasetIndex: number },
-        ) => {
-          if (datasetIndex === 1) {
-            return `S${dataIndex + 6}`;
-          }
-          return parseInt(label) >= 200 ? label : "";
-        },
-      },
-    },
-  };
-
   return (
-    <div class="w-[350px] h-[184px] block mx-auto overflow-hidden">
-      <h4 class="text-center font-semibold">Budget</h4>
-      <div class="h-[160px] mt-[10px]">
-        <Doughnut
-          data={chartData()}
-          options={chartOptions}
-          plugins={[ChartDataLabels]}
-        />
+    <div class="w-full block mx-auto overflow-hidden py-2">
+      {
+        <div class="w-full flex items-center gap-2">
+          <h4 class="font-semibold">Budget</h4>
+          <For each={categories}>
+            {(category) => (
+              <Chip label={category.label} color={category.color} />
+            )}
+          </For>
+        </div>
+      }
+
+      <div class="h-5 w-full rounded-md flex overflow-hidden mt-1 items-center">
+        <Show when={budget()}>
+          <For each={[...Object.values(budget()!.spent), budget()!.available]}>
+            {(expense, index) => (
+              <div
+                class="text-center h-full flex items-center justify-center"
+                style={{
+                  background: categories[index()].color,
+                  width: Math.round((100 * expense) / budget()!.planned) + "%",
+                }}
+              >
+                <Show when={expense >= 200}>
+                  <span
+                    class="font-semibold text-white text-sm"
+                    style={{ "text-shadow": "0px 0px 3px black" }}
+                  >
+                    {Math.round(expense * 100) / 100}$
+                  </span>
+                </Show>
+              </div>
+            )}
+          </For>
+        </Show>
       </div>
     </div>
   );

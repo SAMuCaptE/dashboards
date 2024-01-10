@@ -11,6 +11,7 @@ import {
 import { client } from "../client";
 import { fields } from "../resources/fields";
 import { domainIcons, formatTime, tagToDomainIcon } from "../utils";
+import { Chip } from "./Chip";
 import Dash from "./Dash";
 import NoPrint from "./NoPrint";
 
@@ -179,14 +180,11 @@ const Task = (props: {
       >
         <a href={props.task().url} target="_blank">
           <div class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
-            <div
-              class="rounded-full w-fit px-2 mx-auto z-10"
-              style={{ "background-color": props.task().status.color }}
-            >
-              <p class="uppercase font-black text-white text-center text-[0.65rem]">
-                {statusLabels[props.task().status.status]}
-              </p>
-            </div>
+            <Chip
+              class="mx-auto"
+              label={statusLabels[props.task().status.status]}
+              color={props.task().status.color}
+            />
 
             <div class="flex text-sm items-center">
               <For
