@@ -1,7 +1,7 @@
-import { Component } from "solid-js";
+import { Component, JSX } from "solid-js";
 
 type ChipProps = {
-  label: string;
+  label: string | JSX.Element;
   color: string;
   class?: string;
 };

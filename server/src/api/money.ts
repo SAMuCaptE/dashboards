@@ -1,7 +1,7 @@
 export function getBudget(date: Date) {
   const planned = 4000;
   const spent = {
-    casing: 104.97,
+    casing: 188.71,
     composantes: 144.65,
     communication: 0,
     services: 0,

@@ -7,7 +7,7 @@ export function formatTime(timeInMs: number) {
 export const domainIcons = {
   Informatique: "laptop_mac",
   Électrique: "battery_charging_full",
-  Mécanique: "carpenter",
+  Mécanique: "manufacturing",
   Livrables: "school",
   Administration: "contract",
   unknown: "question_mark",

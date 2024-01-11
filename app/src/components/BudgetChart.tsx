@@ -12,13 +12,16 @@ type Categories =
   | keyof Awaited<ReturnType<(typeof client)["budget"]["query"]>>["spent"]
   | "available";
 
-const categories: Record<Categories, { label: string; color: string }> = {
+const categories: Record<
+  Categories,
+  { label: string; color: string; shadow?: boolean }
+> = {
   casing: { label: "Boitier", color: "#ed21dc" },
   composantes: { label: "Pièces", color: "#12a308" },
   communication: { label: "Données", color: "#5fdae8" },
   services: { label: "Services", color: "#faaf37" },
   nature: { label: "Nature", color: "#dbd51a" },
-  available: { label: "Disponible", color: availableStripe },
+  available: { label: "Disponible", color: availableStripe, shadow: true },
 };
 
 const BudgetChart: Component = () => {
@@ -33,7 +36,16 @@ const BudgetChart: Component = () => {
           <h4 class="font-semibold">Budget</h4>
           <For each={Object.values(categories)}>
             {(category) => (
-              <Chip label={category.label} color={category.color} />
+              <Chip
+                label={
+                  <Show when={category.shadow} fallback={category.label}>
+                    <span style={{ "text-shadow": "0px 0px 4px black" }}>
+                      {category.label}
+                    </span>
+                  </Show>
+                }
+                color={category.color}
+              />
             )}
           </For>
         </div>

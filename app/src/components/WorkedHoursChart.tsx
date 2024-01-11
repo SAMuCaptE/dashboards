@@ -15,6 +15,16 @@ const alternateLabels: Record<string, string> = {
   unknown: "Autre",
 };
 
+const colors = {
+  admin: "#8077f1",
+  mec: "#e65100",
+  elec: "#ff4080",
+  info: "#e50000",
+  livrables: "#2ecd6f",
+  unknown: "#d8e65a",
+  average: "#ababab",
+};
+
 const WorkedHoursChart: Component = () => {
   const [workedHours] = createResource(() =>
     client.hours.query({
@@ -71,6 +81,8 @@ const WorkedHoursChart: Component = () => {
           label: alternateLabels[label] ?? label,
           borderWidth: 1,
           barPercentage: 0.6,
+          backgroundColor:
+            colors[label as keyof typeof colors] ?? colors.unknown,
         })),
       {
         type: "line",
