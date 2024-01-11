@@ -3,9 +3,9 @@ import { client } from "../client";
 import { endDate } from "../stores/params";
 import { Chip } from "./Chip";
 
-const availableColor = "#999896";
-const stripeColor = availableColor + "a0";
-const stripeColorFade = availableColor + "60";
+const availableColor = "#a0a0a0";
+const stripeColor = availableColor;
+const stripeColorFade = availableColor + "da";
 const availableStripe = `repeating-linear-gradient(-55deg, ${stripeColor}, ${stripeColor} 10px, ${stripeColorFade} 10px, ${stripeColorFade} 20px)`;
 
 type Categories =
@@ -39,9 +39,7 @@ const BudgetChart: Component = () => {
               <Chip
                 label={
                   <Show when={category.shadow} fallback={category.label}>
-                    <span style={{ "text-shadow": "0px 0px 4px black" }}>
-                      {category.label}
-                    </span>
+                    <span>{category.label}</span>
                   </Show>
                 }
                 color={category.color}
@@ -88,10 +86,7 @@ const Expense: Component<{
       }}
     >
       <Show when={props.expense >= 200}>
-        <span
-          class="font-semibold text-white text-sm"
-          style={{ "text-shadow": "0px 0px 3px black" }}
-        >
+        <span class="font-semibold text-white text-sm">
           {Math.round(props.expense * 100) / 100}$
         </span>
       </Show>
