@@ -12,7 +12,7 @@ type ResponseSchema = z.infer<typeof ResponseSchema>;
 export async function getUsers() {
   const listId = "901100130356";
   const users = await api(ResponseSchema).get(
-    `https://api.clickup.com/api/v2/list/${listId}/member`
+    `https://api.clickup.com/api/v2/list/${listId}/member`,
   );
 
   if (!users) {
@@ -24,7 +24,7 @@ export async function getUsers() {
 
   return {
     members: users.members.filter(
-      (member) => !["JG", "TE"].includes(member.initials)
+      (member) => !["JG", "TE", "RA"].includes(member.initials),
     ),
   };
 }

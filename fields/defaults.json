@@ -15,12 +15,6 @@
   },
   "members": [
     {
-      "img": "raphael.jpg",
-      "firstname": "Raphaël",
-      "lastname": "A",
-      "role": "Trésorier"
-    },
-    {
       "img": "daniel.jpg",
       "firstname": "Daniel",
       "lastname": "B",
