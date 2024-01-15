@@ -10,7 +10,7 @@ import {
 } from "solid-js";
 import { client } from "../client";
 import { fields } from "../resources/fields";
-import { domainIcons, formatTime, tagToDomainIcon } from "../utils";
+import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import { Chip } from "./Chip";
 import Dash from "./Dash";
 import NoPrint from "./NoPrint";
@@ -196,7 +196,11 @@ const Task = (props: {
               >
                 {(tag) => (
                   <span
-                    style={{ color: tag.tag_fg }}
+                    style={{
+                      color:
+                        colors[tag.name as keyof typeof colors] ||
+                        colors.unknown,
+                    }}
                     class="material-symbols-outlined text-sm font-bold pr-1"
                   >
                     {tagToDomainIcon(tag) || domainIcons.unknown}

@@ -68,7 +68,7 @@
     "problems": [
       {
         "taskId": "8684xxv98",
-        "description": "Nécessite le routage final du PCB submergé"
+        "description": "Nécessite une revue du PCB submergé"
       },
       { "taskId": "86850a74n", "description": "Dépend de sonar" }
     ]

@@ -5,6 +5,7 @@ import { Component, createMemo, createResource, onMount } from "solid-js";
 import { client } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
+import { colors } from "../utils";
 
 const alternateLabels: Record<string, string> = {
   admin: "Admin",
@@ -13,16 +14,6 @@ const alternateLabels: Record<string, string> = {
   info: "Info",
   livrables: "Livrables",
   unknown: "Autre",
-};
-
-const colors = {
-  admin: "#8077f1",
-  mec: "#e65100",
-  elec: "#ff4080",
-  info: "#e50000",
-  livrables: "#2ecd6f",
-  unknown: "#d8e65a",
-  average: "#ababab",
 };
 
 const WorkedHoursChart: Component = () => {

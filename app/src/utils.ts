@@ -29,3 +29,14 @@ export function tagToDomainIcon(tag: { name: string }) {
       return domainIcons.unknown;
   }
 }
+
+export const colors = {
+  admin: "#8077f1",
+  mec: "#e65100",
+  élec: "#f9be34",
+  elec: "#f9be34",
+  info: "#e50000",
+  livrables: "#2ecd6f",
+  unknown: "#d8e65a",
+  average: "#ababab",
+} as const;
