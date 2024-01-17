@@ -7,7 +7,7 @@ COPY server/package*.json ./
 RUN npm ci
 
 COPY server/ ./
-RUN npm run build -- --outDir /dist
+RUN npm run build -- --outDir ./dist/
 
 ENV PORT=8080
 EXPOSE $PORT
