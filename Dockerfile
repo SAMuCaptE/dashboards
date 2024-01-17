@@ -9,7 +9,7 @@ RUN npm ci
 COPY server/ ./
 RUN npm run build -- --outDir ./dist/
 
-ENV PORT=8080
+ENV PORT=16987
 EXPOSE $PORT
 
 ENTRYPOINT ["npm", "start"]

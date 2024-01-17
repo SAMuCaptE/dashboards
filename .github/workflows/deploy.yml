@@ -34,7 +34,7 @@ jobs:
         working-directory: ./app
 
       - name: Build
-        run: npm run build --outDir dist/
+        run: npm run build
         working-directory: ./app
 
       - name: Setup Pages
