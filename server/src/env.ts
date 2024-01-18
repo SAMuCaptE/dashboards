@@ -5,6 +5,10 @@ const EnvSchema = z.object({
   API_KEY: z.string(),
   HOURS_START_DATE: z.string(),
   HOURS_WEEKLY_OFFSET: z.string(),
+
+  DATABASE_CONNECTION_STRING: z.string(),
+  DEFAULTS_OBJECT_ID: z.string(),
+  EMPTY_DATA_OBJECT_ID: z.string(),
 });
 
 config();

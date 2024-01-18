@@ -1,15 +1,23 @@
 import { initTRPC } from "@trpc/server";
-import {
-  constants,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "fs";
-import { join } from "path";
+import { Db, MongoClient, ObjectId } from "mongodb";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
+
+const client = new MongoClient(process.env.DATABASE_CONNECTION_STRING);
+
+async function database<T>(
+  callback: (db: Db) => Promise<T>,
+): Promise<T | null> {
+  let result: T | null = null;
+  try {
+    await client.connect();
+    const db = client.db("saum");
+    result = await callback(db);
+  } finally {
+    await client.close();
+  }
+  return result;
+}
 
 const RiskSchema = z.object({
   description: z.string(),
@@ -66,67 +74,89 @@ const SelectedDashboard = z.object({
   session: z.enum(["s6", "s7", "s8"]),
 });
 
-const getDefaults = () => {
-  const response = readFileSync(
-    join(process.cwd(), "..", "fields", "defaults.json"),
-    "utf-8",
-  );
-  return JSON.parse(response);
-};
+async function getDefaults() {
+  const defaults = await database(async (db) => {
+    const cursor = db
+      .collection("defaults")
+      .find({ _id: new ObjectId(process.env.DEFAULTS_OBJECT_ID) });
+    const document = await cursor.next();
+    await cursor.close();
+    return document;
+  });
 
-const getFields = (session: string, dueDate: Date): Fields => {
+  return defaults || {};
+}
+
+async function getFields(session: string, dueDate: Date): Promise<Fields> {
   const date = dueDate.toLocaleDateString("fr-CA");
-  const response = readFileSync(
-    join(process.cwd(), "..", "fields", session, date, "data.json"),
-    "utf-8",
-  );
-  return JSON.parse(response);
-};
 
-function copyPreviousFields(
+  const fields = await database(async (db) => {
+    const cursor = db
+      .collection("fields")
+      .aggregate([
+        { $match: { [`${session}.${date}`]: { $exists: true } } },
+        { $replaceRoot: { newRoot: `\$${session}.${date}` } },
+      ]);
+    const document = await cursor.next();
+    await cursor.close();
+    return document;
+  });
+
+  if (!fields) {
+    throw new Error("could not find fields");
+  }
+
+  return fields as Fields;
+}
+
+async function getFieldsTemplate(
+  session: z.infer<typeof SelectedDashboard>["session"],
+  date: Date,
+) {
+  try {
+    return await getFields(session, date);
+  } catch {
+    const emptyFields = await database(async (db) => {
+      return db.collection("empty_data").findOne<Fields>({
+        _id: new ObjectId(process.env.EMPTY_DATA_OBJECT_ID),
+      });
+    });
+
+    if (!emptyFields) {
+      throw new Error("could not find defaults");
+    }
+
+    return emptyFields;
+  }
+}
+
+async function copyPreviousFields(
   session: z.infer<typeof SelectedDashboard>["session"],
   dueDate: Date,
 ) {
   const oneWeekBefore = new Date(dueDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-  const sourceDateStr = oneWeekBefore.toLocaleDateString("fr-CA");
   const targetDateStr = dueDate.toLocaleDateString("fr-CA");
 
-  const fieldsDir = join(process.cwd(), "..", "fields");
-  const sourcePath = join(fieldsDir, session, sourceDateStr, "data.json");
-  const defaultSourcePath = join(fieldsDir, "empty_data.json");
-
-  const targetDir = join(fieldsDir, session, targetDateStr);
-  const targetPath = join(targetDir, "data.json");
-
-  if (!existsSync(targetDir)) {
-    mkdirSync(targetDir);
-  }
-
-  try {
-    copyFileSync(sourcePath, targetPath, constants.COPYFILE_EXCL);
-  } catch {
-    copyFileSync(defaultSourcePath, targetPath, constants.COPYFILE_EXCL);
-  }
+  const fields = await getFieldsTemplate(session, oneWeekBefore);
+  await database(async (db) => {
+    await db
+      .collection("fields")
+      .updateOne({}, { $set: { [`${session}.${targetDateStr}`]: fields } });
+  });
 }
 
-function editFields(
+async function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
   modify: (original: Fields) => Fields,
 ) {
-  const fields = getFields(session, dueDate);
+  const dateStr = dueDate.toLocaleDateString("fr-CA");
+  const fields = await getFields(session, dueDate);
   const modifiedFields = modify(fields);
-
-  const filePath = join(
-    process.cwd(),
-    "..",
-    "fields",
-    session,
-    dueDate.toLocaleDateString("fr-CA"),
-    "data.json",
-  );
-
-  writeFileSync(filePath, JSON.stringify(modifiedFields), "utf-8");
+  await database(async (db) => {
+    await db
+      .collection("fields")
+      .updateOne({}, { $set: { [`${session}.${dateStr}`]: modifiedFields } });
+  });
 }
 
 export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
@@ -150,8 +180,8 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
       )
       .query(async ({ input }) => {
         try {
-          const defaults = getDefaults();
-          const data = getFields(input.session, input.dueDate);
+          const defaults = await getDefaults();
+          const data = await getFields(input.session, input.dueDate);
           const result = schema.safeParse(mergeDeep(defaults, data));
 
           return result.success
