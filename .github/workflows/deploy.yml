@@ -14,6 +14,9 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  VITE_APP_SERVER_URL: ${{ vars.SERVER_URL }}
+
 jobs:
   deploy:
     environment:
