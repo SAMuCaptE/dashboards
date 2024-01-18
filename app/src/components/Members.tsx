@@ -21,7 +21,7 @@ const Members: Component<{ data: Fields }> = (props) => {
           <li class="w-[1in] overflow-hidden">
             <figure>
               <img
-                src={`/${member.img}`}
+                src={`${import.meta.env.BASE_URL}/${member.img}`}
                 alt={member.firstname + " " + member.lastname}
                 class="block w-100 h-[1.2in] object-cover"
               />
