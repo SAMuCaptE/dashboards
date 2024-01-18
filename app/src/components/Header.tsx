@@ -15,7 +15,7 @@ const Header: Component = () => {
       </hgroup>
 
       <figure>
-        <img class="object-contain block h-[1in]" src="/assets/logo.png" />
+        <img class="object-contain block h-[1in]" src="/logo.png" />
       </figure>
     </header>
   );
