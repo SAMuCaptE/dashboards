@@ -1,11 +1,11 @@
 import { initTRPC } from "@trpc/server";
 import {
-  constants,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
+    constants,
+    copyFileSync,
+    existsSync,
+    mkdirSync,
+    readFileSync,
+    writeFileSync,
 } from "fs";
 import { Db, MongoClient, ObjectId } from "mongodb";
 import { join } from "path";
@@ -22,8 +22,6 @@ async function database<T>(
     await client.connect();
     const db = client.db("saum");
     result = await callback(db);
-  } catch (err) {
-    console.log(err);
   } finally {
     await client.close();
   }
@@ -156,24 +154,18 @@ async function copyPreviousFields(
   });
 }
 
-// TODO
 async function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
   modify: (original: Fields) => Fields,
 ) {
+  const dateStr = dueDate.toLocaleDateString("fr-CA");
   const fields = await getFields(session, dueDate);
   const modifiedFields = modify(fields);
-
-  const filePath = join(
-    process.cwd(),
-    "..",
-    "fields",
-    session,
-    dueDate.toLocaleDateString("fr-CA"),
-    "data.json",
-  );
-
-  writeFileSync(filePath, JSON.stringify(modifiedFields), "utf-8");
+  await database(async (db) => {
+    await db
+      .collection("fields")
+      .updateOne({}, { $set: { [`${session}.${dateStr}`]: modifiedFields } });
+  });
 }
 
 export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
@@ -205,7 +197,6 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
             ? { success: true, data: result.data }
             : { success: false, error: JSON.parse(result.error.message) };
         } catch (err) {
-          console.log("router: ", err);
           return {
             success: false,
             error:
