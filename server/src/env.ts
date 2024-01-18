@@ -8,6 +8,7 @@ const EnvSchema = z.object({
 
   DATABASE_CONNECTION_STRING: z.string(),
   DEFAULTS_OBJECT_ID: z.string(),
+  EMPTY_DATA_OBJECT_ID: z.string(),
 });
 
 config();

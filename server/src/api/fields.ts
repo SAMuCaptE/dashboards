@@ -1,11 +1,11 @@
 import { initTRPC } from "@trpc/server";
 import {
-    constants,
-    copyFileSync,
-    existsSync,
-    mkdirSync,
-    readFileSync,
-    writeFileSync,
+  constants,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
 } from "fs";
 import { Db, MongoClient, ObjectId } from "mongodb";
 import { join } from "path";
@@ -120,33 +120,43 @@ async function getFields(session: string, dueDate: Date): Promise<Fields> {
   return fields as Fields;
 }
 
-function copyPreviousFields(
+async function getFieldsTemplate(
+  session: z.infer<typeof SelectedDashboard>["session"],
+  date: Date,
+) {
+  try {
+    return await getFields(session, date);
+  } catch {
+    const emptyFields = await database(async (db) => {
+      return db.collection("empty_data").findOne<Fields>({
+        _id: new ObjectId(process.env.EMPTY_DATA_OBJECT_ID),
+      });
+    });
+
+    if (!emptyFields) {
+      throw new Error("could not find defaults");
+    }
+
+    return emptyFields;
+  }
+}
+
+async function copyPreviousFields(
   session: z.infer<typeof SelectedDashboard>["session"],
   dueDate: Date,
 ) {
   const oneWeekBefore = new Date(dueDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-  const sourceDateStr = oneWeekBefore.toLocaleDateString("fr-CA");
   const targetDateStr = dueDate.toLocaleDateString("fr-CA");
 
-  const fieldsDir = join(process.cwd(), "..", "fields");
-  const sourcePath = join(fieldsDir, session, sourceDateStr, "data.json");
-  const defaultSourcePath = join(fieldsDir, "empty_data.json");
-
-  const targetDir = join(fieldsDir, session, targetDateStr);
-  const targetPath = join(targetDir, "data.json");
-
-  if (!existsSync(targetDir)) {
-    mkdirSync(targetDir);
-  }
-
-  try {
-    copyFileSync(sourcePath, targetPath, constants.COPYFILE_EXCL);
-  } catch {
-    copyFileSync(defaultSourcePath, targetPath, constants.COPYFILE_EXCL);
-  }
+  const fields = await getFieldsTemplate(session, oneWeekBefore);
+  await database(async (db) => {
+    await db
+      .collection("fields")
+      .updateOne({}, { $set: { [`${session}.${targetDateStr}`]: fields } });
+  });
 }
 
+// TODO
 async function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
   modify: (original: Fields) => Fields,
