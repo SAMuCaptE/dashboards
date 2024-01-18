@@ -1,15 +1,34 @@
 import { initTRPC } from "@trpc/server";
 import {
-  constants,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
+    constants,
+    copyFileSync,
+    existsSync,
+    mkdirSync,
+    readFileSync,
+    writeFileSync,
 } from "fs";
+import { Db, MongoClient, ObjectId } from "mongodb";
 import { join } from "path";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
+
+const client = new MongoClient(process.env.DATABASE_CONNECTION_STRING);
+
+async function database<T>(
+  callback: (db: Db) => Promise<T>,
+): Promise<T | null> {
+  let result: T | null = null;
+  try {
+    await client.connect();
+    const db = client.db("saum");
+    result = await callback(db);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    await client.close();
+  }
+  return result;
+}
 
 const RiskSchema = z.object({
   description: z.string(),
@@ -66,22 +85,40 @@ const SelectedDashboard = z.object({
   session: z.enum(["s6", "s7", "s8"]),
 });
 
-const getDefaults = () => {
-  const response = readFileSync(
-    join(process.cwd(), "..", "fields", "defaults.json"),
-    "utf-8",
-  );
-  return JSON.parse(response);
-};
+async function getDefaults() {
+  const defaults = await database(async (db) => {
+    const cursor = db
+      .collection("defaults")
+      .find({ _id: new ObjectId(process.env.DEFAULTS_OBJECT_ID) });
+    const document = await cursor.next();
+    await cursor.close();
+    return document;
+  });
 
-const getFields = (session: string, dueDate: Date): Fields => {
+  return defaults || {};
+}
+
+async function getFields(session: string, dueDate: Date): Promise<Fields> {
   const date = dueDate.toLocaleDateString("fr-CA");
-  const response = readFileSync(
-    join(process.cwd(), "..", "fields", session, date, "data.json"),
-    "utf-8",
-  );
-  return JSON.parse(response);
-};
+
+  const fields = await database(async (db) => {
+    const cursor = db
+      .collection("fields")
+      .aggregate([
+        { $match: { [`${session}.${date}`]: { $exists: true } } },
+        { $replaceRoot: { newRoot: `\$${session}.${date}` } },
+      ]);
+    const document = await cursor.next();
+    await cursor.close();
+    return document;
+  });
+
+  if (!fields) {
+    throw new Error("could not find fields");
+  }
+
+  return fields as Fields;
+}
 
 function copyPreviousFields(
   session: z.infer<typeof SelectedDashboard>["session"],
@@ -110,11 +147,11 @@ function copyPreviousFields(
   }
 }
 
-function editFields(
+async function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
   modify: (original: Fields) => Fields,
 ) {
-  const fields = getFields(session, dueDate);
+  const fields = await getFields(session, dueDate);
   const modifiedFields = modify(fields);
 
   const filePath = join(
@@ -150,14 +187,15 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
       )
       .query(async ({ input }) => {
         try {
-          const defaults = getDefaults();
-          const data = getFields(input.session, input.dueDate);
+          const defaults = await getDefaults();
+          const data = await getFields(input.session, input.dueDate);
           const result = schema.safeParse(mergeDeep(defaults, data));
 
           return result.success
             ? { success: true, data: result.data }
             : { success: false, error: JSON.parse(result.error.message) };
         } catch (err) {
+          console.log("router: ", err);
           return {
             success: false,
             error:
