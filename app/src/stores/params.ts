@@ -14,7 +14,7 @@ if (defaultDate === undefined) {
   // defaultDate = thursday.toLocaleDateString("fr-CA");
 
   const monday = new Date();
-  monday.setDate(monday.getDate() + ((2 + 7 - monday.getDay()) % 7));
+  monday.setDate(monday.getDate() + ((1 + 7 - monday.getDay()) % 7));
   defaultDate = monday.toLocaleDateString("fr-CA");
 }
 
