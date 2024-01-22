@@ -23,7 +23,7 @@ const RiskSchema = z.object({
   description: z.string(),
   mitigation: z.string(),
   gravity: z.number().min(1),
-  ticketUrl: z.string().url().optional(),
+  ticketUrl: z.string().url().optional().nullable(),
 });
 
 const schema = z.object({
