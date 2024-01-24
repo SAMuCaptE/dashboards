@@ -43,7 +43,7 @@ const startDate = () =>
     dueDate().getFullYear(),
     dueDate().getMonth(),
     dueDate().getDate() - 7,
-    10,
+    3,
     0,
     0,
   );
@@ -53,18 +53,17 @@ const endDate = () =>
     dueDate().getFullYear(),
     dueDate().getMonth(),
     dueDate().getDate(),
-    9,
+    2,
     59,
     59,
   );
 
 export {
-    dueDate,
-    endDate,
-    isValidDate,
-    session,
-    setDueDate,
-    setSession,
-    startDate,
+  dueDate,
+  endDate,
+  isValidDate,
+  session,
+  setDueDate,
+  setSession,
+  startDate,
 };
-
