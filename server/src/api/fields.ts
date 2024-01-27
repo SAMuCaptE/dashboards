@@ -350,5 +350,22 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           }),
         ),
     }),
+
+    sprint: t.router({
+      select: t.procedure
+        .input(
+          SelectedDashboard.and(
+            z.object({
+              sprintId: z.string(),
+            }),
+          ),
+        )
+        .mutation(({ input }) =>
+          editFields(input, (original) => {
+            original.sprint.id = input.sprintId;
+            return original;
+          }),
+        ),
+    }),
   });
 }

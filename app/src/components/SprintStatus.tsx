@@ -10,9 +10,12 @@ import {
 } from "solid-js";
 import { client } from "../client";
 import { fields } from "../resources/fields";
+import { dueDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
+import AddButton from "./AddButton";
 import { Chip } from "./Chip";
 import Dash from "./Dash";
+import Editable from "./Editable";
 import NoPrint from "./NoPrint";
 
 type Defined<T> = Exclude<T, undefined>;
@@ -99,7 +102,20 @@ const SprintStatus: Component<{
 
   return (
     <>
-      <h4 class="mt-2 text-center font-semibold">État du sprint en cours</h4>
+      <h4 class="mt-2 text-center font-semibold relative">
+        <Editable
+          initialValue={props.data.sprint.id}
+          onEdit={(id) =>
+            client.fields.sprint.select.mutate({
+              dueDate: dueDate(),
+              session: session(),
+              sprintId: id,
+            })
+          }
+        >
+          État du sprint en cours
+        </Editable>
+      </h4>
       <ul class="w-[95%] mx-auto">
         <li class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
           <div> </div>
