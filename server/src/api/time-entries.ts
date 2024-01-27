@@ -1,11 +1,40 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { TimeEntrySchema } from "../schemas/time-entry";
+import { TimeEntry, TimeEntrySchema } from "../schemas/time-entry";
 import { api } from "./api";
 import { getUsers } from "./users";
 
 const ResponseSchema = z.object({
   data: z.array(TimeEntrySchema),
 });
+
+export async function getTimeEntriesInRange(
+  start: Date,
+  end: Date,
+): Promise<Array<TimeEntry>> {
+  const timeEntries = await getAllTimeEntries();
+
+  if (!timeEntries) {
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Could not find some time entries.",
+    });
+  }
+
+  const selectedTimeEntries: Array<TimeEntry> = [];
+  for (const timeEntry of timeEntries) {
+    if (!timeEntry) {
+      throw new Error("Some time entry was null.");
+    }
+
+    const moment = new Date(timeEntry.end).getTime();
+    if (start.getTime() <= moment && end.getTime() > moment) {
+      selectedTimeEntries.push(timeEntry);
+    }
+  }
+
+  return selectedTimeEntries;
+}
 
 export async function getAllTimeEntries() {
   const users = await getUsers();

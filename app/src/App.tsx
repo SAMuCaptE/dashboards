@@ -4,6 +4,7 @@ import { client } from "./client";
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
+import TimeEntries from "./components/TimeEntries";
 import { fields } from "./resources/fields";
 import { dueDate, session } from "./stores/params";
 
@@ -49,6 +50,7 @@ const App: Component = () => {
         }
       >
         <Dashboard fields={f} />
+        <TimeEntries />
       </Show>
     </>
   );

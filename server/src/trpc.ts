@@ -8,9 +8,11 @@ import { getExtraData } from "./api/extraData";
 import { makeFieldsRouter } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
+import { getTimeEntriesInRange } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { TaskSchema } from "./schemas/task";
+import { TimeEntrySchema } from "./schemas/time-entry";
 import { UserSchema } from "./schemas/user";
 
 const t = initTRPC.create({ transformer: SuperJSON });
@@ -81,6 +83,16 @@ export const appRouter = t.router({
   fields: makeFieldsRouter(t as any),
 
   extraData: t.procedure.query(getExtraData),
+
+  timeEntries: t.procedure
+    .input(
+      z.object({
+        start: z.number().transform((num) => new Date(num)),
+        end: z.number().transform((num) => new Date(num)),
+      }),
+    )
+    .output(z.array(TimeEntrySchema))
+    .query(({ input }) => getTimeEntriesInRange(input.start, input.end)),
 });
 
 export type AppRouter = typeof appRouter;
