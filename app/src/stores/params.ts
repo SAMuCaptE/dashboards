@@ -20,7 +20,9 @@ function navigate(date: string | Date, session: Session) {
   const targetParams = new URLSearchParams();
   targetParams.append("date", targetDate);
   targetParams.append("session", session);
-  window.location.replace("/?" + targetParams.toString());
+  window.location.replace(
+    import.meta.env.BASE_URL + "/?" + targetParams.toString(),
+  );
 }
 
 // function isThursday() {
@@ -42,3 +44,4 @@ endDate = new Date(endDate.getTime() + 3 * 60 * 60 * 1000);
 endDate = new Date(endDate.getTime() - 1 * 1000);
 
 export { dueDate, startDate, endDate, isValidDate, session, navigate };
+
