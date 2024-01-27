@@ -21,7 +21,7 @@ function navigate(date: string | Date, session: Session) {
   targetParams.append("date", targetDate);
   targetParams.append("session", session);
   window.location.replace(
-    import.meta.env.BASE_URL + "/?" + targetParams.toString(),
+    import.meta.env.BASE_URL + "?" + targetParams.toString(),
   );
 }
 
