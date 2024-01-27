@@ -6,9 +6,10 @@ const EnvSchema = z.object({
   HOURS_START_DATE: z.string(),
   HOURS_WEEKLY_OFFSET: z.string(),
 
-  DATABASE_CONNECTION_STRING: z.string(),
-  DEFAULTS_OBJECT_ID: z.string(),
-  EMPTY_DATA_OBJECT_ID: z.string(),
+  DB_NAME: z.string(),
+  DB_USER: z.string(),
+  DB_PASSWORD: z.string(),
+  DB_HOSTNAME: z.string(),
 });
 
 config();

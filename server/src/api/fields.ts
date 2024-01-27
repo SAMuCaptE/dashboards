@@ -1,21 +1,26 @@
 import { initTRPC } from "@trpc/server";
-import { Db, MongoClient, ObjectId } from "mongodb";
+import { Connection, createConnection, OkPacket } from "mysql2/promise";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
 
-const client = new MongoClient(process.env.DATABASE_CONNECTION_STRING);
-
 async function database<T>(
-  callback: (db: Db) => Promise<T>,
+  callback: (db: Connection) => Promise<T>,
 ): Promise<T | null> {
+  let connection: Connection | null = null;
   let result: T | null = null;
+
   try {
-    await client.connect();
-    const db = client.db("saum");
-    result = await callback(db);
+    connection = await createConnection({
+      host: process.env.DB_HOSTNAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    });
+    result = await callback(connection);
   } finally {
-    await client.close();
+    await connection?.end();
   }
+
   return result;
 }
 
@@ -76,12 +81,8 @@ const SelectedDashboard = z.object({
 
 async function getDefaults() {
   const defaults = await database(async (db) => {
-    const cursor = db
-      .collection("defaults")
-      .find({ _id: new ObjectId(process.env.DEFAULTS_OBJECT_ID) });
-    const document = await cursor.next();
-    await cursor.close();
-    return document;
+    const [result] = await db.query("select data from defaults limit 1;");
+    return JSON.parse((result as any)[0].data);
   });
 
   return defaults || {};
@@ -91,15 +92,11 @@ async function getFields(session: string, dueDate: Date): Promise<Fields> {
   const date = dueDate.toLocaleDateString("fr-CA");
 
   const fields = await database(async (db) => {
-    const cursor = db
-      .collection("fields")
-      .aggregate([
-        { $match: { [`${session}.${date}`]: { $exists: true } } },
-        { $replaceRoot: { newRoot: `\$${session}.${date}` } },
-      ]);
-    const document = await cursor.next();
-    await cursor.close();
-    return document;
+    const stmt = await db.prepare(
+      "select * from fields where due_date = ? and session = ? limit 1",
+    );
+    const [result] = await stmt.execute([date, session]);
+    return JSON.parse((result as any)[0].data);
   });
 
   if (!fields) {
@@ -117,9 +114,8 @@ async function getFieldsTemplate(
     return await getFields(session, date);
   } catch {
     const emptyFields = await database(async (db) => {
-      return db.collection("empty_data").findOne<Fields>({
-        _id: new ObjectId(process.env.EMPTY_DATA_OBJECT_ID),
-      });
+      const [result] = await db.query("select data from empty_data limit 1;");
+      return JSON.parse((result as any)[0].data);
     });
 
     if (!emptyFields) {
@@ -139,9 +135,11 @@ async function copyPreviousFields(
 
   const fields = await getFieldsTemplate(session, oneWeekBefore);
   await database(async (db) => {
-    await db
-      .collection("fields")
-      .updateOne({}, { $set: { [`${session}.${targetDateStr}`]: fields } });
+    const stmt = await db.prepare(
+      "replace into fields (data, due_date, session) values (?, ?, ?)",
+    );
+    await stmt.execute([JSON.stringify(fields), targetDateStr, session]);
+    await stmt.close();
   });
 }
 
@@ -153,9 +151,11 @@ async function editFields(
   const fields = await getFields(session, dueDate);
   const modifiedFields = modify(fields);
   await database(async (db) => {
-    await db
-      .collection("fields")
-      .updateOne({}, { $set: { [`${session}.${dateStr}`]: modifiedFields } });
+    const stmt = await db.prepare(
+      "replace into fields (data, due_date, session) values (?, ?, ?)",
+    );
+    await stmt.execute([JSON.stringify(modifiedFields), dateStr, session]);
+    await stmt.close();
   });
 }
 
@@ -182,7 +182,8 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         try {
           const defaults = await getDefaults();
           const data = await getFields(input.session, input.dueDate);
-          const result = schema.safeParse(mergeDeep(defaults, data));
+          const payload = mergeDeep(defaults, data);
+          const result = schema.safeParse(payload);
 
           return result.success
             ? { success: true, data: result.data }
