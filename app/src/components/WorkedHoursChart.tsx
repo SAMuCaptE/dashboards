@@ -100,7 +100,7 @@ const WorkedHoursChart: Component = () => {
           const datasetCount = Object.keys(workedHours() ?? {}).length;
           if (metadata.datasetIndex === datasetCount - 2) {
             return (
-              Math.round(weeklyTotal()[metadata.dataIndex] * 10) / 10 + "h"
+              Math.round(weeklyTotal()[metadata.dataIndex] * 100) / 100 + "h"
             );
           } else if (metadata.datasetIndex === datasetCount - 1) {
             return weeklyTotal()[metadata.dataIndex] - value > 2
