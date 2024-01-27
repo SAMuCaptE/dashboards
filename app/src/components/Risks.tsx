@@ -1,11 +1,8 @@
 import { Fields } from "dashboards-server";
 import {
-  Component,
-  For,
-  createEffect,
-  createSignal,
-  onCleanup,
-  onMount,
+    Component, createEffect,
+    createSignal, For, onCleanup,
+    onMount
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { client } from "../client";
@@ -78,7 +75,7 @@ const Risks: Component<{ data: Fields }> = (props) => {
       {selectedRisk() && (
         <Portal>
           <div
-            class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-black bg-opacity-60"
+            class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-black bg-opacity-60 z-40"
             onclick={() => formElement?.reset()}
           >
             <form
