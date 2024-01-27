@@ -1,17 +1,15 @@
 import { createEffect, createMemo, Show, type Component } from "solid-js";
 
+import { client } from "./client";
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
 import { fields } from "./resources/fields";
 import { dueDate, session } from "./stores/params";
-import { client } from "./client";
 
 const App: Component = () => {
   createEffect(() => {
-    document.title = `dashboard_${dueDate()
-      .toLocaleDateString("en-CA")
-      .replaceAll("-", "_")}`;
+    document.title = `dashboard_${dueDate.replaceAll("-", "_")}`;
   });
 
   const fieldResults = createMemo(fields);
@@ -24,7 +22,7 @@ const App: Component = () => {
   };
 
   function handleNewWeek() {
-    client.fields.init.mutate({ session: session(), dueDate: dueDate() });
+    client.fields.init.mutate({ session, dueDate });
   }
 
   return (

@@ -6,9 +6,7 @@ import { domainIcons, formatTime } from "../utils";
 import Dash from "./Dash";
 
 const Epics: Component<{ data: Fields }> = (props) => {
-  const [epics] = createResource(() =>
-    client.epics.query({ session: session() }),
-  );
+  const [epics] = createResource(() => client.epics.query({ session }));
 
   const shownEpics = () =>
     epics()?.filter((epic) => !epic.tags.some((tag) => tag.name === "no-show"));
@@ -70,7 +68,8 @@ const Epics: Component<{ data: Fields }> = (props) => {
                   <div class="flex text-sm items-center justify-center">
                     {epic.due_date ? (
                       <>
-                        {dueDate() >= epic.due_date && (
+                        {new Date(dueDate).getTime() >=
+                          epic.due_date.getTime() && (
                           <span class="material-symbols-outlined text-red-500">
                             event_busy
                           </span>

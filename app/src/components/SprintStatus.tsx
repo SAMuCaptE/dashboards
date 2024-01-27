@@ -9,7 +9,7 @@ import {
   Show,
 } from "solid-js";
 import { client } from "../client";
-import { fields } from "../resources/fields";
+import { fields, refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import AddButton from "./AddButton";
@@ -105,13 +105,14 @@ const SprintStatus: Component<{
       <h4 class="mt-2 text-center font-semibold relative">
         <Editable
           initialValue={props.data.sprint.id}
-          onEdit={(id) =>
-            client.fields.sprint.select.mutate({
-              dueDate: dueDate(),
-              session: session(),
+          onEdit={async (id) => {
+            await client.fields.sprint.select.mutate({
+              dueDate,
+              session,
               sprintId: id,
-            })
-          }
+            });
+            refetchFields();
+          }}
         >
           État du sprint en cours
         </Editable>
@@ -183,6 +184,14 @@ const Task = (props: {
             props.task().time_estimate ?? 0,
           );
 
+  const orderedTasks = createMemo(() =>
+    props
+      .subtasks()
+      .sort((a, b) =>
+        statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1,
+      ),
+  );
+
   return (
     <>
       <li
@@ -199,8 +208,8 @@ const Task = (props: {
             <AddButton
               onAdd={(problem) =>
                 client.fields.sprint.problems.add.mutate({
-                  dueDate: dueDate(),
-                  session: session(),
+                  dueDate,
+                  session,
                   taskId: props.task().id,
                   description: problem,
                 })
@@ -310,21 +319,23 @@ const Task = (props: {
                     <li class="text-xs">
                       <Editable
                         initialValue={problem.description}
-                        onEdit={(d) =>
-                          client.fields.sprint.problems.edit.mutate({
+                        onEdit={async (d) => {
+                          await client.fields.sprint.problems.edit.mutate({
                             ...problem,
-                            dueDate: dueDate(),
-                            session: session(),
+                            dueDate,
+                            session,
                             updatedDescription: d,
-                          })
-                        }
-                        onDelete={() =>
-                          client.fields.sprint.problems.remove.mutate({
+                          });
+                          refetchFields();
+                        }}
+                        onDelete={async () => {
+                          await client.fields.sprint.problems.remove.mutate({
                             ...problem,
-                            dueDate: dueDate(),
-                            session: session(),
-                          })
-                        }
+                            dueDate,
+                            session,
+                          });
+                          refetchFields();
+                        }}
                       >
                         <p>{problem.description}</p>
                       </Editable>
@@ -337,8 +348,8 @@ const Task = (props: {
         </a>
       </li>
 
-      <Show when={props.subtasks().length > 0 && showSubtasks()}>
-        <For each={props.subtasks()}>
+      <Show when={orderedTasks().length > 0 && showSubtasks()}>
+        <For each={orderedTasks()}>
           {(subtask) => (
             <Task task={() => subtask} subtasks={() => []} offset={true} />
           )}

@@ -26,7 +26,7 @@ const categories: Record<
 
 const BudgetChart: Component = () => {
   const [budget] = createResource(() => {
-    return client.budget.query({ date: endDate().getTime() });
+    return client.budget.query({ date: new Date(endDate).getTime() });
   });
 
   return (

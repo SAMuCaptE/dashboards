@@ -1,13 +1,12 @@
 import { Component } from "solid-js";
-import { refetch as refetchFields } from "../resources/fields";
-import { refetch as refetchUsers } from "../resources/users";
+import { refetchFields } from "../resources/fields";
+import { refetchUsers } from "../resources/users";
 import {
   dueDate,
   isValidDate,
+  navigate,
   Session,
   session,
-  setDueDate,
-  setSession,
 } from "../stores/params";
 
 const Controls: Component = () => {
@@ -17,10 +16,9 @@ const Controls: Component = () => {
         <label for="session-input">Session:</label>
         <select
           id="session-input"
-          value={session()}
+          value={session}
           onchange={(e) => {
-            setSession(e.currentTarget.value as Session);
-            refetchFields();
+            navigate(dueDate, e.currentTarget.value as Session);
           }}
         >
           <option value="s6">s6</option>
@@ -32,13 +30,9 @@ const Controls: Component = () => {
         <input
           id="dashboard-date"
           type="date"
-          value={dueDate().toLocaleDateString("en-CA")}
+          value={dueDate}
           onchange={(e) => {
-            const [year, month, day] = e.currentTarget.value
-              .split("-")
-              .map((v) => parseInt(v));
-            setDueDate(new Date(year, month - 1, day));
-            refetchFields();
+            navigate(e.currentTarget.value, session);
           }}
         />
       </form>

@@ -19,8 +19,8 @@ const alternateLabels: Record<string, string> = {
 const WorkedHoursChart: Component = () => {
   const [workedHours] = createResource(() =>
     client.hours.query({
-      start: startDate().getTime(),
-      end: endDate().getTime(),
+      start: new Date(startDate).getTime(),
+      end: new Date(endDate).getTime(),
     }),
   );
 

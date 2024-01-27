@@ -1,7 +1,7 @@
 import { Fields } from "dashboards-server";
 import { Component, For } from "solid-js";
 import { client } from "../client";
-import { refetch as refetchFields } from "../resources/fields";
+import { refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import Editable from "./Editable";
 
@@ -38,8 +38,8 @@ const Members: Component<{ data: Fields }> = (props) => {
                     initialValue={member.disponibility.lastWeek.toString()}
                     onEdit={async (v) => {
                       await client.fields.disponibilities.edit.mutate({
-                        session: session(),
-                        dueDate: dueDate(),
+                        session,
+                        dueDate,
                         selected: "lastWeek",
                         memberIndex: memberIndex(),
                         disponibility: parseInt(v),
@@ -60,8 +60,8 @@ const Members: Component<{ data: Fields }> = (props) => {
                     initialValue={member.disponibility.nextWeek.toString()}
                     onEdit={async (v) => {
                       await client.fields.disponibilities.edit.mutate({
-                        session: session(),
-                        dueDate: dueDate(),
+                        session,
+                        dueDate,
                         selected: "nextWeek",
                         memberIndex: memberIndex(),
                         disponibility: parseInt(v),

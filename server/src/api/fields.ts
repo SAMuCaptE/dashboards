@@ -1,5 +1,5 @@
 import { initTRPC } from "@trpc/server";
-import { Connection, createConnection, OkPacket } from "mysql2/promise";
+import { Connection, createConnection } from "mysql2/promise";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
 
@@ -75,7 +75,7 @@ const schema = z.object({
 export type Fields = z.infer<typeof schema>;
 
 const SelectedDashboard = z.object({
-  dueDate: z.date(),
+  dueDate: z.string(),
   session: z.enum(["s6", "s7", "s8"]),
 });
 
@@ -88,14 +88,12 @@ async function getDefaults() {
   return defaults || {};
 }
 
-async function getFields(session: string, dueDate: Date): Promise<Fields> {
-  const date = dueDate.toLocaleDateString("fr-CA");
-
+async function getFields(session: string, dueDate: string): Promise<Fields> {
   const fields = await database(async (db) => {
     const stmt = await db.prepare(
       "select * from fields where due_date = ? and session = ? limit 1",
     );
-    const [result] = await stmt.execute([date, session]);
+    const [result] = await stmt.execute([dueDate, session]);
     return JSON.parse((result as any)[0].data);
   });
 
@@ -108,7 +106,7 @@ async function getFields(session: string, dueDate: Date): Promise<Fields> {
 
 async function getFieldsTemplate(
   session: z.infer<typeof SelectedDashboard>["session"],
-  date: Date,
+  date: string,
 ) {
   try {
     return await getFields(session, date);
@@ -128,17 +126,18 @@ async function getFieldsTemplate(
 
 async function copyPreviousFields(
   session: z.infer<typeof SelectedDashboard>["session"],
-  dueDate: Date,
+  dueDate: string,
 ) {
-  const oneWeekBefore = new Date(dueDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const targetDateStr = dueDate.toLocaleDateString("fr-CA");
+  const oneWeekBefore = new Date(
+    new Date(dueDate).getTime() - 7 * 24 * 60 * 60 * 1000,
+  ).toLocaleDateString("fr-CA");
 
   const fields = await getFieldsTemplate(session, oneWeekBefore);
   await database(async (db) => {
     const stmt = await db.prepare(
       "replace into fields (data, due_date, session) values (?, ?, ?)",
     );
-    await stmt.execute([JSON.stringify(fields), targetDateStr, session]);
+    await stmt.execute([JSON.stringify(fields), dueDate, session]);
     await stmt.close();
   });
 }
@@ -147,14 +146,13 @@ async function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
   modify: (original: Fields) => Fields,
 ) {
-  const dateStr = dueDate.toLocaleDateString("fr-CA");
   const fields = await getFields(session, dueDate);
   const modifiedFields = modify(fields);
   await database(async (db) => {
     const stmt = await db.prepare(
       "replace into fields (data, due_date, session) values (?, ?, ?)",
     );
-    await stmt.execute([JSON.stringify(modifiedFields), dateStr, session]);
+    await stmt.execute([JSON.stringify(modifiedFields), dueDate, session]);
     await stmt.close();
   });
 }
@@ -163,7 +161,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
   return t.router({
     get: t.procedure
       .input(
-        z.object({ dueDate: z.date(), session: z.enum(["s6", "s7", "s8"]) }),
+        z.object({ dueDate: z.string(), session: z.enum(["s6", "s7", "s8"]) }),
       )
       .output(
         z
@@ -191,22 +189,14 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         } catch (err) {
           return {
             success: false,
-            error:
-              "Could not find " +
-              input.session +
-              "/" +
-              input.dueDate.toLocaleDateString("fr-CA"),
+            error: "Could not find " + input.session + "/" + input.dueDate,
           };
         }
       }),
 
-    init: t.procedure
-      .input(
-        z.object({ dueDate: z.date(), session: z.enum(["s6", "s7", "s8"]) }),
-      )
-      .mutation(async ({ input }) => {
-        copyPreviousFields(input.session, input.dueDate);
-      }),
+    init: t.procedure.input(SelectedDashboard).mutation(async ({ input }) => {
+      copyPreviousFields(input.session, input.dueDate);
+    }),
 
     date: t.router({
       edit: t.procedure

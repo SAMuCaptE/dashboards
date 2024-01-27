@@ -9,8 +9,8 @@ const Header: Component = () => {
       <hgroup>
         <h1 class="text-4xl font-bold">Tableau de bord</h1>
         <h3 class="text-xl font-semibold">
-          Période du <strong>{dateFormatter.format(params.startDate())}</strong>{" "}
-          au <strong>{dateFormatter.format(params.endDate())}</strong>
+          Période du <strong>{dateFormatter.format(params.startDate)}</strong>{" "}
+          au <strong>{dateFormatter.format(params.endDate)}</strong>
         </h3>
       </hgroup>
 

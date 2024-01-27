@@ -1,12 +1,15 @@
 import { Fields } from "dashboards-server";
 import {
-    Component, createEffect,
-    createSignal, For, onCleanup,
-    onMount
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { client } from "../client";
-import { refetch as refetchFields } from "../resources/fields";
+import { refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
@@ -54,14 +57,14 @@ const Risks: Component<{ data: Fields }> = (props) => {
 
     if (originalRisk.description === "") {
       await client.fields.risks.add.mutate({
-        session: session(),
-        dueDate: dueDate(),
+        session,
+        dueDate,
         risk: updatedRisk,
       });
     } else {
       await client.fields.risks.update.mutate({
-        session: session(),
-        dueDate: dueDate(),
+        session,
+        dueDate,
         originalRisk: originalRisk,
         updatedRisk: updatedRisk,
       });
@@ -153,8 +156,8 @@ const Risks: Component<{ data: Fields }> = (props) => {
                 }}
                 onDelete={async () => {
                   await client.fields.risks.delete.mutate({
-                    session: session(),
-                    dueDate: dueDate(),
+                    session,
+                    dueDate,
                     risk,
                   });
                   refetchFields();

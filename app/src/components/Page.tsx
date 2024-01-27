@@ -1,7 +1,7 @@
 import { Fields } from "dashboards-server";
 import { Component, JSX } from "solid-js";
 import { client } from "../client";
-import { refetch as refetchFields } from "../resources/fields";
+import { refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import Editable from "./Editable";
 
@@ -13,11 +13,7 @@ const Page: Component<{ children: JSX.Element; data: Fields }> = (props) => {
         <Editable
           initialValue={props.data.meeting.date}
           onEdit={async (v) => {
-            await client.fields.date.edit.mutate({
-              session: session(),
-              dueDate: dueDate(),
-              date: v,
-            });
+            await client.fields.date.edit.mutate({ session, dueDate, date: v });
             refetchFields();
           }}
         >

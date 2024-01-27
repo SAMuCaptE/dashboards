@@ -2,7 +2,7 @@ import { Component, For } from "solid-js";
 
 import { Fields } from "dashboards-server";
 import { client } from "../client";
-import { refetch as refetchFields } from "../resources/fields";
+import { refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
@@ -18,8 +18,8 @@ const Objectives: Component<{ data: Fields }> = (props) => {
     [
       ["Objectif(s) du sprint:", props.data.sprint.objective],
       [
-        `Objectif(s) de la ${session().toUpperCase()}:`,
-        props.data.sessions[session()]?.objective,
+        `Objectif(s) de la ${session.toUpperCase()}:`,
+        props.data.sessions[session]?.objective,
       ],
     ] as const;
 
@@ -41,8 +41,8 @@ const Objectives: Component<{ data: Fields }> = (props) => {
                         await client.fields[
                           index() === 0 ? "daily" : "technical"
                         ].update.mutate({
-                          session: session(),
-                          dueDate: dueDate(),
+                          session,
+                          dueDate,
                           target: item,
                           updated: v,
                         });
@@ -51,11 +51,7 @@ const Objectives: Component<{ data: Fields }> = (props) => {
                       onDelete={async () => {
                         await client.fields[
                           index() === 0 ? "daily" : "technical"
-                        ].delete.mutate({
-                          session: session(),
-                          dueDate: dueDate(),
-                          objective: item,
-                        });
+                        ].delete.mutate({ session, dueDate, objective: item });
                         refetchFields();
                       }}
                     >
@@ -70,11 +66,7 @@ const Objectives: Component<{ data: Fields }> = (props) => {
               onAdd={async (value) => {
                 await client.fields[
                   index() === 0 ? "daily" : "technical"
-                ].add.mutate({
-                  session: session(),
-                  dueDate: dueDate(),
-                  objective: value,
-                });
+                ].add.mutate({ session, dueDate, objective: value });
                 refetchFields();
               }}
             />
