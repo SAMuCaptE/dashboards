@@ -1,17 +1,18 @@
 import {
-  Component,
-  createEffect,
-  createMemo,
-  createResource,
-  createSignal,
-  For,
-  on,
-  Show,
+    Component,
+    createEffect,
+    createMemo,
+    createResource,
+    createSignal,
+    For,
+    on,
+    Suspense
 } from "solid-js";
 import { client } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
+import Loader from "./Loader";
 import NoPrint from "./NoPrint";
 
 const TimeEntries: Component = () => {
@@ -37,26 +38,27 @@ const TimeEntries: Component = () => {
     }),
   );
 
-  const [timeEntries] = createResource(() =>
-    client.timeEntries.query({
-      start: startDate.getTime(),
-      end: endDate.getTime(),
-    }),
-  );
+  const [timeEntries] = createResource(sortedUsers, async () => {
+    if (sortedUsers().length < 0) {
+      return null;
+    }
 
-  const sortedEntries = createMemo(() => {
     const result: Record<
       number,
       Awaited<ReturnType<(typeof client)["timeEntries"]["query"]>>
     > = {};
 
+    const entries = await client.timeEntries.query({
+      start: startDate.getTime(),
+      end: endDate.getTime(),
+    });
+
     for (const user of sortedUsers()) {
       result[user.id] = [];
     }
 
-    const t = timeEntries();
-    if (t) {
-      for (const entry of t) {
+    if (entries) {
+      for (const entry of entries) {
         result[entry.user.id].push(entry);
       }
     }
@@ -70,27 +72,35 @@ const TimeEntries: Component = () => {
         <h3 class="text-lg font-medium text-center">
           Détails des heures saisies
         </h3>
-        <ul>
-          <For each={sortedUsers()}>
-            {(user) => (
-              <li class="py-2">
-                <button
-                  class="flex items-center"
-                  onClick={() =>
-                    setExpanded((prev) => ({
-                      ...prev,
-                      [user.id]: !prev[user.id],
-                    }))
-                  }
-                >
-                  <span class="material-symbols-outlined">expand_more</span>
-                  <div class="font-semibold text-md">{user.username}</div>
-                </button>
-                <Show when={expanded()[user.id]}>
+
+        <Suspense
+          fallback={
+            <div class="w-fit mx-auto pt-2">
+              <Loader />
+            </div>
+          }
+        >
+          <ul>
+            <For each={sortedUsers()}>
+              {(user) => (
+                <li class="py-2">
+                  <button
+                    class="flex items-center"
+                    onClick={() =>
+                      setExpanded((prev) => ({
+                        ...prev,
+                        [user.id]: !prev[user.id],
+                      }))
+                    }
+                  >
+                    <span class="material-symbols-outlined">expand_more</span>
+                    <div class="font-semibold text-md">{user.username}</div>
+                  </button>
+
                   <ul>
-                    <For each={sortedEntries()[user.id]}>
+                    <For each={timeEntries()?.[user.id] ?? []}>
                       {(entry) => (
-                        <li>
+                        <li classList={{ hidden: !expanded()[user.id] }}>
                           <a
                             target="_blank"
                             href={entry.task_url}
@@ -134,11 +144,11 @@ const TimeEntries: Component = () => {
                       )}
                     </For>
                   </ul>
-                </Show>
-              </li>
-            )}
-          </For>
-        </ul>
+                </li>
+              )}
+            </For>
+          </ul>
+        </Suspense>
       </div>
     </NoPrint>
   );
