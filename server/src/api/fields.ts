@@ -31,6 +31,11 @@ const RiskSchema = z.object({
   ticketUrl: z.string().url().optional().nullable(),
 });
 
+const ProblemSchema = z.object({
+  description: z.string(),
+  taskId: z.string(),
+});
+
 const schema = z.object({
   sessions: z.record(
     z.enum(["s6", "s7", "s8"]),
@@ -63,12 +68,7 @@ const schema = z.object({
   sprint: z.object({
     id: z.string(),
     objective: z.string(),
-    problems: z.array(
-      z.object({
-        taskId: z.string(),
-        description: z.string(),
-      }),
-    ),
+    problems: z.array(ProblemSchema),
   }),
 });
 
@@ -366,6 +366,55 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
             return original;
           }),
         ),
+
+      problems: t.router({
+        add: t.procedure
+          .input(SelectedDashboard.and(ProblemSchema))
+          .mutation(async ({ input }) =>
+            editFields(input, (original) => {
+              original.sprint.problems.push({
+                description: input.description,
+                taskId: input.taskId,
+              });
+              return original;
+            }),
+          ),
+        edit: t.procedure
+          .input(
+            SelectedDashboard.and(ProblemSchema).and(
+              z.object({ updatedDescription: z.string() }),
+            ),
+          )
+          .mutation(async ({ input }) =>
+            editFields(input, (original) => {
+              const index = original.sprint.problems.findIndex(
+                (p) =>
+                  p.taskId === input.taskId &&
+                  p.description === input.description,
+              );
+
+              if (index >= 0) {
+                original.sprint.problems[index] = {
+                  description: input.updatedDescription,
+                  taskId: input.taskId,
+                };
+              }
+              return original;
+            }),
+          ),
+        remove: t.procedure
+          .input(SelectedDashboard.and(ProblemSchema))
+          .mutation(async ({ input }) =>
+            editFields(input, (original) => {
+              original.sprint.problems = original.sprint.problems.filter(
+                (p) =>
+                  p.taskId !== input.taskId ||
+                  p.description !== input.description,
+              );
+              return original;
+            }),
+          ),
+      }),
     }),
   });
 }

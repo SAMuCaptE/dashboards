@@ -10,7 +10,10 @@ type EditableProps = {
 };
 
 const Editable: Component<EditableProps> = (props) => {
-  const edit = async () => {
+  const edit = async (e: Event) => {
+    e.stopPropagation();
+    e.preventDefault();
+
     if (props.complexEdit) {
       await props.onEdit("");
       return;
@@ -18,7 +21,7 @@ const Editable: Component<EditableProps> = (props) => {
 
     const value = window.prompt(
       "Saisir la nouvelle valeur",
-      props.initialValue
+      props.initialValue,
     );
     if (value) {
       await props.onEdit(value);
@@ -38,6 +41,7 @@ const Editable: Component<EditableProps> = (props) => {
           <button
             onclick={async (e) => {
               e.stopPropagation();
+              e.preventDefault();
               await props.onDelete!();
             }}
           >

@@ -194,6 +194,20 @@ const Task = (props: {
             props.offset,
         }}
       >
+        <NoPrint>
+          <div class="absolute -right-5">
+            <AddButton
+              onAdd={(problem) =>
+                client.fields.sprint.problems.add.mutate({
+                  dueDate: dueDate(),
+                  session: session(),
+                  taskId: props.task().id,
+                  description: problem,
+                })
+              }
+            />
+          </div>
+        </NoPrint>
         <a href={props.task().url} target="_blank">
           <div class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
             <Chip
@@ -294,7 +308,26 @@ const Task = (props: {
                 <For each={props.task().problems}>
                   {(problem) => (
                     <li class="text-xs">
-                      <p>{problem.description}</p>
+                      <Editable
+                        initialValue={problem.description}
+                        onEdit={(d) =>
+                          client.fields.sprint.problems.edit.mutate({
+                            ...problem,
+                            dueDate: dueDate(),
+                            session: session(),
+                            updatedDescription: d,
+                          })
+                        }
+                        onDelete={() =>
+                          client.fields.sprint.problems.remove.mutate({
+                            ...problem,
+                            dueDate: dueDate(),
+                            session: session(),
+                          })
+                        }
+                      >
+                        <p>{problem.description}</p>
+                      </Editable>
                     </li>
                   )}
                 </For>
