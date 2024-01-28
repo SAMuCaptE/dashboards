@@ -1,6 +1,6 @@
 import { User } from "../schemas/user";
 import { convertTags } from "../utils";
-import { getTimeEntriesInRange } from "./time-entries";
+import { getAllTimeEntries, getTimeEntriesInRange } from "./time-entries";
 
 type WorkedHoursResult = Record<
   ReturnType<typeof convertTags> | "average",
@@ -33,9 +33,15 @@ export async function getWorkedHours(start: Date, end: Date) {
     result[convertTags(timeEntry.task_tags)][timeEntry.user.id] ??= 0;
     result[convertTags(timeEntry.task_tags)][timeEntry.user.id] +=
       durationInHours;
+  }
 
-    result["average"][timeEntry.user.id] ??= 0;
-    result["average"][timeEntry.user.id] += durationInHours / weekCount;
+  const allTimeEntries = await getAllTimeEntries();
+  for (const timeEntry of allTimeEntries ?? []) {
+    if (timeEntry) {
+      const durationInHours = timeEntry.duration / 3600_000;
+      result["average"][timeEntry.user.id] ??= 0;
+      result["average"][timeEntry.user.id] += durationInHours / weekCount;
+    }
   }
 
   return result;
