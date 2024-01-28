@@ -1,21 +1,22 @@
-import { Fields } from "dashboards-server";
 import {
-  Accessor,
-  Component,
-  createMemo,
-  createResource,
-  createSignal,
-  For,
-  Show,
+    Accessor,
+    Component,
+    createMemo,
+    createResource,
+    createSignal,
+    For,
+    Resource,
+    Show,
+    Suspense
 } from "solid-js";
 import { client } from "../client";
-import { fields, refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import AddButton from "./AddButton";
 import { Chip } from "./Chip";
 import Dash from "./Dash";
 import Editable from "./Editable";
+import Loader from "./Loader";
 import NoPrint from "./NoPrint";
 
 type Defined<T> = Exclude<T, undefined>;
@@ -51,67 +52,66 @@ const statusOrder = {
 };
 
 const SprintStatus: Component<{
-  data: Fields;
+  sprintId: Resource<string>;
   itemCount: number;
   offset?: number;
 }> = (props) => {
-  const [sprintTasks] = createResource(fields, (f) => {
-    if (f.success) {
-      return client.tasks.query({ listIds: [f.data.sprint.id] });
+  const [tasks, { refetch }] = createResource(props.sprintId, async (id) => {
+    if (!id) {
+      return { selected: [], subtasks: {} };
     }
-    return [];
-  });
 
-  const parentTasks = createMemo(
-    () => sprintTasks()?.filter((task) => task.parent === null) ?? [],
-  );
+    const tasks = await client.tasks
+      .query({
+        listIds: [props.sprintId()!],
+        dueDate,
+        session,
+      })
+      .catch(() => []);
 
-  function addProblems(task: Task) {
-    const associatedProblems = props.data.sprint.problems.filter(
-      (problem) => problem.taskId === task.id,
-    );
-    return { ...task, problems: associatedProblems };
-  }
+    const parentTasks = tasks.filter((task) => task.parent === null);
 
-  const subtasks = createMemo(() => {
-    const counts: Record<string, TaskWithProblem[]> = {};
-    for (const task of sprintTasks() ?? []) {
-      if (task.parent !== null) {
-        counts[task.parent] ??= [];
-        counts[task.parent].push(addProblems(task));
+    const subtasks = (() => {
+      const counts: Record<string, TaskWithProblem[]> = {};
+      for (const task of tasks) {
+        if (task.parent !== null) {
+          counts[task.parent] ??= [];
+          counts[task.parent].push(task);
+        }
       }
-    }
-    return counts;
+      return counts;
+    })();
+
+    const selectedTasks = parentTasks
+      .sort((a, b) =>
+        statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1,
+      )
+      .slice(
+        props.offset ?? 0,
+        (props.offset ?? 0) + props.itemCount ?? parentTasks.length ?? 0,
+      );
+
+    return { selected: selectedTasks, subtasks };
   });
-
-  const orderedTasks = createMemo(() =>
-    parentTasks().sort((a, b) =>
-      statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1,
-    ),
-  );
-
-  const tasksWithProblems = () => orderedTasks().map(addProblems);
-
-  const selectedTasks = () => {
-    const t = tasksWithProblems();
-    return t.slice(
-      props.offset ?? 0,
-      (props.offset ?? 0) + props.itemCount ?? t?.length ?? 0,
-    );
-  };
 
   return (
-    <>
+    <Suspense
+      fallback={
+        <div class="mx-auto w-fit pt-6">
+          <Loader />
+        </div>
+      }
+    >
       <h4 class="mt-2 text-center font-semibold relative">
         <Editable
-          initialValue={props.data.sprint.id}
+          initialValue={props.sprintId()}
           onEdit={async (id) => {
             await client.fields.sprint.select.mutate({
               dueDate,
               session,
               sprintId: id,
             });
-            refetchFields();
+            await refetch();
           }}
         >
           État du sprint en cours
@@ -134,26 +134,35 @@ const SprintStatus: Component<{
           </p>
         </li>
 
-        <For
-          each={selectedTasks()}
+        <Suspense
           fallback={
-            <li>
-              <p class="font-bold text-center mt-6">
-                Aucune tâche n'est associée au sprint '
-                <span class="italic">{props.data.sprint.id}</span>'.
-              </p>
-            </li>
+            <div class="mx-auto w-fit">
+              <Loader />
+            </div>
           }
         >
-          {(task) => (
-            <Task
-              task={() => task}
-              subtasks={() => subtasks()[task.id] ?? []}
-            />
-          )}
-        </For>
+          <For
+            each={tasks()?.selected}
+            fallback={
+              <li>
+                <p class="font-bold text-center mt-6">
+                  Aucune tâche n'est associée au sprint '
+                  <span class="italic">{props.sprintId()}</span>'.
+                </p>
+              </li>
+            }
+          >
+            {(task) => (
+              <Task
+                refetch={refetch}
+                task={() => task}
+                subtasks={() => tasks()?.subtasks[task.id] ?? []}
+              />
+            )}
+          </For>
+        </Suspense>
       </ul>
-    </>
+    </Suspense>
   );
 };
 
@@ -161,6 +170,7 @@ const Task = (props: {
   task: Accessor<TaskWithProblem>;
   subtasks: Accessor<TaskWithProblem[]>;
   offset?: boolean;
+  refetch: Function;
 }) => {
   const [showSubtasks, setShowSubtasks] = createSignal(false);
 
@@ -206,14 +216,15 @@ const Task = (props: {
         <NoPrint>
           <div class="absolute -right-5">
             <AddButton
-              onAdd={(problem) =>
-                client.fields.sprint.problems.add.mutate({
+              onAdd={async (problem) => {
+                await client.fields.sprint.problems.add.mutate({
                   dueDate,
                   session,
                   taskId: props.task().id,
                   description: problem,
-                })
-              }
+                });
+                await props.refetch();
+              }}
             />
           </div>
         </NoPrint>
@@ -326,7 +337,7 @@ const Task = (props: {
                             session,
                             updatedDescription: d,
                           });
-                          refetchFields();
+                          await props.refetch();
                         }}
                         onDelete={async () => {
                           await client.fields.sprint.problems.remove.mutate({
@@ -334,7 +345,7 @@ const Task = (props: {
                             dueDate,
                             session,
                           });
-                          refetchFields();
+                          await props.refetch();
                         }}
                       >
                         <p>{problem.description}</p>
@@ -351,7 +362,12 @@ const Task = (props: {
       <Show when={orderedTasks().length > 0 && showSubtasks()}>
         <For each={orderedTasks()}>
           {(subtask) => (
-            <Task task={() => subtask} subtasks={() => []} offset={true} />
+            <Task
+              task={() => subtask}
+              subtasks={() => []}
+              offset={true}
+              refetch={props.refetch}
+            />
           )}
         </For>
       </Show>

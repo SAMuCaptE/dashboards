@@ -1,8 +1,7 @@
 import { createResource } from "solid-js";
 import { client } from "../client";
 
-const [users, { refetch: refetchUsers }] = createResource(async () =>
-  client.users.query(),
-);
+const [users] = createResource(async () => client.users.query());
 
-export { refetchUsers, users };
+export { users };
+

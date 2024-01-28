@@ -1,4 +1,4 @@
-import { initTRPC } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import { Connection, createConnection } from "mysql2/promise";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
@@ -31,18 +31,15 @@ const RiskSchema = z.object({
   ticketUrl: z.string().url().optional().nullable(),
 });
 
-const ProblemSchema = z.object({
+export const ProblemSchema = z.object({
   description: z.string(),
   taskId: z.string(),
 });
 
+const Session = z.enum(["s6", "s7", "s8"]);
+
 const schema = z.object({
-  sessions: z.record(
-    z.enum(["s6", "s7", "s8"]),
-    z.object({
-      objective: z.array(z.string()),
-    }),
-  ),
+  sessions: z.record(Session, z.object({ objective: z.array(z.string()) })),
   members: z.array(
     z.object({
       img: z.string(),
@@ -74,7 +71,7 @@ const schema = z.object({
 
 export type Fields = z.infer<typeof schema>;
 
-const SelectedDashboard = z.object({
+export const SelectedDashboard = z.object({
   dueDate: z.string(),
   session: z.enum(["s6", "s7", "s8"]),
 });
@@ -157,41 +154,49 @@ async function editFields(
   });
 }
 
+async function getMergedFields(
+  dueDate: string,
+  session: z.infer<typeof Session>,
+) {
+  try {
+    const defaults = await getDefaults();
+    const data = await getFields(session, dueDate);
+    const payload = mergeDeep(defaults, data);
+    const result = schema.safeParse(payload);
+
+    return result.success
+      ? { success: true, data: result.data }
+      : { success: false, error: JSON.parse(result.error.message) };
+  } catch (err) {
+    return {
+      success: false,
+      error: "Could not find " + session + "/" + dueDate,
+    };
+  }
+}
+
+export async function findField<T>(
+  input: { dueDate: string; session: z.infer<typeof Session> },
+  selector: (fields: Fields) => T,
+): Promise<T> {
+  const fields = await getMergedFields(input.dueDate, input.session);
+  if (!fields.success) {
+    throw new TRPCError({
+      message: fields.error,
+      code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+  return selector(fields.data!);
+}
+
 export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
   return t.router({
-    get: t.procedure
-      .input(
-        z.object({ dueDate: z.string(), session: z.enum(["s6", "s7", "s8"]) }),
-      )
-      .output(
-        z
-          .object({
-            success: z.literal(true),
-            data: schema,
-          })
-          .or(
-            z.object({
-              success: z.literal(false),
-              error: z.string().or(z.array(z.any())),
-            }),
-          ),
-      )
+    valid: t.procedure
+      .input(SelectedDashboard)
+      .output(z.object({ valid: z.boolean(), error: z.unknown() }))
       .query(async ({ input }) => {
-        try {
-          const defaults = await getDefaults();
-          const data = await getFields(input.session, input.dueDate);
-          const payload = mergeDeep(defaults, data);
-          const result = schema.safeParse(payload);
-
-          return result.success
-            ? { success: true, data: result.data }
-            : { success: false, error: JSON.parse(result.error.message) };
-        } catch (err) {
-          return {
-            success: false,
-            error: "Could not find " + input.session + "/" + input.dueDate,
-          };
-        }
+        const fields = await getMergedFields(input.dueDate, input.session);
+        return { valid: fields.success, error: fields.error ?? null };
       }),
 
     init: t.procedure.input(SelectedDashboard).mutation(async ({ input }) => {
@@ -199,6 +204,12 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
     }),
 
     date: t.router({
+      get: t.procedure
+        .input(SelectedDashboard)
+        .query(({ input }) =>
+          findField(input, (fields) => fields.meeting.date),
+        ),
+
       edit: t.procedure
         .input(SelectedDashboard.and(z.object({ date: z.string() })))
         .mutation(({ input }) =>
@@ -210,6 +221,12 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
     }),
 
     daily: t.router({
+      get: t.procedure
+        .input(SelectedDashboard)
+        .query(({ input }) =>
+          findField(input, (fields) => fields.meeting.agenda),
+        ),
+
       add: t.procedure
         .input(SelectedDashboard.and(z.object({ objective: z.string() })))
         .mutation(({ input }) =>
@@ -247,6 +264,12 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
     }),
 
     technical: t.router({
+      get: t.procedure
+        .input(SelectedDashboard)
+        .query(({ input }) =>
+          findField(input, (fields) => fields.meeting.technical),
+        ),
+
       add: t.procedure
         .input(SelectedDashboard.and(z.object({ objective: z.string() })))
         .mutation(({ input }) =>
@@ -283,27 +306,47 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         ),
     }),
 
-    disponibilities: t.router({
-      edit: t.procedure
-        .input(
-          SelectedDashboard.and(
-            z.object({
-              selected: z.enum(["lastWeek", "nextWeek"]),
-              memberIndex: z.number().int(),
-              disponibility: z.number().int().min(1).max(5),
+    objectives: t.router({
+      get: t.procedure.input(SelectedDashboard).query(({ input }) =>
+        findField(input, (fields) => ({
+          sprint: fields.sprint.objective,
+          session: fields.sessions[input.session]?.objective,
+        })),
+      ),
+    }),
+
+    members: t.router({
+      get: t.procedure
+        .input(SelectedDashboard)
+        .query(({ input }) => findField(input, (fields) => fields.members)),
+
+      disponibilities: t.router({
+        edit: t.procedure
+          .input(
+            SelectedDashboard.and(
+              z.object({
+                selected: z.enum(["lastWeek", "nextWeek"]),
+                memberIndex: z.number().int(),
+                disponibility: z.number().int().min(1).max(5),
+              }),
+            ),
+          )
+          .mutation(({ input }) =>
+            editFields(input, (original) => {
+              original.members[input.memberIndex].disponibility[
+                input.selected
+              ] = input.disponibility;
+              return original;
             }),
           ),
-        )
-        .mutation(({ input }) =>
-          editFields(input, (original) => {
-            original.members[input.memberIndex].disponibility[input.selected] =
-              input.disponibility;
-            return original;
-          }),
-        ),
+      }),
     }),
 
     risks: t.router({
+      get: t.procedure
+        .input(SelectedDashboard)
+        .query(({ input }) => findField(input, (fields) => fields.risks)),
+
       add: t.procedure
         .input(SelectedDashboard.and(z.object({ risk: RiskSchema })))
         .mutation(({ input }) =>
@@ -342,6 +385,10 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
     }),
 
     sprint: t.router({
+      id: t.procedure
+        .input(SelectedDashboard)
+        .query(({ input }) => findField(input, (fields) => fields.sprint.id)),
+
       select: t.procedure
         .input(
           SelectedDashboard.and(
@@ -358,6 +405,12 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         ),
 
       problems: t.router({
+        get: t.procedure
+          .input(SelectedDashboard)
+          .query(({ input }) =>
+            findField(input, (fields) => fields.sprint.problems),
+          ),
+
         add: t.procedure
           .input(SelectedDashboard.and(ProblemSchema))
           .mutation(async ({ input }) =>

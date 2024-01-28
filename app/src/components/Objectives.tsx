@@ -1,80 +1,51 @@
-import { Component, For } from "solid-js";
+import { Component, createResource, For, Show, Suspense } from "solid-js";
 
-import { Fields } from "dashboards-server";
 import { client } from "../client";
-import { refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
+import Loader from "./Loader";
 
-const Objectives: Component<{ data: Fields }> = (props) => {
-  const rows = () =>
-    [
-      ["Ordre du jour:", props.data.meeting.agenda.items],
-      ["Plan technique:", props.data.meeting.technical.items],
-    ] as const;
+const Objectives: Component = () => {
+  const [daily, { refetch: refetchDaily }] = createResource(() =>
+    client.fields.daily.get.query({ dueDate, session }).catch(() => null),
+  );
+  const [technical, { refetch: refetchTechnical }] = createResource(() =>
+    client.fields.technical.get.query({ dueDate, session }).catch(() => null),
+  );
+  const [objectives] = createResource(() =>
+    client.fields.objectives.get.query({ dueDate, session }).catch(() => null),
+  );
 
-  const objectives = () =>
+  const formattedObjectives = () =>
     [
-      ["Objectif(s) du sprint:", props.data.sprint.objective],
+      ["Objectif(s) du sprint:", objectives()?.sprint ?? "Erreur"],
       [
         `Objectif(s) de la ${session.toUpperCase()}:`,
-        props.data.sessions[session]?.objective,
+        objectives()?.session ?? "Erreur",
       ],
     ] as const;
 
   return (
     <div class="w-[95%] mx-auto">
-      <For each={rows()}>
-        {([title, items], index) => (
-          <div class="grid grid-cols-[120px_1fr] items-center my-1">
-            <p>
-              <strong>{title}</strong>
-            </p>
-            <ol class="flex border-gray-300 border-2 rounded-full w-fit">
-              <For each={items}>
-                {(item) => (
-                  <li class="px-3 py-1 text-sm border-r-2 border-gray-300 last:border-r-0">
-                    <Editable
-                      initialValue={item}
-                      onEdit={async (v) => {
-                        await client.fields[
-                          index() === 0 ? "daily" : "technical"
-                        ].update.mutate({
-                          session,
-                          dueDate,
-                          target: item,
-                          updated: v,
-                        });
-                        refetchFields();
-                      }}
-                      onDelete={async () => {
-                        await client.fields[
-                          index() === 0 ? "daily" : "technical"
-                        ].delete.mutate({ session, dueDate, objective: item });
-                        refetchFields();
-                      }}
-                    >
-                      <p>{item}</p>
-                    </Editable>
-                  </li>
-                )}
-              </For>
-            </ol>
+      <AgendaList
+        title="Ordre du jour:"
+        items={daily()?.items}
+        refetch={refetchDaily}
+        add={client.fields.daily.add.mutate}
+        update={client.fields.daily.update.mutate}
+        delete={client.fields.daily.delete.mutate}
+      />
+      <AgendaList
+        title="Plan technique:"
+        items={technical()?.items}
+        refetch={refetchTechnical}
+        add={client.fields.technical.add.mutate}
+        update={client.fields.technical.update.mutate}
+        delete={client.fields.technical.delete.mutate}
+      />
 
-            <AddButton
-              onAdd={async (value) => {
-                await client.fields[
-                  index() === 0 ? "daily" : "technical"
-                ].add.mutate({ session, dueDate, objective: value });
-                refetchFields();
-              }}
-            />
-          </div>
-        )}
-      </For>
-
-      <For each={objectives()}>
+      <For each={formattedObjectives()}>
         {([title, items]) => (
           <div class="grid grid-cols-[160px_1fr] items-center my-1">
             <p>
@@ -88,6 +59,60 @@ const Objectives: Component<{ data: Fields }> = (props) => {
           </div>
         )}
       </For>
+    </div>
+  );
+};
+
+const AgendaList: Component<{
+  title: string;
+  items: Array<string> | undefined;
+  refetch: Function;
+  add: (typeof client)["fields"]["technical"]["add"]["mutate"];
+  update: (typeof client)["fields"]["technical"]["update"]["mutate"];
+  delete: (typeof client)["fields"]["technical"]["delete"]["mutate"];
+}> = (props) => {
+  return (
+    <div class="grid grid-cols-[120px_1fr] items-center my-1">
+      <p>
+        <strong>{props.title}</strong>
+      </p>
+      <Suspense fallback={<Loader />}>
+        <Show when={props.items} fallback={<p>Erreur</p>}>
+          <ol class="flex border-gray-300 border-2 rounded-full w-fit">
+            <For each={props.items}>
+              {(item) => (
+                <li class="px-3 py-1 text-sm border-r-2 border-gray-300 last:border-r-0">
+                  <Editable
+                    initialValue={item}
+                    onEdit={async (v) => {
+                      await props.update({
+                        session,
+                        dueDate,
+                        target: item,
+                        updated: v,
+                      });
+                      await props.refetch();
+                    }}
+                    onDelete={async () => {
+                      await props.delete({ session, dueDate, objective: item });
+                      await props.refetch();
+                    }}
+                  >
+                    <p>{item}</p>
+                  </Editable>
+                </li>
+              )}
+            </For>
+          </ol>
+        </Show>
+      </Suspense>
+
+      <AddButton
+        onAdd={async (value) => {
+          await props.add({ session, dueDate, objective: value });
+          await props.refetch();
+        }}
+      />
     </div>
   );
 };

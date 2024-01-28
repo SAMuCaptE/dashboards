@@ -1,10 +1,18 @@
 import "chartjs-adapter-moment";
 
 import { Chart, Colors, Legend, TimeScale, Title, Tooltip } from "chart.js";
-import { Fields } from "dashboards-server";
 import { Line } from "solid-chartjs";
-import { Component, createResource, onMount } from "solid-js";
+import {
+    Component,
+    createEffect,
+    createResource,
+    onMount,
+    Resource,
+    Show,
+    Suspense
+} from "solid-js";
 import { client } from "../client";
+import Loader from "./Loader";
 
 const formatter = new Intl.DateTimeFormat("fr-CA", {
   month: "numeric",
@@ -24,33 +32,31 @@ function makeDatasetFromTimeEntries(timeEntries: Record<number, number>) {
     }));
 }
 
-const BurndownChart: Component<{ data: Fields }> = (props) => {
-  const [burndown] = createResource(() =>
-    client.burndown.query({ sprintId: props.data.sprint.id })
-  );
+const BurndownChart: Component<{ sprintId: string }> = (props) => {
+  const [burndown] = createResource(async () => {
+    const data = await client.burndown
+      .query({ sprintId: props.sprintId })
+      .catch(() => null);
 
-  onMount(() => {
-    Chart.register(Title, Tooltip, Legend, Colors, TimeScale);
-  });
-
-  const data = () => ({
-    datasets: [
-      {
-        label: "Prévision",
-        type: "line",
-        data: makeDatasetFromTimeEntries(burndown()?.plannedCurve ?? {}),
-      },
-      {
-        label: "Réel",
-        type: "line",
-        data: makeDatasetFromTimeEntries(burndown()?.actualCurve ?? {}),
-      },
-      {
-        label: "Idéal",
-        type: "line",
-        data: makeDatasetFromTimeEntries(burndown()?.idealCurve ?? {}),
-      },
-    ],
+    return {
+      datasets: [
+        {
+          label: "Prévision",
+          type: "line",
+          data: makeDatasetFromTimeEntries(data?.plannedCurve ?? {}),
+        },
+        {
+          label: "Réel",
+          type: "line",
+          data: makeDatasetFromTimeEntries(data?.actualCurve ?? {}),
+        },
+        {
+          label: "Idéal",
+          type: "line",
+          data: makeDatasetFromTimeEntries(data?.idealCurve ?? {}),
+        },
+      ],
+    };
   });
 
   const options = {
@@ -68,8 +74,28 @@ const BurndownChart: Component<{ data: Fields }> = (props) => {
   return (
     <div>
       <h4 class="text-center font-semibold">Burndown</h4>
-      <Line data={data()} options={options} width={400} height={200} />
+      <Suspense
+        fallback={
+          <div class="mx-auto w-fit">
+            <Loader />
+          </div>
+        }
+      >
+        <Show when={burndown()}>
+          <ChartWrapper data={burndown()} options={options} />
+        </Show>
+      </Suspense>
     </div>
+  );
+};
+
+const ChartWrapper: Component<{ data: any; options: any }> = (props) => {
+  onMount(() => {
+    Chart.register(Title, Tooltip, Legend, Colors, TimeScale);
+  });
+
+  return (
+    <Line data={props.data} options={props.options} width={400} height={200} />
   );
 };
 

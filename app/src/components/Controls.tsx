@@ -1,12 +1,10 @@
 import { Component } from "solid-js";
-import { refetchFields } from "../resources/fields";
-import { refetchUsers } from "../resources/users";
 import {
-  dueDate,
-  isValidDate,
-  navigate,
-  Session,
-  session,
+    dueDate,
+    isValidDate,
+    navigate,
+    Session,
+    session
 } from "../stores/params";
 
 const Controls: Component = () => {
@@ -43,16 +41,6 @@ const Controls: Component = () => {
           onclick={() => window.print()}
         >
           <span class="material-symbols-outlined">print</span>
-        </button>
-
-        <button
-          class="block bg-transparent border-0 mx-auto my-0 "
-          onclick={() => {
-            refetchFields();
-            refetchUsers();
-          }}
-        >
-          <span class="material-symbols-outlined">update</span>
         </button>
       </div>
 

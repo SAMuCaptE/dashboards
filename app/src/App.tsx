@@ -1,6 +1,6 @@
 import {
     createEffect,
-    createMemo,
+    createResource,
     Show,
     Suspense,
     type Component
@@ -12,7 +12,6 @@ import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
 import Loader from "./components/Loader";
 import TimeEntries from "./components/TimeEntries";
-import { fields } from "./resources/fields";
 import { dueDate, session } from "./stores/params";
 
 const App: Component = () => {
@@ -20,18 +19,15 @@ const App: Component = () => {
     document.title = `dashboard_${dueDate.replaceAll("-", "_")}`;
   });
 
-  const fieldResults = createMemo(fields);
-  const f = () => {
-    const result = fieldResults();
-    if (result?.success) {
-      return result.data;
-    }
-    return null as never;
-  };
-
   function handleNewWeek() {
     client.fields.init.mutate({ session, dueDate });
   }
+
+  const [fields] = createResource(() =>
+    client.fields.valid
+      .query({ dueDate, session })
+      .catch((err) => ({ valid: false, error: err as unknown })),
+  );
 
   return (
     <>
@@ -48,7 +44,7 @@ const App: Component = () => {
         }
       >
         <Show
-          when={fieldResults()?.success}
+          when={fields()?.valid}
           fallback={
             <div class="pt-4">
               <button
@@ -57,13 +53,14 @@ const App: Component = () => {
               >
                 Créer le fichier de la semaine
               </button>
-              <pre class="w-fit mx-auto">
-                {JSON.stringify(fieldResults(), null, 2)}
+
+              <pre class="w-fit mx-auto pt-4">
+                {JSON.stringify(fields()?.error, null, 2)}
               </pre>
             </div>
           }
         >
-          <Dashboard fields={f} />
+          <Dashboard />
         </Show>
       </Suspense>
 

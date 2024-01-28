@@ -1,26 +1,42 @@
-import { Fields } from "dashboards-server";
-import { Component, JSX } from "solid-js";
+import { Component, createResource, JSX, Suspense } from "solid-js";
 import { client } from "../client";
-import { refetchFields } from "../resources/fields";
 import { dueDate, session } from "../stores/params";
 import Editable from "./Editable";
+import Loader from "./Loader";
 
-const Page: Component<{ children: JSX.Element; data: Fields }> = (props) => {
+const Page: Component<{ children: JSX.Element }> = (props) => {
+  const [meetingDate, { refetch }] = createResource(() =>
+    client.fields.date.get.query({ session, dueDate }).catch(() => null),
+  );
+
   return (
     <main class="w-[8.5in] h-[11in] border-black border-2 mx-auto block my-5 relative">
       {props.children}
+
       <footer class="opacity-80 absolute bottom-4 left-1/2 -translate-x-1/2">
-        <Editable
-          initialValue={props.data.meeting.date}
-          onEdit={async (v) => {
-            await client.fields.date.edit.mutate({ session, dueDate, date: v });
-            refetchFields();
-          }}
+        <Suspense
+          fallback={
+            <div class="mx-auto w-fit">
+              <Loader />
+            </div>
+          }
         >
-          <p class="text-sm">
-            <strong>SAUM</strong> - {props.data.meeting.date}
-          </p>
-        </Editable>
+          <Editable
+            initialValue={meetingDate() ?? ""}
+            onEdit={async (v) => {
+              await client.fields.date.edit.mutate({
+                session,
+                dueDate,
+                date: v,
+              });
+              await refetch();
+            }}
+          >
+            <p class="text-sm">
+              <strong>SAUM</strong> - {meetingDate() ?? "Erreur"}
+            </p>
+          </Editable>
+        </Suspense>
       </footer>
     </main>
   );

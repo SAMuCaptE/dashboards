@@ -5,7 +5,12 @@ import { z } from "zod";
 import { getBurndown } from "./api/burndown";
 import { EpicSchema, getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
-import { makeFieldsRouter } from "./api/fields";
+import {
+    ProblemSchema,
+    SelectedDashboard,
+    findField,
+    makeFieldsRouter,
+} from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
 import { getTimeEntriesInRange } from "./api/time-entries";
@@ -16,6 +21,11 @@ import { TimeEntrySchema } from "./schemas/time-entry";
 import { UserSchema } from "./schemas/user";
 
 const t = initTRPC.create({ transformer: SuperJSON });
+
+const TaskWithProblemSchema = TaskSchema.and(
+  z.object({ problems: z.array(ProblemSchema) }),
+);
+type TaskWithProblem = z.infer<typeof TaskWithProblemSchema>;
 
 export const appRouter = t.router({
   ping: t.procedure.query(() => "pong"),
@@ -45,25 +55,40 @@ export const appRouter = t.router({
 
   tasks: t.procedure
     .input(
-      z.object({
-        tags: z.array(z.string()).optional(),
-        assigneeIds: z.array(z.string()).optional(),
-        listIds: z.array(z.string()).optional(),
-        spaceIds: z.array(z.string()).optional(),
-        associatedWithAnEpic: z.boolean().optional(),
-        epicId: z.string().optional(),
-      }),
+      z
+        .object({
+          tags: z.array(z.string()).optional(),
+          assigneeIds: z.array(z.string()).optional(),
+          listIds: z.array(z.string()).optional(),
+          spaceIds: z.array(z.string()).optional(),
+          associatedWithAnEpic: z.boolean().optional(),
+          epicId: z.string().optional(),
+        })
+        .and(SelectedDashboard),
     )
-    .output(z.array(TaskSchema))
-    .query(({ input }) =>
-      getTasks(
-        input.tags ?? [],
-        input.assigneeIds ?? [],
-        input.listIds ?? [],
-        input.spaceIds ?? [],
-        input.epicId ?? null,
-      ),
-    ),
+    .output(z.array(TaskWithProblemSchema))
+    .query(async ({ input }) => {
+      const [tasks, problems] = await Promise.all([
+        getTasks(
+          input.tags ?? [],
+          input.assigneeIds ?? [],
+          input.listIds ?? [],
+          input.spaceIds ?? [],
+          input.epicId ?? null,
+        ),
+        findField(input, (fields) => fields.sprint.problems),
+      ]);
+
+      const tasksWithProblems: Array<TaskWithProblem> = [];
+      for (const task of tasks) {
+        tasksWithProblems.push({
+          ...task,
+          problems: problems.filter((p) => p.taskId === task.id),
+        });
+      }
+
+      return tasksWithProblems;
+    }),
 
   epics: t.procedure
     .input(

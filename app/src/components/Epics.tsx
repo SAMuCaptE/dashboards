@@ -1,11 +1,10 @@
-import { Fields } from "dashboards-server";
 import { Component, createResource, For, Show } from "solid-js";
 import { client } from "../client";
 import { dueDate, session } from "../stores/params";
 import { domainIcons, formatTime } from "../utils";
 import Dash from "./Dash";
 
-const Epics: Component<{ data: Fields }> = (props) => {
+const Epics: Component = () => {
   const [epics] = createResource(() => client.epics.query({ session }));
 
   const shownEpics = () =>
