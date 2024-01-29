@@ -168,6 +168,7 @@ async function getMergedFields(
       ? { success: true, data: result.data }
       : { success: false, error: JSON.parse(result.error.message) };
   } catch (err) {
+    console.log(err);
     return {
       success: false,
       error: "Could not find " + session + "/" + dueDate,

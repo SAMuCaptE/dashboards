@@ -1,15 +1,14 @@
 import {
-    Accessor,
-    Component,
-    createMemo,
-    createResource,
-    createSignal,
-    For,
-    Resource,
-    Show,
-    Suspense
+  Accessor,
+  Component,
+  createSignal,
+  For,
+  Resource,
+  Show,
+  Suspense,
 } from "solid-js";
 import { client } from "../client";
+import { TaskWithProblem } from "../resources/tasks";
 import { dueDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import AddButton from "./AddButton";
@@ -18,16 +17,6 @@ import Dash from "./Dash";
 import Editable from "./Editable";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
-
-type Defined<T> = Exclude<T, undefined>;
-
-type Problem = { description: string; taskId: string };
-type Task = Defined<
-  Awaited<ReturnType<(typeof client)["tasks"]["query"]>>
->[number];
-type TaskWithProblem = Task & {
-  problems: Problem[];
-};
 
 const statusLabels = {
   open: "Disponible",
@@ -40,60 +29,16 @@ const statusLabels = {
   shipping: "Commande",
 };
 
-const statusOrder = {
-  open: 0,
-  "to do": 1,
-  "in progress": 2,
-  review: 3,
-  complete: 4,
-  shipping: 5,
-  blocked: 6,
-  closed: 6,
-};
-
 const SprintStatus: Component<{
   sprintId: Resource<string>;
+  tasks: Resource<{
+    tasks: TaskWithProblem[];
+    subtasks: Record<string, TaskWithProblem[]>;
+  }>;
+  refetch: Function;
   itemCount: number;
   offset?: number;
 }> = (props) => {
-  const [tasks, { refetch }] = createResource(props.sprintId, async (id) => {
-    if (!id) {
-      return { selected: [], subtasks: {} };
-    }
-
-    const tasks = await client.tasks
-      .query({
-        listIds: [props.sprintId()!],
-        dueDate,
-        session,
-      })
-      .catch(() => []);
-
-    const parentTasks = tasks.filter((task) => task.parent === null);
-
-    const subtasks = (() => {
-      const counts: Record<string, TaskWithProblem[]> = {};
-      for (const task of tasks) {
-        if (task.parent !== null) {
-          counts[task.parent] ??= [];
-          counts[task.parent].push(task);
-        }
-      }
-      return counts;
-    })();
-
-    const selectedTasks = parentTasks
-      .sort((a, b) =>
-        statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1,
-      )
-      .slice(
-        props.offset ?? 0,
-        (props.offset ?? 0) + props.itemCount ?? parentTasks.length ?? 0,
-      );
-
-    return { selected: selectedTasks, subtasks };
-  });
-
   return (
     <Suspense
       fallback={
@@ -111,7 +56,7 @@ const SprintStatus: Component<{
               session,
               sprintId: id,
             });
-            await refetch();
+            await props.refetch();
           }}
         >
           État du sprint en cours
@@ -142,7 +87,14 @@ const SprintStatus: Component<{
           }
         >
           <For
-            each={tasks()?.selected}
+            each={props
+              .tasks()
+              ?.tasks.slice(
+                props.offset ?? 0,
+                (props.offset ?? 0) + props.itemCount ??
+                  props.tasks()?.tasks.length ??
+                  0,
+              )}
             fallback={
               <li>
                 <p class="font-bold text-center mt-6">
@@ -154,9 +106,9 @@ const SprintStatus: Component<{
           >
             {(task) => (
               <Task
-                refetch={refetch}
+                refetch={props.refetch}
                 task={() => task}
-                subtasks={() => tasks()?.subtasks[task.id] ?? []}
+                subtasks={() => props.tasks()?.subtasks[task.id] ?? []}
               />
             )}
           </For>
@@ -193,14 +145,6 @@ const Task = (props: {
             (total, subtask) => total + (subtask.time_estimate ?? 0),
             props.task().time_estimate ?? 0,
           );
-
-  const orderedTasks = createMemo(() =>
-    props
-      .subtasks()
-      .sort((a, b) =>
-        statusOrder[a.status.status] > statusOrder[b.status.status] ? 1 : -1,
-      ),
-  );
 
   return (
     <>
@@ -359,8 +303,8 @@ const Task = (props: {
         </a>
       </li>
 
-      <Show when={orderedTasks().length > 0 && showSubtasks()}>
-        <For each={orderedTasks()}>
+      <Show when={props.subtasks().length > 0 && showSubtasks()}>
+        <For each={props.subtasks()}>
           {(subtask) => (
             <Task
               task={() => subtask}

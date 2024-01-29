@@ -1,5 +1,6 @@
-import { Accessor, Component, createResource, Show, Suspense } from "solid-js";
+import { Component, createResource, Show, Suspense } from "solid-js";
 import { client } from "../client";
+import { useTasks } from "../resources/tasks";
 
 import { dueDate, session } from "../stores/params";
 import BudgetChart from "./BudgetChart";
@@ -21,6 +22,8 @@ const Dashboard: Component = () => {
   const [sprintId] = createResource(() =>
     client.fields.sprint.id.query({ dueDate, session }).catch(() => "Erreur"),
   );
+
+  const [tasks, { refetch }] = useTasks(sprintId);
 
   return (
     <>
@@ -50,20 +53,27 @@ const Dashboard: Component = () => {
 
       <Page>
         <Epics />
-        <SprintStatus sprintId={sprintId} itemCount={tasksInFirstPage} />
+        <SprintStatus
+          sprintId={sprintId}
+          tasks={tasks}
+          itemCount={tasksInFirstPage}
+          refetch={refetch}
+        />
       </Page>
 
-      {
-        // <Show when={(sprintTasks()?.length ?? 0) > tasksInFirstPage}>
-        //   <Page data={validFields()}>
-        //     <SprintStatus
-        //       data={validFields()}
-        //       itemCount={30}
-        //       offset={tasksInFirstPage}
-        //     />
-        //   </Page>
-        // </Show>
-      }
+      <Suspense>
+        <Show when={(tasks()?.tasks ?? []).length > tasksInFirstPage}>
+          <Page>
+            <SprintStatus
+              sprintId={sprintId}
+              tasks={tasks}
+              itemCount={30}
+              offset={tasksInFirstPage}
+              refetch={refetch}
+            />
+          </Page>
+        </Show>
+      </Suspense>
     </>
   );
 };
