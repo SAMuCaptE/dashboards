@@ -21,6 +21,7 @@ const statusOrder = {
   shipping: 5,
   blocked: 6,
   closed: 6,
+  cancelled: 7,
 };
 
 export function useTasks(sprintId: Resource<string>) {

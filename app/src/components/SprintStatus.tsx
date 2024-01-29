@@ -1,11 +1,11 @@
 import {
-  Accessor,
-  Component,
-  createSignal,
-  For,
-  Resource,
-  Show,
-  Suspense,
+    Accessor,
+    Component,
+    createSignal,
+    For,
+    Resource,
+    Show,
+    Suspense
 } from "solid-js";
 import { client } from "../client";
 import { TaskWithProblem } from "../resources/tasks";
@@ -27,6 +27,7 @@ const statusLabels = {
   blocked: "Bloquée",
   closed: "Fermée",
   shipping: "Commande",
+  cancelled: "Annulée",
 };
 
 const SprintStatus: Component<{

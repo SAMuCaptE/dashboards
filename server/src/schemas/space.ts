@@ -16,10 +16,10 @@ export const SpaceSchema = z.object({
         .string()
         .transform((str) => str.toLowerCase())
         .pipe(TaskStatus),
-      type: z.enum(["open", "closed", "custom"]),
+      type: z.enum(["open", "closed", "custom", "done"]),
       orderindex: z.number(),
       color: ColorSchema,
-    })
+    }),
   ),
   multiple_assignees: z.boolean(),
   features: z
@@ -46,7 +46,7 @@ export const SpaceSchema = z.object({
             id: z.string(),
             orderindex: z.string().transform((str) => parseInt(str)),
             priority: z.enum(["urgent", "high", "normal", "low"]),
-          })
+          }),
         ),
       }),
       tags: z.object({ enabled: z.boolean() }),

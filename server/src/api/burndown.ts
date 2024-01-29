@@ -18,21 +18,23 @@ export async function getBurndown(sprintId: string) {
 
   const plannedTime = tasks.reduce(
     (sum, task) => sum + (task.time_estimate ?? 0),
-    0
+    0,
   );
 
   const sortedTasksByDueDate = tasks.sort(
     (a, b) =>
       (a.due_date ?? sprint.due_date!).getTime() -
-      (b.due_date ?? sprint.due_date!).getTime()
+      (b.due_date ?? sprint.due_date!).getTime(),
   );
 
   const sortedTasksByCompletedDate = tasks
-    .filter((task) => ["closed", "complete"].includes(task.status.status))
+    .filter((task) =>
+      ["closed", "cancelled", "complete"].includes(task.status.status),
+    )
     .sort(
       (a, b) =>
         (a.date_done ?? a.date_closed)!.getTime() -
-        (b.date_done ?? b.date_closed)!.getTime()
+        (b.date_done ?? b.date_closed)!.getTime(),
     );
 
   const idealCurve: Curve = {
@@ -60,7 +62,7 @@ export async function getBurndown(sprintId: string) {
     completedTime += task.time_estimate ?? 0;
     const moment = clampDateToSprint(
       task.date_done ?? task.date_closed,
-      sprint
+      sprint,
     ).getTime();
     actualCurve[moment] = plannedTime - completedTime;
   }

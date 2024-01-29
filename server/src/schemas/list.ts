@@ -12,7 +12,7 @@ export const EpicListSchema = z.object({
     .pipe(TaskStatus),
   orderindex: z.number(),
   color: ColorSchema,
-  type: z.enum(["open", "closed", "custom"]),
+  type: z.enum(["open", "closed", "custom", "done"]),
   date_created: z
     .string()
     .transform((str) => new Date(parseInt(str)))
@@ -104,7 +104,7 @@ export const ListSchema = z.object({
         .pipe(TaskStatus),
       orderindex: z.number(),
       color: ColorSchema,
-      type: z.enum(["open", "closed", "custom"]),
+      type: z.enum(["open", "closed", "custom", "done"]),
     }),
   ),
   permission_level: z.string(),
