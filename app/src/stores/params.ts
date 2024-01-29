@@ -35,11 +35,16 @@ function isMonday() {
 
 const isValidDate = isMonday;
 
+let dueDateInMs =
+  new Date(dueDate!).getTime() +
+  new Date(dueDate!).getTimezoneOffset() * 60 * 1000;
 let startDate = new Date(dueDate!);
+
+startDate = new Date(dueDateInMs);
 startDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
 startDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
 
-let endDate = new Date(dueDate!);
+let endDate = new Date(dueDateInMs);
 endDate = new Date(endDate.getTime() + 3 * 60 * 60 * 1000);
 endDate = new Date(endDate.getTime() - 1 * 1000);
 
