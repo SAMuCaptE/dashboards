@@ -20,11 +20,10 @@ export async function getWorkedHours(start: Date, end: Date) {
     average: {},
   };
 
-  const now = new Date().getTime();
   const averageStartDate = new Date(process.env.HOURS_START_DATE!).getTime();
   const weekLength = 7 * 24 * 60 * 60 * 1000;
   const weekCount =
-    Math.floor((now - averageStartDate) / weekLength) -
+    Math.floor((end.getTime() - averageStartDate) / weekLength) -
     parseInt(process.env.HOURS_WEEKLY_OFFSET!);
 
   for (const timeEntry of timeEntries) {
