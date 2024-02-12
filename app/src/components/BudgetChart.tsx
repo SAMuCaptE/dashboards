@@ -16,10 +16,9 @@ const categories: Record<
   Categories,
   { label: string; color: string; shadow?: boolean }
 > = {
-  casing: { label: "Boitier", color: "#ed21dc" },
-  composantes: { label: "Pièces", color: "#12a308" },
-  communication: { label: "Données", color: "#5fdae8" },
-  services: { label: "Services", color: "#faaf37" },
+  mec: { label: "Mec", color: "#ed21dc" },
+  élec: { label: "Élec", color: "#12a308" },
+  info: { label: "Info", color: "#5fdae8" },
   nature: { label: "Nature", color: "#dbd51a" },
   available: { label: "Disponible", color: availableStripe, shadow: true },
 };
