@@ -1,15 +1,15 @@
 import {
-    Accessor,
-    Component,
-    createSignal,
-    For,
-    Resource,
-    Show,
-    Suspense
+  Accessor,
+  Component,
+  createSignal,
+  For,
+  Resource,
+  Show,
+  Suspense,
 } from "solid-js";
 import { client } from "../client";
 import { TaskWithProblem } from "../resources/tasks";
-import { dueDate, session } from "../stores/params";
+import { endDate, dueDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import AddButton from "./AddButton";
 import { Chip } from "./Chip";
@@ -147,6 +147,10 @@ const Task = (props: {
             props.task().time_estimate ?? 0,
           );
 
+  const isLate = () =>
+    (props.task().due_date ?? Infinity) < endDate &&
+    !["closed", "cancelled", "complete"].includes(props.task().status.status);
+
   return (
     <>
       <li
@@ -202,7 +206,13 @@ const Task = (props: {
                   </span>
                 )}
               </For>
-              <span>{props.task().name}</span>
+              <span
+                classList={{
+                  "font-bold text-rose-600": isLate(),
+                }}
+              >
+                {props.task().name}
+              </span>
 
               <Show when={props.subtasks().length > 0}>
                 <NoPrint class="ml-auto group relative">
