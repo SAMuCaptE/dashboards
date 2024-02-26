@@ -51,7 +51,7 @@ export const appRouter = t.router({
 
   budget: t.procedure
     .input(z.object({ date: z.number().transform((num) => new Date(num)) }))
-    .query(({ input }) => getBudget(input.date)),
+    .query(getBudget),
 
   tasks: t.procedure
     .input(
