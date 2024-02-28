@@ -39,7 +39,14 @@ export const ProblemSchema = z.object({
 const Session = z.enum(["s6", "s7", "s8"]);
 
 const schema = z.object({
-  sessions: z.record(Session, z.object({ objective: z.array(z.string()) })),
+  sessions: z.record(
+    Session,
+    z.object({
+      objective: z
+        .string()
+        .or(z.array(z.string()).transform((arr) => arr.join(" | "))),
+    }),
+  ),
   members: z.array(
     z.object({
       img: z.string(),
@@ -314,6 +321,17 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
           session: fields.sessions[input.session]?.objective,
         })),
       ),
+
+      sprint: t.router({
+        update: t.procedure
+          .input(SelectedDashboard.and(z.object({ objective: z.string() })))
+          .mutation(({ input }) =>
+            editFields(input, (original) => {
+              original.sprint.objective = input.objective;
+              return original;
+            }),
+          ),
+      }),
     }),
 
     members: t.router({

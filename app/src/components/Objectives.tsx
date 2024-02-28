@@ -13,18 +13,9 @@ const Objectives: Component = () => {
   const [technical, { refetch: refetchTechnical }] = createResource(() =>
     client.fields.technical.get.query({ dueDate, session }).catch(() => null),
   );
-  const [objectives] = createResource(() =>
+  const [objectives, { refetch: refetchObjectives }] = createResource(() =>
     client.fields.objectives.get.query({ dueDate, session }).catch(() => null),
   );
-
-  const formattedObjectives = () =>
-    [
-      ["Objectif(s) du sprint:", objectives()?.sprint ?? "Erreur"],
-      [
-        `Objectif(s) de la ${session.toUpperCase()}:`,
-        objectives()?.session ?? "Erreur",
-      ],
-    ] as const;
 
   return (
     <div class="w-[95%] mx-auto">
@@ -45,20 +36,39 @@ const Objectives: Component = () => {
         delete={client.fields.technical.delete.mutate}
       />
 
-      <For each={formattedObjectives()}>
-        {([title, items]) => (
-          <div class="grid grid-cols-[160px_1fr] items-center my-1">
-            <p>
-              <strong>{title}</strong>
-            </p>
+      <div class="grid grid-cols-[160px_1fr] items-center my-1">
+        <p>
+          <strong>Objectifs du sprint:</strong>
+        </p>
+        <Suspense fallback={<Loader />}>
+          <Editable
+            initialValue={objectives()?.sprint}
+            onEdit={async (value) => {
+              await client.fields.objectives.sprint.update.mutate({
+                dueDate,
+                session,
+                objective: value,
+              });
+              await refetchObjectives();
+            }}
+          >
             <div class="text-sm">
-              <For each={Array.isArray(items) ? items : [items]}>
-                {(objective) => <p>{objective}</p>}
-              </For>
+              <p>{objectives()?.sprint}</p>
             </div>
-          </div>
-        )}
-      </For>
+          </Editable>
+        </Suspense>
+      </div>
+
+      <div class="grid grid-cols-[160px_1fr] items-center my-1">
+        <p>
+          <strong>Objectifs de la {session.toUpperCase()}:</strong>
+        </p>
+        <div class="text-sm">
+          <Suspense fallback={<Loader />}>
+            <p>{objectives()?.session ?? "Erreur"}</p>
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 };
