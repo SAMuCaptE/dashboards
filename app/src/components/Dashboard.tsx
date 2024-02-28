@@ -19,7 +19,7 @@ import WorkedHoursChart from "./WorkedHoursChart";
 const tasksInFirstPage = 27;
 
 const Dashboard: Component = () => {
-  const [sprintId] = createResource(() =>
+  const [sprintId, { refetch: refetchSprintId }] = createResource(() =>
     client.fields.sprint.id.query({ dueDate, session }).catch(() => "Erreur"),
   );
 
@@ -58,6 +58,7 @@ const Dashboard: Component = () => {
           tasks={tasks}
           itemCount={tasksInFirstPage}
           refetch={refetch}
+          refetchSprint={refetchSprintId}
         />
       </Page>
 
@@ -70,6 +71,7 @@ const Dashboard: Component = () => {
               itemCount={30}
               offset={tasksInFirstPage}
               refetch={refetch}
+              refetchSprint={refetchSprintId}
             />
           </Page>
         </Show>

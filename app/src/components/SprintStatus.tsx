@@ -1,15 +1,15 @@
 import {
-  Accessor,
-  Component,
-  createSignal,
-  For,
-  Resource,
-  Show,
-  Suspense,
+    Accessor,
+    Component,
+    createSignal,
+    For,
+    Resource,
+    Show,
+    Suspense
 } from "solid-js";
 import { client } from "../client";
 import { TaskWithProblem } from "../resources/tasks";
-import { endDate, dueDate, session } from "../stores/params";
+import { dueDate, endDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import AddButton from "./AddButton";
 import { Chip } from "./Chip";
@@ -35,8 +35,10 @@ const SprintStatus: Component<{
   tasks: Resource<{
     tasks: TaskWithProblem[];
     subtasks: Record<string, TaskWithProblem[]>;
+    timeTotals: { actual: number; planned: number };
   }>;
   refetch: Function;
+  refetchSprint: Function;
   itemCount: number;
   offset?: number;
 }> = (props) => {
@@ -48,35 +50,41 @@ const SprintStatus: Component<{
         </div>
       }
     >
-      <h4 class="mt-2 text-center font-semibold relative">
-        <Editable
-          initialValue={props.sprintId()}
-          onEdit={async (id) => {
-            await client.fields.sprint.select.mutate({
-              dueDate,
-              session,
-              sprintId: id,
-            });
-            await props.refetch();
-          }}
-        >
-          État du sprint en cours
-        </Editable>
-      </h4>
-      <ul class="w-[95%] mx-auto">
+      <ul class="w-[95%] mx-auto pt-3">
         <li class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
-          <div> </div>
+          <Editable
+            initialValue={props.sprintId()}
+            onEdit={async (id) => {
+              await client.fields.sprint.select.mutate({
+                dueDate,
+                session,
+                sprintId: id,
+              });
+              await props.refetchSprint();
+            }}
+          >
+            <p class="text-center">
+              <strong>Sprint</strong>
+            </p>
+          </Editable>
+
           <p>
             <strong>Tâche</strong>
           </p>
           <p class="text-center">
             <strong>Responsable(s)</strong>
           </p>
-          <p class="text-center">
-            <strong>Prévu</strong>
+          <p class="text-center flex flex-col">
+            <strong class="leading-5">Prévu</strong>
+            <span class="text-sm font-bold leading-3">
+              <Time time={props.tasks()?.timeTotals.planned ?? 0} />
+            </span>
           </p>
-          <p class="text-center">
-            <strong>Réel</strong>
+          <p class="text-center flex flex-col">
+            <strong class="leading-5">Réel</strong>
+            <span class="text-sm font-bold leading-3">
+              <Time time={props.tasks()?.timeTotals.actual ?? 0} />
+            </span>
           </p>
         </li>
 

@@ -36,7 +36,7 @@ export function useTasks(sprintId: Resource<string>) {
         dueDate,
         session,
       })
-      .catch(() => []);
+      .catch(() => [] as Task[]);
 
     const parentTasks = tasks.filter((task) => task.parent === null);
 
@@ -61,6 +61,15 @@ export function useTasks(sprintId: Resource<string>) {
       );
     }
 
-    return { tasks: topLevelTasks, subtasks };
+    const timeTotals = tasks.reduce(
+      (sum, current) => {
+        sum.planned += current.time_estimate ?? 0;
+        sum.actual += current.time_spent ?? 0;
+        return sum;
+      },
+      { planned: 0, actual: 0 },
+    );
+
+    return { tasks: topLevelTasks, subtasks, timeTotals };
   });
 }
