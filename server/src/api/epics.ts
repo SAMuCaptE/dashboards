@@ -32,7 +32,7 @@ export async function getEpics(sessionTag: string, sprintId: string | null) {
   const result: Array<Epic> = [];
   for (const { epic, associatedTasks } of allTasks) {
     const completedTasks = associatedTasks.filter((task) =>
-      ["done", "closed", "complete"].includes(task.status.status),
+      ["done", "closed", "complete", "cancelled"].includes(task.status.status),
     );
 
     const totalPlannedInMs = associatedTasks.reduce(
