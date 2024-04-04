@@ -54,8 +54,8 @@ const schema = z.object({
       lastname: z.string(),
       role: z.string(),
       disponibility: z.object({
-        lastWeek: z.number().min(1).max(5),
-        nextWeek: z.number().min(1).max(5),
+        lastWeek: z.number().min(1).max(6),
+        nextWeek: z.number().min(1).max(6),
       }),
     }),
   ),
@@ -346,7 +346,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
               z.object({
                 selected: z.enum(["lastWeek", "nextWeek"]),
                 memberIndex: z.number().int(),
-                disponibility: z.number().int().min(1).max(5),
+                disponibility: z.number().int().min(1).max(6),
               }),
             ),
           )
