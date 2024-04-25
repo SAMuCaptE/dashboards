@@ -6,10 +6,10 @@ Projet ~~rapide~~ pour générer des tableaux de bord au lieu de se battre avec 
 
 1. Naviguer [ici](https://samucapte.github.io/dashboards/).
 1. Sélectionner la date de remise.
-1. Mettre les champs à jour (certains nécessiteront de modifier les valeurs dans Mongo)
+1. Mettre les champs à jour.
 1. Imprimer le pdf.
 
-## Pour générer un tableau de bord
+## Mise en place
 
 - Générer un token [ici](https://app.clickup.com/9003057443/settings/apps)
 - Créer le fichier `./server/.env` et insérer le code suivant:
@@ -19,9 +19,11 @@ API_KEY=INSERER_LE_TOKEN_ICI    # Pour accéder à l'api ClickUp
 HOURS_START_DATE=2023-05-11     # La date à partir de laquelle compter les moyennes
 HOURS_WEEKLY_OFFSET=0           # Le nombre de semaines à soustraire depuis la date de début des moyennes
 
-DATABASE_CONNECTION_STRING=mongodb+srv://<username>:<password>@<cluster_url>/?retryWrites=true&w=majority
-DEFAULTS_OBJECT_ID=             # Id de la collection comprenant les éléments communs
-EMPTY_DATA_OBJECT_ID=           # Id de la collection comprenant les valeurs par défaut d'un tableau de bord
+### Informations pour la base de données
+DB_HOSTNAME= # IP ou URL
+DB_NAME=
+DB_PASSWORD=
+DB_USER=
 ```
 
 - Créer le fichier `./app/.env` et insérer le code suivant:
