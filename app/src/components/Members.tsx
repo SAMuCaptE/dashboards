@@ -10,6 +10,7 @@ const colors = [
   "bg-yellow-400",
   "bg-lime-200",
   "bg-green-400",
+  "bg-fuchsia-400",
 ];
 
 const Members: Component = () => {
