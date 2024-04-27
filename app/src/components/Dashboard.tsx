@@ -1,5 +1,6 @@
 import { Component, createResource, Show, Suspense } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+import { makeRequest } from "../client";
 import { useTasks } from "../resources/tasks";
 
 import { dueDate, session } from "../stores/params";
@@ -20,7 +21,9 @@ const tasksInFirstPage = 27;
 
 const Dashboard: Component = () => {
   const [sprintId, { refetch: refetchSprintId }] = createResource(() =>
-    client.fields.sprint.id.query({ dueDate, session }).catch(() => null),
+    makeRequest(`/fields/${session}/${dueDate}/sprint`)
+      .get(z.string())
+      .catch(() => null),
   );
 
   const [tasks, { refetch }] = useTasks(sprintId);

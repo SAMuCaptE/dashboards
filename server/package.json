@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@trpc/server": "^10.45.2",
+    "body-parser": "^1.20.2",
     "common": "file:../common",
     "cors": "^2.8.5",
     "dotenv": "^16.1.0",

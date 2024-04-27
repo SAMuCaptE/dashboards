@@ -8,6 +8,7 @@ import {
     SelectedDashboard,
     Session,
     copyPreviousFields,
+    editFields,
     existsFields,
     findField,
 } from "./api/fields";
@@ -149,6 +150,31 @@ fields
       res.sendStatus(200);
     }),
   );
+
+fields
+  .route("/footer")
+  .get(
+    handle<SelectedDashboard>(async function (_, res) {
+      const date = await findField(res.locals, (fields) => fields.meeting.date);
+      res.status(200).send(date);
+    }),
+  )
+  .post(
+    handle<SelectedDashboard>(async function (req, res) {
+      await editFields(res.locals, (original) => {
+        original.meeting.date = z.string().parse(req.body);
+        return original;
+      });
+      res.sendStatus(200);
+    }),
+  );
+
+fields.route("/sprint").get(
+  handle<SelectedDashboard>(async function (_, res) {
+    const id = await findField(res.locals, (fields) => fields.sprint.id);
+    res.status(200).send(id);
+  }),
+);
 
 export { router };
 

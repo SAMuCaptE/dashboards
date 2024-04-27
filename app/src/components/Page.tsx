@@ -1,13 +1,25 @@
 import { Component, createResource, JSX, Suspense } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+
+import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import Editable from "./Editable";
 import Loader from "./Loader";
 
 const Page: Component<{ children: JSX.Element }> = (props) => {
   const [meetingDate, { refetch }] = createResource(() =>
-    client.fields.date.get.query({ session, dueDate }).catch(() => null),
+    makeRequest(`/fields/${session}/${dueDate}/footer`)
+      .get(z.string())
+      .catch(() => null),
   );
+
+  async function handlerFooterUpdate(date: string) {
+    await makeRequest(`/fields/${session}/${dueDate}/footer`).post(
+      z.any(),
+      date,
+    );
+    await refetch();
+  }
 
   return (
     <main class="w-[8.5in] h-[11in] border-black border-2 mx-auto block my-5 relative">
@@ -23,14 +35,7 @@ const Page: Component<{ children: JSX.Element }> = (props) => {
         >
           <Editable
             initialValue={meetingDate() ?? ""}
-            onEdit={async (v) => {
-              await client.fields.date.edit.mutate({
-                session,
-                dueDate,
-                date: v,
-              });
-              await refetch();
-            }}
+            onEdit={handlerFooterUpdate}
           >
             <p class="text-sm">
               <strong>SAUM</strong> - {meetingDate() ?? "Erreur"}

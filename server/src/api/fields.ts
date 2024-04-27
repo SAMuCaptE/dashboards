@@ -128,8 +128,6 @@ async function getFields(session: string, dueDate: string): Promise<Fields> {
       : undefined;
   });
 
-  console.log(fields);
-
   if (!fields) {
     throw new Error("could not find fields");
   }
@@ -173,7 +171,7 @@ export async function copyPreviousFields(session: Session, dueDate: string) {
   });
 }
 
-async function editFields(
+export async function editFields(
   { dueDate, session }: z.infer<typeof SelectedDashboard>,
   modify: (original: Fields) => Fields,
 ) {

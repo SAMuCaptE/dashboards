@@ -2,7 +2,14 @@ import "chartjs-adapter-moment";
 
 import { Chart, Colors, Legend, TimeScale, Title, Tooltip } from "chart.js";
 import { Line } from "solid-chartjs";
-import { Component, createResource, onMount, Show, Suspense } from "solid-js";
+import {
+  Component,
+  createEffect,
+  createResource,
+  onMount,
+  Show,
+  Suspense,
+} from "solid-js";
 import { z } from "zod";
 import { makeRequest } from "../client";
 import Loader from "./Loader";
@@ -27,13 +34,9 @@ function makeDatasetFromTimeEntries(timeEntries: Record<number, number>) {
 
 const BurndownChart: Component<{ sprintId: string }> = (props) => {
   const [burndown] = createResource(async () => {
-    let data = null;
-
-    if (props.sprintId) {
-      data = await makeRequest("/burndown")
-        .get(z.any(), new URLSearchParams({ sprintId: props.sprintId }))
-        .catch(() => null);
-    }
+    const data = await makeRequest("/burndown")
+      .get(z.any(), new URLSearchParams({ sprintId: props.sprintId }))
+      .catch(() => null);
 
     return {
       datasets: [

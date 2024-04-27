@@ -53,9 +53,14 @@ export function makeRequest(url: string) {
 
     post: async function <S extends z.Schema>(
       schema: S,
-      body?: Record<string, unknown>,
+      body?: Record<string, unknown> | string,
     ) {
-      return request(schema, "post", null, body ? JSON.stringify(body) : null);
+      const bodyStr = body
+        ? typeof body === "string"
+          ? body
+          : JSON.stringify(body)
+        : null;
+      return request(schema, "post", null, bodyStr);
     },
   };
 }
