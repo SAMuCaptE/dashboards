@@ -9,7 +9,7 @@ const Loader: Component<LoaderProps> = (props) => {
   return (
     <NoPrint>
       <span
-        class="loader"
+        class="loader mx-auto"
         style={{
           width: `${props.size ?? 36}px`,
           height: `${props.size ?? 36}px`,

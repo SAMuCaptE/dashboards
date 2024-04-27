@@ -1,6 +1,6 @@
 import { Component, createResource, For, Show } from "solid-js";
-import { client } from "../client";
-import { endDate } from "../stores/params";
+import { z } from "zod";
+import { makeRequest } from "../client";
 import { Chip } from "./Chip";
 
 const availableColor = "#a0a0a0";
@@ -8,12 +8,8 @@ const stripeColor = availableColor;
 const stripeColorFade = availableColor + "da";
 const availableStripe = `repeating-linear-gradient(-55deg, ${stripeColor}, ${stripeColor} 10px, ${stripeColorFade} 10px, ${stripeColorFade} 20px)`;
 
-type Categories =
-  | keyof Awaited<ReturnType<(typeof client)["budget"]["query"]>>["spent"]
-  | "available";
-
 const categories: Record<
-  Categories,
+  string,
   { label: string; color: string; shadow?: boolean }
 > = {
   mec: { label: "Mec", color: "#ed21dc" },
@@ -24,9 +20,13 @@ const categories: Record<
 };
 
 const BudgetChart: Component = () => {
-  const [budget] = createResource(() => {
-    return client.budget.query({ date: new Date(endDate).getTime() });
-  });
+  const [budget] = createResource(() =>
+    makeRequest("/budget")
+      .get(
+        z.record(z.string(), z.number().or(z.record(z.string(), z.number()))),
+      )
+      .catch(() => null),
+  );
 
   return (
     <div class="w-full block mx-auto overflow-hidden py-2">
@@ -53,17 +53,17 @@ const BudgetChart: Component = () => {
           <For each={Object.entries(budget()!.spent)}>
             {([category, expense]) => (
               <Expense
+                category={category}
                 expense={expense}
-                category={category as Categories}
-                planned={budget()!.planned}
+                planned={budget()!.planned as number}
               />
             )}
           </For>
 
           <Expense
-            expense={budget()!.available}
             category={"available"}
-            planned={budget()!.planned}
+            expense={budget()!.available as number}
+            planned={budget()!.planned as number}
           />
         </Show>
       </div>
@@ -72,7 +72,7 @@ const BudgetChart: Component = () => {
 };
 
 const Expense: Component<{
-  category: Categories;
+  category: string;
   expense: number;
   planned: number;
 }> = (props) => {
@@ -86,7 +86,7 @@ const Expense: Component<{
     >
       <Show when={props.expense >= 200}>
         <span class="font-semibold text-white text-sm">
-          {Math.round(props.expense * 100) / 100}$
+          {(Math.round(props.expense * 100) / 100).toFixed(2)}$
         </span>
       </Show>
     </div>

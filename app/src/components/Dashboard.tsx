@@ -20,7 +20,7 @@ const tasksInFirstPage = 27;
 
 const Dashboard: Component = () => {
   const [sprintId, { refetch: refetchSprintId }] = createResource(() =>
-    client.fields.sprint.id.query({ dueDate, session }).catch(() => "Erreur"),
+    client.fields.sprint.id.query({ dueDate, session }).catch(() => null),
   );
 
   const [tasks, { refetch }] = useTasks(sprintId);
@@ -37,7 +37,10 @@ const Dashboard: Component = () => {
         <div class="h-2"></div>
 
         <Columns>
-          <WorkedHoursChart />
+          <Suspense fallback={<Loader />}>
+            <WorkedHoursChart />
+          </Suspense>
+
           <Suspense fallback={<Loader />}>
             <Show when={sprintId()}>
               <BurndownChart sprintId={sprintId()!} />

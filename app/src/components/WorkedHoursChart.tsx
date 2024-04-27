@@ -1,7 +1,13 @@
 import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Bar } from "solid-chartjs";
-import { Component, createMemo, createResource, onMount } from "solid-js";
+import {
+  Component,
+  createMemo,
+  createResource,
+  onMount,
+  Suspense,
+} from "solid-js";
 import { z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
