@@ -1,4 +1,5 @@
 import { Component } from "solid-js";
+import { client } from "../client";
 import {
     dueDate,
     isValidDate,
@@ -21,6 +22,7 @@ const Controls: Component = () => {
         >
           <option value="s6">s6</option>
           <option value="s7">s7</option>
+          <option value="t5">t5</option>
           <option value="s8">s8</option>
         </select>
 
@@ -41,6 +43,16 @@ const Controls: Component = () => {
           onclick={() => window.print()}
         >
           <span class="material-symbols-outlined">print</span>
+        </button>
+        <button
+          title="clear cache and reload"
+          class="block bg-transparent border-0 mx-auto my-0"
+          onclick={async () => {
+            await client.fields.clearCache.mutate();
+            location.reload();
+          }}
+        >
+          <span class="material-symbols-outlined">refresh</span>
         </button>
       </div>
 

@@ -36,7 +36,7 @@ export const ProblemSchema = z.object({
   taskId: z.string(),
 });
 
-const Session = z.enum(["s6", "s7", "s8"]);
+export const Session = z.enum(["s6", "s7", "t5", "s8"]);
 
 const schema = z.object({
   sessions: z.record(
@@ -78,33 +78,62 @@ const schema = z.object({
 
 export type Fields = z.infer<typeof schema>;
 
+let cachedQuery: string = "";
+let cachedDefaults: Record<string, unknown> | null = null;
+let cachedFields: Fields | null = null;
+
 export const SelectedDashboard = z.object({
   dueDate: z.string(),
-  session: z.enum(["s6", "s7", "s8"]),
+  session: Session,
 });
 
+export type SelectedDashboard = z.infer<typeof SelectedDashboard>;
+
+export async function existsFields(session: string, dueDate: string) {
+  return !!(await database(async (db) => {
+    const stmt = await db.prepare(
+      "select 1 from fields where session = ? and due_date = ? limit 1",
+    );
+    const [result] = await stmt.execute([session, dueDate]);
+    return (result as any).length === 1;
+  }));
+}
+
 async function getDefaults() {
-  const defaults = await database(async (db) => {
+  if (cachedDefaults !== null) {
+    return cachedDefaults;
+  }
+
+  cachedDefaults = await database(async (db) => {
     const [result] = await db.query("select data from defaults limit 1;");
     return JSON.parse((result as any)[0].data);
   });
-
-  return defaults || {};
+  return cachedDefaults || {};
 }
 
 async function getFields(session: string, dueDate: string): Promise<Fields> {
+  console.log("getting fields for ", session, dueDate, cachedFields);
+  if (cachedFields) {
+    return cachedFields;
+  }
+
   const fields = await database(async (db) => {
     const stmt = await db.prepare(
       "select * from fields where due_date = ? and session = ? limit 1",
     );
     const [result] = await stmt.execute([dueDate, session]);
-    return JSON.parse((result as any)[0].data);
+    return (result as any).length > 0
+      ? JSON.parse((result as any)[0].data)
+      : undefined;
   });
+
+  console.log(fields);
 
   if (!fields) {
     throw new Error("could not find fields");
   }
 
+  cachedFields = fields;
   return fields as Fields;
 }
 
@@ -137,6 +166,7 @@ async function copyPreviousFields(
   ).toLocaleDateString("fr-CA");
 
   const fields = await getFieldsTemplate(session, oneWeekBefore);
+  console.log(fields);
   await database(async (db) => {
     const stmt = await db.prepare(
       "replace into fields (data, due_date, session) values (?, ?, ?)",
@@ -152,6 +182,8 @@ async function editFields(
 ) {
   const fields = await getFields(session, dueDate);
   const modifiedFields = modify(fields);
+  cachedFields = null;
+
   await database(async (db) => {
     const stmt = await db.prepare(
       "replace into fields (data, due_date, session) values (?, ?, ?)",
@@ -166,6 +198,13 @@ async function getMergedFields(
   session: z.infer<typeof Session>,
 ) {
   try {
+    const query = `${session}-${dueDate}`;
+    if (query !== cachedQuery) {
+      cachedDefaults = null;
+      cachedFields = null;
+    }
+    cachedQuery = query;
+
     const defaults = await getDefaults();
     const data = await getFields(session, dueDate);
     const payload = mergeDeep(defaults, data);
@@ -209,6 +248,11 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
 
     init: t.procedure.input(SelectedDashboard).mutation(async ({ input }) => {
       copyPreviousFields(input.session, input.dueDate);
+    }),
+
+    clearCache: t.procedure.mutation(() => {
+      cachedFields = null;
+      cachedDefaults = null;
     }),
 
     date: t.router({

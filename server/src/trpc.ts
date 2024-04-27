@@ -8,6 +8,7 @@ import { getExtraData } from "./api/extraData";
 import {
     ProblemSchema,
     SelectedDashboard,
+    Session,
     findField,
     makeFieldsRouter,
 } from "./api/fields";
@@ -93,7 +94,7 @@ export const appRouter = t.router({
   epics: t.procedure
     .input(
       z.object({
-        session: z.enum(["s6", "s7", "s8"]),
+        session: Session,
         sprintId: z.string().optional(),
       }),
     )

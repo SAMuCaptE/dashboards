@@ -1,4 +1,19 @@
+import { Request, Response } from "express";
 import { TimeEntry } from "./schemas/time-entry";
+
+export function handle<Locals extends Record<string, any>>(
+  fn: (req: Request, res: Response<any, Locals>) => any | Promise<any>,
+) {
+  return async function (req: Request, res: Response<any, Locals>) {
+    try {
+      await fn(req, res);
+    } catch (err) {
+      res
+        .status(500)
+        .send("Something went wrong (" + req.url + "):\n'" + err + "'.");
+    }
+  };
+}
 
 export function mergeDeep(...objects: Record<string, unknown>[]) {
   const isObject = (obj: any) => obj && typeof obj === "object";

@@ -31,6 +31,10 @@ export async function getEpics(sessionTag: string, sprintId: string | null) {
 
   const result: Array<Epic> = [];
   for (const { epic, associatedTasks } of allTasks) {
+    if (epic.tags.some((t) => t.name === "no-show")) {
+      continue;
+    }
+
     const completedTasks = associatedTasks.filter((task) =>
       ["done", "closed", "complete", "cancelled"].includes(task.status.status),
     );

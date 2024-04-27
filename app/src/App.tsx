@@ -19,8 +19,9 @@ const App: Component = () => {
     document.title = `dashboard_${dueDate.replaceAll("-", "_")}`;
   });
 
-  function handleNewWeek() {
-    client.fields.init.mutate({ session, dueDate });
+  async function handleNewWeek() {
+    await client.fields.init.mutate({ session, dueDate });
+    location.reload();
   }
 
   const [fields] = createResource(() =>

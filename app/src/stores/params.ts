@@ -1,4 +1,4 @@
-export type Session = "s6" | "s7" | "s8";
+export type Session = "s6" | "s7" | "t5" | "s8";
 
 const params = new URLSearchParams(window.location.search);
 const dueDate = params.get("date")!;
@@ -10,7 +10,7 @@ if (!dueDate || !session) {
 
   const monday = new Date();
   monday.setDate(monday.getDate() + ((1 + 7 - monday.getDay()) % 7));
-  navigate(monday, "s7");
+  navigate(monday, "t5");
 }
 
 function navigate(date: string | Date, session: Session) {
@@ -49,4 +49,3 @@ endDate = new Date(endDate.getTime() + 3 * 60 * 60 * 1000);
 endDate = new Date(endDate.getTime() - 1 * 1000);
 
 export { dueDate, startDate, endDate, isValidDate, session, navigate };
-
