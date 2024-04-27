@@ -1,9 +1,9 @@
 import {
-    createEffect,
-    createResource,
-    Show,
-    Suspense,
-    type Component
+  createEffect,
+  createResource,
+  Show,
+  Suspense,
+  type Component,
 } from "solid-js";
 import { z } from "zod";
 
@@ -13,7 +13,6 @@ import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
 import Loader from "./components/Loader";
 import TimeEntries from "./components/TimeEntries";
-import { users } from "./resources/users";
 import { dueDate, session } from "./stores/params";
 
 const App: Component = () => {
@@ -25,8 +24,6 @@ const App: Component = () => {
     await makeRequest(`/fields/${session}/${dueDate}`).post(z.any());
     location.reload();
   }
-
-  createEffect(() => console.log(users()));
 
   const [exists] = createResource(() =>
     makeRequest(`/fields/${session}/${dueDate}`)

@@ -6,7 +6,8 @@ import { makeRequest } from "../client";
 const [users] = createResource(() =>
   makeRequest("/users")
     .get(z.object({ members: z.array(User) }))
-    .catch(() => []),
+    .then(({ members }) => members)
+    .catch(() => [] as User[]),
 );
 
 export { users };

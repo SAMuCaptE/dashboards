@@ -8,7 +8,7 @@ const StrToNum = z.union([
   z.number(),
 ]);
 
-export const TimeEntrySchema = z.object({
+export const TimeEntry = z.object({
   id: z.string(),
   task: ShortTaskSchema,
   wid: z.string(),
@@ -37,4 +37,4 @@ export const TimeEntrySchema = z.object({
   task_url: z.string().url(),
 });
 
-export type TimeEntry = z.infer<typeof TimeEntrySchema>;
+export type TimeEntry = z.infer<typeof TimeEntry>;

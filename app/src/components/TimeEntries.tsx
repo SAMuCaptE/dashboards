@@ -1,25 +1,27 @@
 import {
-    Component,
-    createEffect,
-    createMemo,
-    createResource,
-    createSignal,
-    For,
-    on,
-    Suspense
+  Component,
+  createEffect,
+  createMemo,
+  createResource,
+  createSignal,
+  For,
+  on,
+  Suspense,
 } from "solid-js";
+import { z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
+import { TimeEntry } from "common";
 
 const TimeEntries: Component = () => {
   const [expanded, setExpanded] = createSignal<Record<number, boolean>>({});
 
   const sortedUsers = createMemo(() =>
-    (users()?.members ?? []).sort((a, b) =>
+    (users() ?? []).sort((a, b) =>
       a.username.split(" ")[1].localeCompare(b.username.split(" ")[1]),
     ),
   );
@@ -43,16 +45,15 @@ const TimeEntries: Component = () => {
       return null;
     }
 
-    const result: Record<
-      number,
-      Awaited<ReturnType<(typeof client)["timeEntries"]["query"]>>
-    > = {};
+    const entries = await makeRequest("/time-entries").get(
+      z.array(TimeEntry),
+      new URLSearchParams({
+        start: startDate.getTime().toString(),
+        end: endDate.getTime().toString(),
+      }),
+    );
 
-    const entries = await client.timeEntries.query({
-      start: startDate.getTime(),
-      end: endDate.getTime(),
-    });
-
+    const result: Record<number, Array<TimeEntry>> = {};
     for (const user of sortedUsers()) {
       result[user.id] = [];
     }
