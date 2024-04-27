@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ColorSchema } from "./color";
-import { ShortTaskSchema } from "./task";
+import { Color } from "./color";
+import { ShortTask } from "./task";
 import { User } from "./user";
 
 const StrToNum = z.union([
@@ -10,7 +10,7 @@ const StrToNum = z.union([
 
 export const TimeEntry = z.object({
   id: z.string(),
-  task: ShortTaskSchema,
+  task: ShortTask,
   wid: z.string(),
   user: User,
   billable: z.boolean(),
@@ -29,8 +29,8 @@ export const TimeEntry = z.object({
   task_tags: z.array(
     z.object({
       name: z.string(),
-      tag_fg: ColorSchema,
-      tag_bg: ColorSchema,
+      tag_fg: Color,
+      tag_bg: Color,
       creator: z.number(),
     }),
   ),

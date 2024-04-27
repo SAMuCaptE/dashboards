@@ -1,19 +1,6 @@
-import { z } from "zod";
-import { TaskSchema } from "../schemas/task";
+import { Epic } from "common";
 import { getEpicList } from "./lists";
 import { getTasks } from "./tasks";
-
-export const EpicSchema = TaskSchema.and(
-  z.object({
-    ticketCount: z.number(),
-    completedTicketCount: z.number(),
-    totalTimePlanned: z.number(),
-    totalTimeSpent: z.number(),
-    domain: z.string(),
-  }),
-);
-
-type Epic = z.infer<typeof EpicSchema>;
 
 export async function getEpics(sessionTag: string, sprintId: string | null) {
   const epicSpaceId = "90110010916";

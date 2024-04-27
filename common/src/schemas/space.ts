@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { ColorSchema } from "./color";
+import { Color } from "./color";
 import { TaskStatus } from "./task";
 
 export const SpaceSchema = z.object({
   id: z.string(),
   name: z.string(),
-  color: ColorSchema.nullable(),
+  color: Color.nullable(),
   private: z.boolean(),
   avatar: z.null(),
   admin_can_manage: z.boolean().nullable(),
@@ -18,7 +18,7 @@ export const SpaceSchema = z.object({
         .pipe(TaskStatus),
       type: z.enum(["open", "closed", "custom", "done"]),
       orderindex: z.number(),
-      color: ColorSchema,
+      color: Color,
     }),
   ),
   multiple_assignees: z.boolean(),
@@ -42,7 +42,7 @@ export const SpaceSchema = z.object({
         enabled: z.boolean(),
         priorities: z.array(
           z.object({
-            color: ColorSchema,
+            color: Color,
             id: z.string(),
             orderindex: z.string().transform((str) => parseInt(str)),
             priority: z.enum(["urgent", "high", "normal", "low"]),

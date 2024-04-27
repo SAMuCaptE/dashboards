@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ColorSchema } from "./color";
+import { Color } from "./color";
 import { User } from "./user";
 
 export const TaskStatus = z.enum([
@@ -14,7 +14,7 @@ export const TaskStatus = z.enum([
   "cancelled",
 ]);
 
-export const ShortTaskSchema = z.object({
+export const ShortTask = z.object({
   id: z.string(),
   name: z.string(),
   status: z.object({
@@ -22,39 +22,41 @@ export const ShortTaskSchema = z.object({
       .string()
       .transform((str) => str.toLowerCase())
       .pipe(TaskStatus),
-    color: ColorSchema,
+    color: Color,
     type: z.string(),
     orderindex: z.number(),
   }),
   custom_type: z.string().optional().nullable(),
 });
 
-export const TaskSchema = ShortTaskSchema.and(
+export const Task = ShortTask.and(
   z.object({
     orderindex: z.string(),
-    date_created: z
-      .string()
-      .transform((str) => new Date(parseInt(str)))
-      .or(z.date()),
-    date_updated: z
-      .string()
-      .transform((str) => new Date(parseInt(str)))
+    date_created: z.coerce
+      .date()
+      .or(z.string().transform((str) => new Date(parseInt(str)))),
+    date_closed: z.coerce
+      .date()
       .nullable()
-      .or(z.date().nullable()),
-    date_closed: z
-      .string()
-      .transform((str) => new Date(parseInt(str)))
+      .or(
+        z
+          .string()
+          .transform((str) => new Date(parseInt(str)))
+          .nullable(),
+      ),
+    date_done: z.coerce
+      .date()
       .nullable()
-      .or(z.date().nullable()),
-    date_done: z
-      .string()
-      .transform((str) => new Date(parseInt(str)))
-      .nullable()
-      .or(z.date().nullable()),
+      .or(
+        z
+          .string()
+          .transform((str) => new Date(parseInt(str)))
+          .nullable(),
+      ),
     creator: z.object({
       id: z.number(),
       username: z.string(),
-      color: ColorSchema,
+      color: Color,
       profilePicture: z.string().url().nullable(),
     }),
     assignees: z
@@ -64,14 +66,14 @@ export const TaskSchema = ShortTaskSchema.and(
     tags: z.array(z.object({ name: z.string(), tag_fg: z.string() })),
     parent: z.string().nullable(),
     priority: z.unknown().nullable(),
-    due_date: z
-      .string()
-      .transform((str) => new Date(parseInt(str)))
-      .or(z.date().nullable()),
-    start_date: z
-      .string()
-      .transform((str) => new Date(parseInt(str)))
-      .or(z.date().nullable()),
+    due_date: z.coerce
+      .date()
+      .nullable()
+      .or(z.string().transform((str) => new Date(parseInt(str)))),
+    start_date: z.coerce
+      .date()
+      .nullable()
+      .or(z.string().transform((str) => new Date(parseInt(str)))),
     time_estimate: z.number().optional().nullable(),
     custom_fields: z.array(
       z.object({
@@ -79,10 +81,9 @@ export const TaskSchema = ShortTaskSchema.and(
         name: z.string(),
         type: z.string(),
         type_config: z.unknown(),
-        date_created: z
-          .string()
-          .transform((str) => new Date(parseInt(str)))
-          .or(z.date()),
+        date_created: z.coerce
+          .date()
+          .or(z.string().transform((str) => new Date(parseInt(str)))),
         hide_from_guests: z.boolean(),
         required: z.boolean(),
       }),
@@ -95,4 +96,4 @@ export const TaskSchema = ShortTaskSchema.and(
   }),
 );
 
-export type Task = z.infer<typeof TaskSchema>;
+export type Task = z.infer<typeof Task>;

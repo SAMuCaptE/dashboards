@@ -1,17 +1,24 @@
+import { Epic } from "common";
 import { Component, createResource, For, Show } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+
+import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import { domainIcons, formatTime } from "../utils";
 import Dash from "./Dash";
 
 const Epics: Component = () => {
-  const [epics] = createResource(() => client.epics.query({ session }));
-
-  const shownEpics = () =>
-    epics()?.filter((epic) => !epic.tags.some((tag) => tag.name === "no-show"));
+  const [epics] = createResource(() =>
+    makeRequest("/epics")
+      .get(z.array(Epic), new URLSearchParams({ session }))
+      .catch((err) => {
+        console.log(err);
+        return [] as Epic[];
+      }),
+  );
 
   const sortedEpics = () =>
-    shownEpics()?.sort(
+    epics()?.sort(
       (a, b) =>
         (a.due_date?.getTime() ?? Number.MAX_VALUE) -
         (b.due_date?.getTime() ?? Number.MAX_VALUE),

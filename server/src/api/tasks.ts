@@ -12,7 +12,7 @@ export async function getTasks(
   assigneeIds: string[],
   listIds: string[],
   spaceIds: string[],
-  epicId: string | null
+  epicId: string | null,
 ) {
   let query = new URLSearchParams({
     archived: "false",
@@ -47,7 +47,7 @@ export async function getTasks(
 
   const teamId = "9003057443";
   const data = await api(ResponseSchema).get(
-    `https://api.clickup.com/api/v2/team/${teamId}/task?${query}`
+    `https://api.clickup.com/api/v2/team/${teamId}/task?${query}`,
   );
 
   if (!data?.tasks) {

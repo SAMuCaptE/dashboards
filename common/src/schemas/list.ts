@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ColorSchema } from "./color";
+import { Color } from "./color";
 import { TaskStatus } from "./task";
 import { User } from "./user";
 
@@ -11,7 +11,7 @@ export const EpicListSchema = z.object({
     .transform((str) => str.toLowerCase())
     .pipe(TaskStatus),
   orderindex: z.number(),
-  color: ColorSchema,
+  color: Color,
   type: z.enum(["open", "closed", "custom", "done"]),
   date_created: z
     .string()
@@ -103,7 +103,7 @@ export const ListSchema = z.object({
         .transform((str) => str.toLowerCase())
         .pipe(TaskStatus),
       orderindex: z.number(),
-      color: ColorSchema,
+      color: Color,
       type: z.enum(["open", "closed", "custom", "done"]),
     }),
   ),
