@@ -2,7 +2,8 @@ import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { Bar } from "solid-chartjs";
 import { Component, createMemo, createResource, onMount } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 import { colors } from "../utils";
@@ -18,26 +19,23 @@ const alternateLabels: Record<string, string> = {
 
 const WorkedHoursChart: Component = () => {
   const [workedHours] = createResource(() =>
-    client.hours.query({
-      start: new Date(startDate).getTime(),
-      end: new Date(endDate).getTime(),
-    }),
+    makeRequest("/hours").get(
+      z.record(z.string(), z.record(z.string(), z.number())),
+      new URLSearchParams({
+        start: startDate.getTime().toString(),
+        end: endDate.getTime().toString(),
+      }),
+    ),
   );
 
   onMount(() => {
     Chart.register(Title, Tooltip, Legend, Colors);
   });
 
-  const sortedUsers = createMemo(() =>
-    (users()?.members ?? []).sort((a, b) =>
-      a.username.split(" ")[1].localeCompare(b.username.split(" ")[1]),
-    ),
-  );
-
   const sortedHours = createMemo(() => {
     const sorted: Record<string, number[]> = {};
     const hours = workedHours() ?? {};
-    for (const user of sortedUsers()) {
+    for (const user of users() ?? []) {
       for (const key of Object.keys(hours)) {
         sorted[key] ??= [];
         sorted[key].push(hours[key][user.id] ?? 0);
@@ -53,7 +51,7 @@ const WorkedHoursChart: Component = () => {
 
     const totals: number[] = [];
     for (const hour of hours) {
-      for (let i = 0; i < sortedUsers().length; i++) {
+      for (let i = 0; i < (users() ?? []).length; i++) {
         totals[i] ??= 0;
         totals[i] += hour[i];
       }
@@ -62,7 +60,7 @@ const WorkedHoursChart: Component = () => {
   };
 
   const chartData = () => ({
-    labels: sortedUsers().map((user) => user.initials),
+    labels: (users() ?? []).map((user) => user.initials),
     datasets: [
       ...Object.entries(sortedHours())
         .filter(([label]) => label !== "average")
