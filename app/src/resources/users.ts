@@ -1,7 +1,13 @@
+import { User } from "common";
 import { createResource } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+import { makeRequest } from "../client";
 
-const [users] = createResource(async () => client.users.query());
+const [users] = createResource(() =>
+  makeRequest("/users")
+    .get(z.object({ members: z.array(User) }))
+    .catch(() => []),
+);
 
 export { users };
 

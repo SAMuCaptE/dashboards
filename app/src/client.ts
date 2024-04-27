@@ -1,20 +1,21 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { AppRouter } from "dashboards-server";
 import SuperJSON from "superjson";
 import { z } from "zod";
+
+type AppRouter = any;
 
 export const client = createTRPCProxyClient<AppRouter>({
   links: [httpBatchLink({ url: import.meta.env.VITE_APP_SERVER_URL })],
   transformer: SuperJSON,
 });
 
-export function server(url: string) {
+export function makeRequest(url: string) {
   async function request<S extends z.Schema>(
     schema: S,
     method: string,
     query: URLSearchParams | null,
     body: string | null,
-  ): Promise<z.infer<S> | null> {
+  ): Promise<z.infer<S>> {
     const destination = new URL(url, import.meta.env.VITE_APP_SERVER_URL);
     if (query) {
       for (const [key, value] of query) {
@@ -24,8 +25,11 @@ export function server(url: string) {
 
     try {
       const response = await fetch(destination, { method, body });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
 
-      if (response.headers.get("content-type") === "application/json") {
+      if (response.headers.get("content-type")?.includes("application/json")) {
         const data = await response.json();
         return schema.parse(data);
       } else {
@@ -33,8 +37,9 @@ export function server(url: string) {
         return schema.parse(data);
       }
     } catch (err) {
-      console.error("could not fetch '" + destination.toString() + "': " + err);
-      return null;
+      const message =
+        "could not fetch '" + destination.toString() + "': " + err;
+      throw new Error(message);
     }
   }
 

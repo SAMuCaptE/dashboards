@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Router } from "express";
 
 import { getEpics } from "./api/epics";
 import {
@@ -6,6 +7,7 @@ import {
   SelectedDashboard,
   findField,
   existsFields,
+  copyPreviousFields,
 } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getUsers } from "./api/users";
@@ -15,7 +17,6 @@ import { getBurndown } from "./api/burndown";
 import { getExtraData } from "./api/extraData";
 import { getTimeEntriesInRange } from "./api/time-entries";
 import { getTasks } from "./api/tasks";
-import { Router } from "express";
 
 const DateRange = z.object({
   start: z.string().transform((str) => new Date(parseInt(str))),
@@ -129,16 +130,24 @@ router.use(
   fields,
 );
 
-fields.get(
-  "/",
-  handle<SelectedDashboard>(async function (_, res) {
-    const { session, dueDate } = res.locals;
-    if (await existsFields(session, dueDate)) {
+fields
+  .route("/")
+  .get(
+    handle<SelectedDashboard>(async function (_, res) {
+      const { session, dueDate } = res.locals;
+      if (await existsFields(session, dueDate)) {
+        res.sendStatus(200);
+      } else {
+        res.status(400).send(`could not find '${session}-${dueDate}'`);
+      }
+    }),
+  )
+  .post(
+    handle<SelectedDashboard>(async function (_, res) {
+      const { session, dueDate } = res.locals;
+      await copyPreviousFields(session, dueDate);
       res.sendStatus(200);
-    } else {
-      res.status(400).send(`could not find '${session}-${dueDate}'`);
-    }
-  }),
-);
+    }),
+  );
 
 export { router };

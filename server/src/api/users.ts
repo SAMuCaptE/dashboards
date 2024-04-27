@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { UserSchema } from "../schemas/user";
+import { User } from "../schemas/user";
 import { api } from "./api";
 
 const ResponseSchema = z.object({
-  members: z.array(UserSchema),
+  members: z.array(User),
 });
 
 type ResponseSchema = z.infer<typeof ResponseSchema>;

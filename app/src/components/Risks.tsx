@@ -1,4 +1,3 @@
-import { Fields } from "dashboards-server";
 import {
     Component,
     createEffect,
@@ -15,6 +14,8 @@ import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
 import Loader from "./Loader";
+
+type Fields = any;
 
 const columns = ["Risque", "Mitigation", "Poids", "Ticket"];
 const rowClasses =

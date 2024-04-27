@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "commonjs",
+    "module": "es2022",
     "rootDir": "src",
     "baseUrl": "src",
     "moduleResolution": "node",
@@ -9,7 +9,7 @@
     "lib": ["es2022", "DOM"],
     "types": ["node"],
     "noEmit": true,
-    "outDir": "dist",
+    "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

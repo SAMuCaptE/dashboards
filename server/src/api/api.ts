@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export function api<S extends z.Schema>(
   schema: S,
-  options?: Omit<RequestInit, "method">
+  options?: Omit<RequestInit, "method">,
 ) {
   const execute = async (
     method: "GET" | "POST",
-    url: string
+    url: string,
   ): Promise<z.infer<S> | null> => {
     const response = await fetch(url, {
       ...options,

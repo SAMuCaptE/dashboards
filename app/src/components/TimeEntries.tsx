@@ -8,7 +8,7 @@ import {
     on,
     Suspense
 } from "solid-js";
-import { client } from "../client";
+import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";

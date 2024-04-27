@@ -37,6 +37,7 @@ export const ProblemSchema = z.object({
 });
 
 export const Session = z.enum(["s6", "s7", "t5", "s8"]);
+export type Session = z.infer<typeof Session>;
 
 const schema = z.object({
   sessions: z.record(
@@ -157,16 +158,12 @@ async function getFieldsTemplate(
   }
 }
 
-async function copyPreviousFields(
-  session: z.infer<typeof SelectedDashboard>["session"],
-  dueDate: string,
-) {
+export async function copyPreviousFields(session: Session, dueDate: string) {
   const oneWeekBefore = new Date(
     new Date(dueDate).getTime() - 7 * 24 * 60 * 60 * 1000,
   ).toLocaleDateString("fr-CA");
 
   const fields = await getFieldsTemplate(session, oneWeekBefore);
-  console.log(fields);
   await database(async (db) => {
     const stmt = await db.prepare(
       "replace into fields (data, due_date, session) values (?, ?, ?)",

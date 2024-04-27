@@ -5,13 +5,15 @@ import {
     Suspense,
     type Component
 } from "solid-js";
+import { z } from "zod";
 
-import { client } from "./client";
+import { makeRequest } from "./client";
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
 import Loader from "./components/Loader";
 import TimeEntries from "./components/TimeEntries";
+import { users } from "./resources/users";
 import { dueDate, session } from "./stores/params";
 
 const App: Component = () => {
@@ -20,14 +22,17 @@ const App: Component = () => {
   });
 
   async function handleNewWeek() {
-    await client.fields.init.mutate({ session, dueDate });
+    await makeRequest(`/fields/${session}/${dueDate}`).post(z.any());
     location.reload();
   }
 
-  const [fields] = createResource(() =>
-    client.fields.valid
-      .query({ dueDate, session })
-      .catch((err) => ({ valid: false, error: err as unknown })),
+  createEffect(() => console.log(users()));
+
+  const [exists] = createResource(() =>
+    makeRequest(`/fields/${session}/${dueDate}`)
+      .get(z.any())
+      .then(() => ({ success: true, error: null }))
+      .catch((error) => ({ success: false, error })),
   );
 
   return (
@@ -45,19 +50,17 @@ const App: Component = () => {
         }
       >
         <Show
-          when={fields()?.valid}
+          when={exists()?.success}
           fallback={
             <div class="pt-4">
               <button
-                class="w-fit block mx-auto border-black border-2"
+                class="w-fit block mx-auto border-black border-2 hover:font-semibold"
                 onClick={handleNewWeek}
               >
                 Créer le fichier de la semaine
               </button>
 
-              <pre class="w-fit mx-auto pt-4">
-                {JSON.stringify(fields()?.error, null, 2)}
-              </pre>
+              <pre class="w-fit mx-auto pt-4">{exists()?.error.toString()}</pre>
             </div>
           }
         >

@@ -19,7 +19,7 @@ import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { TaskSchema } from "./schemas/task";
 import { TimeEntrySchema } from "./schemas/time-entry";
-import { UserSchema } from "./schemas/user";
+import { User } from "./schemas/user";
 
 const t = initTRPC.create({ transformer: SuperJSON });
 
@@ -32,7 +32,7 @@ export const appRouter = t.router({
   ping: t.procedure.query(() => "pong"),
 
   users: t.procedure
-    .output(z.object({ members: z.array(UserSchema) }))
+    .output(z.object({ members: z.array(User) }))
     .query(getUsers),
 
   hours: t.procedure
