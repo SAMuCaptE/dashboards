@@ -12,9 +12,8 @@ export const client = createTRPCProxyClient<AppRouter>({
 export function makeRequest(url: string) {
   async function request<S extends z.Schema>(
     schema: S,
-    method: string,
     query: URLSearchParams | null,
-    body: string | null,
+    details: RequestInit,
   ): Promise<z.infer<S>> {
     const destination = new URL(url, import.meta.env.VITE_APP_SERVER_URL);
     if (query) {
@@ -24,7 +23,7 @@ export function makeRequest(url: string) {
     }
 
     try {
-      const response = await fetch(destination, { method, body });
+      const response = await fetch(destination, details);
       if (!response.ok) {
         throw new Error(await response.text());
       }
@@ -43,24 +42,36 @@ export function makeRequest(url: string) {
     }
   }
 
+  function requestWithBody(method: string) {
+    return async function <S extends z.Schema>(
+      schema: S,
+      body?: Record<string, unknown> | string,
+    ) {
+      const headers = new Headers();
+
+      switch (typeof body) {
+        case "string":
+          body = body;
+          break;
+        case "object":
+          body = JSON.stringify(body);
+          headers.set("Content-Type", "application/json");
+          break;
+      }
+
+      return request(schema, null, { method, body, headers });
+    };
+  }
+
   return {
     get: async function <S extends z.Schema>(
       schema: S,
       query?: URLSearchParams,
     ) {
-      return request(schema, "get", query || null, null);
+      return request(schema, query || null, { method: "get" });
     },
-
-    post: async function <S extends z.Schema>(
-      schema: S,
-      body?: Record<string, unknown> | string,
-    ) {
-      const bodyStr = body
-        ? typeof body === "string"
-          ? body
-          : JSON.stringify(body)
-        : null;
-      return request(schema, "post", null, bodyStr);
-    },
+    put: requestWithBody("put"),
+    post: requestWithBody("post"),
+    delete: requestWithBody("delete"),
   };
 }

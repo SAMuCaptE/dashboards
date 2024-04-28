@@ -1,3 +1,4 @@
+import { Risk } from "common";
 import {
     Component,
     createEffect,
@@ -9,7 +10,8 @@ import {
     Suspense
 } from "solid-js";
 import { Portal } from "solid-js/web";
-import { client } from "../client";
+import { z } from "zod";
+import { client, makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
@@ -24,8 +26,8 @@ const iconClasses = "material-symbols-outlined block h-6 text-lg";
 
 const Risks: Component = () => {
   const [risks, { refetch }] = createResource(async () => {
-    const data = await client.fields.risks.get
-      .query({ dueDate, session })
+    const data = await makeRequest(`/fields/${session}/${dueDate}/risks`)
+      .get(z.array(Risk))
       .catch(() => []);
     return data.sort((a, b) => (a.gravity < b.gravity ? 1 : -1));
   });
@@ -63,17 +65,14 @@ const Risks: Component = () => {
     updatedRisk["ticketUrl"] = updatedRisk["ticketUrl"] || undefined;
 
     if (originalRisk.description === "") {
-      await client.fields.risks.add.mutate({
-        session,
-        dueDate,
-        risk: updatedRisk,
-      });
+      await makeRequest(`/fields/${session}/${dueDate}/risks`).put(
+        z.any(),
+        updatedRisk,
+      );
     } else {
-      await client.fields.risks.update.mutate({
-        session,
-        dueDate,
-        originalRisk: originalRisk,
-        updatedRisk: updatedRisk,
+      await makeRequest(`/fields/${session}/${dueDate}/risks`).post(z.any(), {
+        original: originalRisk,
+        updated: updatedRisk,
       });
     }
 
@@ -169,11 +168,9 @@ const Risks: Component = () => {
                     setSelectedRisk(risk);
                   }}
                   onDelete={async () => {
-                    await client.fields.risks.delete.mutate({
-                      session,
-                      dueDate,
-                      risk,
-                    });
+                    await makeRequest(
+                      `/fields/${session}/${dueDate}/risks`,
+                    ).delete(z.any(), risk);
                     await refetch();
                   }}
                 >

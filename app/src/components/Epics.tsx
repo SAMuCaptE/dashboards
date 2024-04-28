@@ -11,10 +11,7 @@ const Epics: Component = () => {
   const [epics] = createResource(() =>
     makeRequest("/epics")
       .get(z.array(Epic), new URLSearchParams({ session }))
-      .catch((err) => {
-        console.log(err);
-        return [] as Epic[];
-      }),
+      .catch(() => [] as Epic[]),
   );
 
   const sortedEpics = () =>

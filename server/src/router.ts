@@ -5,12 +5,12 @@ import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
-    SelectedDashboard,
-    Session,
-    copyPreviousFields,
-    editFields,
-    existsFields,
-    findField,
+  SelectedDashboard,
+  Session,
+  copyPreviousFields,
+  editFields,
+  existsFields,
+  findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
@@ -18,6 +18,7 @@ import { getTimeEntriesInRange } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { handle } from "./utils";
+import { Risk } from "common";
 
 const DateRange = z.object({
   start: z.string().transform((str) => new Date(parseInt(str))),
@@ -176,5 +177,48 @@ fields.route("/sprint").get(
   }),
 );
 
-export { router };
+fields
+  .route("/risks")
+  .get(
+    handle<SelectedDashboard>(async function (_, res) {
+      const risks = await findField(res.locals, (fields) => fields.risks);
+      res.status(200).json(risks);
+    }),
+  )
+  .put(
+    handle<SelectedDashboard>(async function (req, res) {
+      const risk = Risk.parse(req.body);
+      await editFields(res.locals, (original) => {
+        original.risks.push(risk);
+        return original;
+      });
+      res.sendStatus(200);
+    }),
+  )
+  .post(
+    handle<SelectedDashboard>(async function (req, res) {
+      const input = z.object({ original: Risk, updated: Risk }).parse(req.body);
+      await editFields(res.locals, (original) => {
+        const index = original.risks.findIndex(
+          (r) => r.description === input.original.description,
+        );
+        original.risks[index] = input.updated;
+        return original;
+      });
+      res.sendStatus(200);
+    }),
+  )
+  .delete(
+    handle<SelectedDashboard>(async function (req, res) {
+      const risk = Risk.parse(req.body);
+      await editFields(res.locals, (original) => {
+        original.risks = original.risks.filter(
+          (r) => r.description !== risk.description,
+        );
+        return original;
+      });
+      res.sendStatus(200);
+    }),
+  );
 
+export { router };

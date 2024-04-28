@@ -1,4 +1,5 @@
 import { TRPCError, initTRPC } from "@trpc/server";
+import { Risk } from "common";
 import { Connection, createConnection } from "mysql2/promise";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
@@ -23,13 +24,6 @@ async function database<T>(
 
   return result;
 }
-
-const RiskSchema = z.object({
-  description: z.string(),
-  mitigation: z.string(),
-  gravity: z.number().min(1),
-  ticketUrl: z.string().url().optional().nullable(),
-});
 
 export const ProblemSchema = z.object({
   description: z.string(),
@@ -69,7 +63,7 @@ const schema = z.object({
       items: z.array(z.string()),
     }),
   }),
-  risks: z.array(RiskSchema),
+  risks: z.array(Risk),
   sprint: z.object({
     id: z.string(),
     objective: z.string(),
@@ -113,7 +107,6 @@ async function getDefaults() {
 }
 
 async function getFields(session: string, dueDate: string): Promise<Fields> {
-  console.log("getting fields for ", session, dueDate, cachedFields);
   if (cachedFields) {
     return cachedFields;
   }
@@ -406,7 +399,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         .query(({ input }) => findField(input, (fields) => fields.risks)),
 
       add: t.procedure
-        .input(SelectedDashboard.and(z.object({ risk: RiskSchema })))
+        .input(SelectedDashboard.and(z.object({ risk: Risk })))
         .mutation(({ input }) =>
           editFields(input, (original) => {
             original.risks.push(input.risk);
@@ -417,7 +410,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
       update: t.procedure
         .input(
           SelectedDashboard.and(
-            z.object({ originalRisk: RiskSchema, updatedRisk: RiskSchema }),
+            z.object({ originalRisk: Risk, updatedRisk: Risk }),
           ),
         )
         .mutation(async ({ input }) =>
@@ -431,7 +424,7 @@ export function makeFieldsRouter(t: ReturnType<(typeof initTRPC)["create"]>) {
         ),
 
       delete: t.procedure
-        .input(SelectedDashboard.and(z.object({ risk: RiskSchema })))
+        .input(SelectedDashboard.and(z.object({ risk: Risk })))
         .mutation(({ input }) =>
           editFields(input, (original) => {
             original.risks = original.risks.filter(
