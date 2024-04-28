@@ -96,4 +96,17 @@ export const Task = ShortTask.and(
   }),
 );
 
+export const Problem = z.object({
+  description: z.string(),
+  taskId: z.string(),
+});
+
+export const TaskWithProblem = Task.and(
+  z.object({
+    problems: z.array(Problem),
+  }),
+);
+
 export type Task = z.infer<typeof Task>;
+export type TaskWithProblem = z.infer<typeof TaskWithProblem>;
+export type Problem = z.infer<typeof Problem>;

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { IRoute } from "express-serve-static-core";
 import { z } from "zod";
 
-import { Risk } from "common";
+import { Risk, Problem } from "common";
 import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
@@ -172,12 +172,52 @@ fields
     }),
   );
 
-fields.route("/sprint").get(
-  handle<SelectedDashboard>(async function (_, res) {
-    const id = await findField(res.locals, (fields) => fields.sprint.id);
-    res.status(200).send(id);
-  }),
+fields
+  .route("/sprint")
+  .get(
+    handle<SelectedDashboard>(async function (_, res) {
+      const id = await findField(res.locals, (fields) => fields.sprint.id);
+      res.status(200).send(id);
+    }),
+  )
+  .post(
+    handle<SelectedDashboard>(async function (req, res) {
+      const id = z.string().parse(req.body);
+      await editFields(res.locals, (original) => {
+        original.sprint.id = id;
+        return original;
+      });
+      res.sendStatus(200);
+    }),
+  );
+
+crud(
+  fields.route("/sprint/problems"),
+  Problem,
+  (fields) => fields.sprint.problems,
+  (a, b) => a.taskId === b.taskId && a.description === b.description,
 );
+
+// fields.route("/sprint/problems").post(
+//   handle<SelectedDashboard>(async function (req, res) {
+//     const input = z
+//       .object({ taskId: z.string(), description: z.string() })
+//       .parse(req.body);
+//     await editFields(res.locals, (original) => {
+//       const index = original.sprint.problems.findIndex(
+//         (p) => p.taskId === input.taskId && p.description === input.description,
+//       );
+//       if (index >= 0) {
+//         original.sprint.problems[index] = {
+//           description: input.description,
+//           taskId: input.taskId,
+//         };
+//       }
+//       return original;
+//     });
+//     res.sendStatus(200);
+//   }),
+// );
 
 fields
   .route("/members")

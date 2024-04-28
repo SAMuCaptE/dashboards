@@ -1,16 +1,9 @@
 import { createResource, Resource } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+import { TaskWithProblem } from "common";
+
+import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
-
-type Defined<T> = Exclude<T, undefined>;
-
-type Problem = { description: string; taskId: string };
-type Task = Defined<
-  Awaited<ReturnType<(typeof client)["tasks"]["query"]>>
->[number];
-export type TaskWithProblem = Task & {
-  problems: Problem[];
-};
 
 const statusOrder = {
   open: 0,
@@ -24,19 +17,22 @@ const statusOrder = {
   cancelled: 7,
 };
 
-export function useTasks(sprintId: Resource<string>) {
+export function useTasks(sprintId: Resource<string | null>) {
   return createResource(sprintId, async (id) => {
     if (!id) {
       return { tasks: [], subtasks: {} };
     }
 
-    const tasks = await client.tasks
-      .query({
-        listIds: [id],
-        dueDate,
-        session,
-      })
-      .catch(() => [] as Task[]);
+    const tasks = await makeRequest(`/tasks`)
+      .get(
+        z.array(TaskWithProblem),
+        new URLSearchParams({
+          session,
+          dueDate,
+          listId: id,
+        }),
+      )
+      .catch(() => [] as TaskWithProblem[]);
 
     const parentTasks = tasks.filter((task) => task.parent === null);
 

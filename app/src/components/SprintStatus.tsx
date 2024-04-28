@@ -1,3 +1,4 @@
+import { Problem, TaskWithProblem } from "common";
 import {
     Accessor,
     Component,
@@ -7,8 +8,8 @@ import {
     Show,
     Suspense
 } from "solid-js";
-import { client } from "../client";
-import { TaskWithProblem } from "../resources/tasks";
+import { z } from "zod";
+import { makeRequest } from "../client";
 import { dueDate, endDate, session } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import AddButton from "./AddButton";
@@ -55,11 +56,10 @@ const SprintStatus: Component<{
           <Editable
             initialValue={props.sprintId()}
             onEdit={async (id) => {
-              await client.fields.sprint.select.mutate({
-                dueDate,
-                session,
-                sprintId: id,
-              });
+              await makeRequest(`/fields/${session}/${dueDate}/sprint`).post(
+                z.any(),
+                id,
+              );
               await props.refetchSprint();
             }}
           >
@@ -174,9 +174,9 @@ const Task = (props: {
           <div class="absolute -right-5">
             <AddButton
               onAdd={async (problem) => {
-                await client.fields.sprint.problems.add.mutate({
-                  dueDate,
-                  session,
+                await makeRequest(
+                  `/fields/${session}/${dueDate}/sprint/problems`,
+                ).put(z.any(), {
                   taskId: props.task().id,
                   description: problem,
                 });
@@ -294,20 +294,21 @@ const Task = (props: {
                       <Editable
                         initialValue={problem.description}
                         onEdit={async (d) => {
-                          await client.fields.sprint.problems.edit.mutate({
-                            ...problem,
-                            dueDate,
-                            session,
-                            updatedDescription: d,
+                          await makeRequest(
+                            `/fields/${session}/${dueDate}/sprint/problems`,
+                          ).post(z.any(), {
+                            original: problem,
+                            updated: {
+                              ...problem,
+                              description: d,
+                            } satisfies Problem,
                           });
                           await props.refetch();
                         }}
                         onDelete={async () => {
-                          await client.fields.sprint.problems.remove.mutate({
-                            ...problem,
-                            dueDate,
-                            session,
-                          });
+                          await makeRequest(
+                            `/fields/${session}/${dueDate}/sprint/problems`,
+                          ).delete(z.any(), problem);
                           await props.refetch();
                         }}
                       >
