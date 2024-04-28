@@ -1,5 +1,6 @@
 import { Component } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+import { makeRequest } from "../client";
 import {
     dueDate,
     isValidDate,
@@ -48,7 +49,7 @@ const Controls: Component = () => {
           title="clear cache and reload"
           class="block bg-transparent border-0 mx-auto my-0"
           onclick={async () => {
-            await client.fields.clearCache.mutate();
+            await makeRequest("/cache").delete(z.any());
             location.reload();
           }}
         >

@@ -1,8 +1,8 @@
+import { Problem, Risk } from "common";
 import { Router } from "express";
 import { IRoute } from "express-serve-static-core";
 import { z } from "zod";
 
-import { Risk, Problem } from "common";
 import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
@@ -20,6 +20,7 @@ import { getTasks } from "./api/tasks";
 import { getTimeEntriesInRange } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
+import { cache, cached, clearCache } from "./cache";
 import { handle } from "./utils";
 
 const DateRange = z.object({
@@ -33,90 +34,140 @@ router.get("/health", function (_, res) {
   res.sendStatus(200);
 });
 
+router
+  .route("/cache")
+  .get(function (_, res) {
+    res.json(cached).status(200);
+  })
+  .delete(function (_, res) {
+    clearCache();
+    res.sendStatus(200);
+  });
+
 router.get(
   "/users",
-  handle(async function (_, res) {
-    res.json(await getUsers()).status(200);
-  }),
+  handle(
+    cache(async function (_, res) {
+      res.json(await getUsers()).status(200);
+    }),
+  ),
 );
 
 router.get(
   "/hours",
-  handle(async function (req, res) {
-    const input = DateRange.parse({
-      start: req.query.start,
-      end: req.query.end,
-    });
+  handle(
+    cache(
+      async function (req, res) {
+        const input = DateRange.parse({
+          start: req.query.start,
+          end: req.query.end,
+        });
 
-    res.json(await getWorkedHours(input.start, input.end)).status(200);
-  }),
+        res.json(await getWorkedHours(input.start, input.end)).status(200);
+      },
+      { dependsOn: (req) => [req.query.start, req.query.end] },
+    ),
+  ),
 );
 
 router.get(
   "/budget",
-  handle(async function (_, res) {
-    return res.json(getBudget()).status(200);
-  }),
+  handle(
+    cache(async function (_, res) {
+      return res.json(getBudget()).status(200);
+    }),
+  ),
 );
 
 router.get(
   "/tasks",
-  handle(async function (req, res) {
-    const input = z
-      .object({ listId: z.string() })
-      .and(SelectedDashboard)
-      .parse({
-        session: req.query.session,
-        dueDate: req.query.dueDate,
-        listId: req.query.listId,
-      });
+  handle(
+    cache(
+      async function (req, res) {
+        const input = z
+          .object({ listId: z.string() })
+          .and(SelectedDashboard)
+          .parse({
+            session: req.query.session,
+            dueDate: req.query.dueDate,
+            listId: req.query.listId,
+          });
 
-    const [tasks, problems] = await Promise.all([
-      getTasks([], [], [input.listId], [], null),
-      findField(input, (fields) => fields.sprint.problems),
-    ]);
+        const [tasks, problems] = await Promise.all([
+          getTasks([], [], [input.listId], [], null),
+          findField(input, (fields) => fields.sprint.problems),
+        ]);
 
-    const tasksWithProblems = tasks.map((task) => ({
-      ...task,
-      problems: problems.filter((p) => p.taskId === task.id),
-    }));
+        const tasksWithProblems = tasks.map((task) => ({
+          ...task,
+          problems: problems.filter((p) => p.taskId === task.id),
+        }));
 
-    res.json(tasksWithProblems).status(200);
-  }),
+        res.json(tasksWithProblems).status(200);
+      },
+      {
+        dependsOn: (req) => [
+          req.query.session,
+          req.query.dueDate,
+          req.query.listId,
+          fieldsIteration,
+        ],
+      },
+    ),
+  ),
 );
 
 router.get(
   "/epics",
-  handle(async function (req, res) {
-    const session = Session.parse(req.query.session);
-    res.json(await getEpics(session, null)).status(200);
-  }),
+  handle(
+    cache(
+      async function (req, res) {
+        const session = Session.parse(req.query.session);
+        res.json(await getEpics(session, null)).status(200);
+      },
+      { dependsOn: (req) => [req.query.session] },
+    ),
+  ),
 );
 
 router.get(
   "/burndown",
-  handle(async function (req, res) {
-    const sprintId = z.string().parse(req.query.sprintId);
-    return res.json(await getBurndown(sprintId)).status(200);
-  }),
+  handle(
+    cache(
+      async function (req, res) {
+        const sprintId = z.string().parse(req.query.sprintId);
+        return res.json(await getBurndown(sprintId)).status(200);
+      },
+      { dependsOn: (req) => [req.query.sprintId] },
+    ),
+  ),
 );
 
 router.get(
   "/extra",
-  handle(async function (_, res) {
-    res.json(await getExtraData()).status(200);
-  }),
+  handle(
+    cache(async function (_, res) {
+      res.json(await getExtraData()).status(200);
+    }),
+  ),
 );
 
 router.get(
   "/time-entries",
-  handle(async function (req, res) {
-    const input = DateRange.parse({
-      start: req.query.start,
-      end: req.query.end,
-    });
-    res.json(await getTimeEntriesInRange(input.start, input.end)).status(200);
-  }),
+  handle(
+    cache(
+      async function (req, res) {
+        const input = DateRange.parse({
+          start: req.query.start,
+          end: req.query.end,
+        });
+        res
+          .json(await getTimeEntriesInRange(input.start, input.end))
+          .status(200);
+      },
+      { dependsOn: (req) => [req.query.start, req.query.end] },
+    ),
+  ),
 );
 
 const fields = Router({ mergeParams: true });
@@ -137,19 +188,31 @@ router.use(
 fields
   .route("/")
   .get(
-    handle<SelectedDashboard>(async function (_, res) {
-      const { session, dueDate } = res.locals;
-      if (await existsFields(session, dueDate)) {
-        res.sendStatus(200);
-      } else {
-        res.status(400).send(`could not find '${session}-${dueDate}'`);
-      }
-    }),
+    handle(
+      cache<SelectedDashboard>(
+        async function (_, res) {
+          const { session, dueDate } = res.locals;
+          if (await existsFields(session, dueDate)) {
+            res.sendStatus(200);
+          } else {
+            res.status(400).send(`could not find '${session}-${dueDate}'`);
+          }
+        },
+        {
+          dependsOn: (_, res) => [
+            res.locals.session,
+            res.locals.dueDate,
+            fieldsIteration,
+          ],
+        },
+      ),
+    ),
   )
   .post(
-    handle<SelectedDashboard>(async function (_, res) {
+    handle(async function (_, res) {
       const { session, dueDate } = res.locals;
       await copyPreviousFields(session, dueDate);
+      invalidateFields();
       res.sendStatus(200);
     }),
   );
@@ -157,10 +220,24 @@ fields
 fields
   .route("/footer")
   .get(
-    handle<SelectedDashboard>(async function (_, res) {
-      const date = await findField(res.locals, (fields) => fields.meeting.date);
-      res.status(200).send(date);
-    }),
+    handle(
+      cache<SelectedDashboard>(
+        async function (_, res) {
+          const date = await findField(
+            res.locals,
+            (fields) => fields.meeting.date,
+          );
+          res.status(200).send(date);
+        },
+        {
+          dependsOn: (_, res) => [
+            res.locals.session,
+            res.locals.dueDate,
+            fieldsIteration,
+          ],
+        },
+      ),
+    ),
   )
   .post(
     handle<SelectedDashboard>(async function (req, res) {
@@ -168,6 +245,7 @@ fields
         original.meeting.date = z.string().parse(req.body);
         return original;
       });
+      invalidateFields();
       res.sendStatus(200);
     }),
   );
@@ -175,10 +253,21 @@ fields
 fields
   .route("/sprint")
   .get(
-    handle<SelectedDashboard>(async function (_, res) {
-      const id = await findField(res.locals, (fields) => fields.sprint.id);
-      res.status(200).send(id);
-    }),
+    handle(
+      cache<SelectedDashboard>(
+        async function (_, res) {
+          const id = await findField(res.locals, (fields) => fields.sprint.id);
+          res.status(200).send(id);
+        },
+        {
+          dependsOn: (_, res) => [
+            res.locals.session,
+            res.locals.dueDate,
+            fieldsIteration,
+          ],
+        },
+      ),
+    ),
   )
   .post(
     handle<SelectedDashboard>(async function (req, res) {
@@ -187,6 +276,7 @@ fields
         original.sprint.id = id;
         return original;
       });
+      invalidateFields();
       res.sendStatus(200);
     }),
   );
@@ -197,27 +287,6 @@ crud(
   (fields) => fields.sprint.problems,
   (a, b) => a.taskId === b.taskId && a.description === b.description,
 );
-
-// fields.route("/sprint/problems").post(
-//   handle<SelectedDashboard>(async function (req, res) {
-//     const input = z
-//       .object({ taskId: z.string(), description: z.string() })
-//       .parse(req.body);
-//     await editFields(res.locals, (original) => {
-//       const index = original.sprint.problems.findIndex(
-//         (p) => p.taskId === input.taskId && p.description === input.description,
-//       );
-//       if (index >= 0) {
-//         original.sprint.problems[index] = {
-//           description: input.description,
-//           taskId: input.taskId,
-//         };
-//       }
-//       return original;
-//     });
-//     res.sendStatus(200);
-//   }),
-// );
 
 fields
   .route("/members")
@@ -320,10 +389,21 @@ function crud<R extends string, G>(
 ) {
   route
     .get(
-      handle<SelectedDashboard>(async function (_, res) {
-        const selection = await findField(res.locals, selector);
-        res.json(selection).status(200);
-      }),
+      handle(
+        cache<SelectedDashboard>(
+          async function (_, res) {
+            const selection = await findField(res.locals, selector);
+            res.json(selection).status(200);
+          },
+          {
+            dependsOn: (_, req) => [
+              req.locals.session,
+              req.locals.dueDate,
+              fieldsIteration,
+            ],
+          },
+        ),
+      ),
     )
     .put(
       handle<SelectedDashboard>(async function (req, res) {
@@ -332,6 +412,7 @@ function crud<R extends string, G>(
           selector(fields).push(insertion);
           return fields;
         });
+        invalidateFields();
         res.sendStatus(200);
       }),
     )
@@ -348,6 +429,7 @@ function crud<R extends string, G>(
           selection[index] = input.updated;
           return fields;
         });
+        invalidateFields();
         res.sendStatus(200);
       }),
     )
@@ -362,6 +444,7 @@ function crud<R extends string, G>(
           selection.splice(index, 1);
           return fields;
         });
+        invalidateFields();
         res.sendStatus(200);
       }),
     );
@@ -379,5 +462,10 @@ crud(
   (fields) => fields.meeting.technical.items,
   (a, b) => a === b,
 );
+
+let fieldsIteration = 0; // This is used to track when to invalidate the cache
+function invalidateFields() {
+  fieldsIteration++;
+}
 
 export { router };
