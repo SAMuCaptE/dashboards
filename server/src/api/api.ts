@@ -1,3 +1,5 @@
+import { writeFileSync } from "fs";
+import { join } from "path";
 import { z } from "zod";
 
 export function api<S extends z.Schema>(
@@ -20,7 +22,16 @@ export function api<S extends z.Schema>(
 
     const parsedData = schema.safeParse(data);
     if (!parsedData.success) {
-      console.log(parsedData.error);
+      // console.log(parsedData.error);
+      writeFileSync(
+        join("logs", new Date().getTime() + ".log"),
+        JSON.stringify({
+          url,
+          data,
+          error: parsedData.error,
+        }),
+      );
+      console.error("There was en arror, wrote a log");
       return null;
     }
     return parsedData.data;

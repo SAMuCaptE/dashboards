@@ -121,7 +121,7 @@ async function getFields(session: string, dueDate: string): Promise<Fields> {
 async function getFieldsTemplate(
   session: z.infer<typeof SelectedDashboard>["session"],
   date: string,
-) {
+): Promise<Fields> {
   try {
     return await getFields(session, date);
   } catch {
@@ -144,6 +144,11 @@ export async function copyPreviousFields(session: Session, dueDate: string) {
   ).toLocaleDateString("fr-CA");
 
   const fields = await getFieldsTemplate(session, oneWeekBefore);
+  for (const member of fields.members) {
+    member.disponibility.lastWeek = member.disponibility.nextWeek;
+    member.disponibility.nextWeek = 6;
+  }
+
   await database(async (db) => {
     const stmt = await db.prepare(
       "replace into fields (data, due_date, session) values (?, ?, ?)",
@@ -200,7 +205,7 @@ async function getMergedFields(
 }
 
 export async function findField<T>(
-  input: { dueDate: string; session: z.infer<typeof Session> },
+  input: { dueDate: string; session: Session },
   selector: (fields: Fields) => T,
 ): Promise<T> {
   const fields = await getMergedFields(input.dueDate, input.session);

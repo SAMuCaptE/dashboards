@@ -1,10 +1,13 @@
 import { Router } from "express";
+import { IRoute } from "express-serve-static-core";
 import { z } from "zod";
 
+import { Risk } from "common";
 import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
+  Fields,
   SelectedDashboard,
   Session,
   copyPreviousFields,
@@ -18,7 +21,6 @@ import { getTimeEntriesInRange } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { handle } from "./utils";
-import { Risk } from "common";
 
 const DateRange = z.object({
   start: z.string().transform((str) => new Date(parseInt(str))),
@@ -247,5 +249,95 @@ fields
       res.sendStatus(200);
     }),
   );
+
+fields.route("/objectives").get(
+  handle<SelectedDashboard>(async function (_, res) {
+    const objectives = await findField(res.locals, (fields) => ({
+      sprint: fields.sprint.objective,
+      session:
+        fields.sessions[res.locals.session]?.objective ?? "Aucun objectif",
+    }));
+    res.json(objectives).status(200);
+  }),
+);
+
+fields.route("/objectives/sprint").post(
+  handle<SelectedDashboard>(async function (req, res) {
+    const objective = z.string().parse(req.body);
+    await editFields(res.locals, (original) => {
+      original.sprint.objective = objective;
+      return original;
+    });
+    res.sendStatus(200);
+  }),
+);
+
+function crud<R extends string, G>(
+  route: IRoute<R>,
+  schema: z.Schema,
+  selector: (fields: Fields) => G[],
+  comparator: (a: G, b: G) => boolean,
+) {
+  route
+    .get(
+      handle<SelectedDashboard>(async function (_, res) {
+        const selection = await findField(res.locals, selector);
+        res.json(selection).status(200);
+      }),
+    )
+    .put(
+      handle<SelectedDashboard>(async function (req, res) {
+        const insertion = schema.parse(req.body);
+        await editFields(res.locals, (fields) => {
+          selector(fields).push(insertion);
+          return fields;
+        });
+        res.sendStatus(200);
+      }),
+    )
+    .post(
+      handle<SelectedDashboard>(async function (req, res) {
+        const input = z
+          .object({ original: schema, updated: schema })
+          .parse(req.body);
+        await editFields(res.locals, (fields) => {
+          const selection = selector(fields);
+          const index = selection.findIndex((element) =>
+            comparator(element, input.original),
+          );
+          selection[index] = input.updated;
+          return fields;
+        });
+        res.sendStatus(200);
+      }),
+    )
+    .delete(
+      handle<SelectedDashboard>(async function (req, res) {
+        const input = schema.parse(req.body);
+        await editFields(res.locals, (fields) => {
+          const selection = selector(fields);
+          const index = selection.findIndex((element) =>
+            comparator(element, input),
+          );
+          selection.splice(index, 1);
+          return fields;
+        });
+        res.sendStatus(200);
+      }),
+    );
+}
+
+crud(
+  fields.route("/daily"),
+  z.string(),
+  (fields) => fields.meeting.agenda.items,
+  (a, b) => a === b,
+);
+crud(
+  fields.route("/technical"),
+  z.string(),
+  (fields) => fields.meeting.technical.items,
+  (a, b) => a === b,
+);
 
 export { router };

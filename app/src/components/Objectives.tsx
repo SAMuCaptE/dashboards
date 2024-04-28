@@ -1,39 +1,74 @@
 import { Component, createResource, For, Show, Suspense } from "solid-js";
+import { z } from "zod";
 
-import { client } from "../client";
+import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
 import Loader from "./Loader";
 
+function add(route: string) {
+  return (element: string) =>
+    makeRequest(`/fields/${session}/${dueDate}/${route}`).put(z.any(), element);
+}
+
+function update(route: string) {
+  return (original: string, updated: string) =>
+    makeRequest(`/fields/${session}/${dueDate}/${route}`).post(z.any(), {
+      original,
+      updated,
+    });
+}
+
+function remove(route: string) {
+  return (element: string) =>
+    makeRequest(`/fields/${session}/${dueDate}/${route}`).delete(
+      z.any(),
+      element,
+    );
+}
+
 const Objectives: Component = () => {
   const [daily, { refetch: refetchDaily }] = createResource(() =>
-    client.fields.daily.get.query({ dueDate, session }).catch(() => null),
+    makeRequest(`/fields/${session}/${dueDate}/daily`)
+      .get(z.array(z.string()))
+      .catch(() => []),
   );
+
   const [technical, { refetch: refetchTechnical }] = createResource(() =>
-    client.fields.technical.get.query({ dueDate, session }).catch(() => null),
+    makeRequest(`/fields/${session}/${dueDate}/technical`)
+      .get(z.array(z.string()))
+      .catch(() => []),
   );
+
   const [objectives, { refetch: refetchObjectives }] = createResource(() =>
-    client.fields.objectives.get.query({ dueDate, session }).catch(() => null),
+    makeRequest(`/fields/${session}/${dueDate}/objectives`)
+      .get(
+        z.object({
+          sprint: z.string(),
+          session: z.string(),
+        }),
+      )
+      .catch(() => null),
   );
 
   return (
     <div class="w-[95%] mx-auto">
       <AgendaList
         title="Ordre du jour:"
-        items={daily()?.items}
+        items={daily()}
         refetch={refetchDaily}
-        add={client.fields.daily.add.mutate}
-        update={client.fields.daily.update.mutate}
-        delete={client.fields.daily.delete.mutate}
+        add={add("daily")}
+        update={update("daily")}
+        delete={remove("daily")}
       />
       <AgendaList
         title="Plan technique:"
-        items={technical()?.items}
+        items={technical()}
         refetch={refetchTechnical}
-        add={client.fields.technical.add.mutate}
-        update={client.fields.technical.update.mutate}
-        delete={client.fields.technical.delete.mutate}
+        add={add("technical")}
+        update={update("technical")}
+        delete={remove("technical")}
       />
 
       <div class="grid grid-cols-[160px_1fr] items-center my-1">
@@ -43,12 +78,10 @@ const Objectives: Component = () => {
         <Suspense fallback={<Loader />}>
           <Editable
             initialValue={objectives()?.sprint}
-            onEdit={async (value) => {
-              await client.fields.objectives.sprint.update.mutate({
-                dueDate,
-                session,
-                objective: value,
-              });
+            onEdit={async (objective) => {
+              await makeRequest(
+                `/fields/${session}/${dueDate}/objectives/sprint`,
+              ).post(z.any(), objective);
               await refetchObjectives();
             }}
           >
@@ -77,9 +110,9 @@ const AgendaList: Component<{
   title: string;
   items: Array<string> | undefined;
   refetch: Function;
-  add: (typeof client)["fields"]["technical"]["add"]["mutate"];
-  update: (typeof client)["fields"]["technical"]["update"]["mutate"];
-  delete: (typeof client)["fields"]["technical"]["delete"]["mutate"];
+  add: ReturnType<typeof add>;
+  update: ReturnType<typeof update>;
+  delete: ReturnType<typeof remove>;
 }> = (props) => {
   return (
     <div class="grid grid-cols-[120px_1fr] items-center my-1">
@@ -95,16 +128,11 @@ const AgendaList: Component<{
                   <Editable
                     initialValue={item}
                     onEdit={async (v) => {
-                      await props.update({
-                        session,
-                        dueDate,
-                        target: item,
-                        updated: v,
-                      });
+                      await props.update(item, v);
                       await props.refetch();
                     }}
                     onDelete={async () => {
-                      await props.delete({ session, dueDate, objective: item });
+                      await props.delete(item);
                       await props.refetch();
                     }}
                   >
@@ -118,8 +146,8 @@ const AgendaList: Component<{
       </Suspense>
 
       <AddButton
-        onAdd={async (value) => {
-          await props.add({ session, dueDate, objective: value });
+        onAdd={async (item) => {
+          await props.add(item);
           await props.refetch();
         }}
       />
