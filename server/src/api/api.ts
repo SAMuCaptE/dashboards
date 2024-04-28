@@ -31,7 +31,7 @@ export function api<S extends z.Schema>(
           error: parsedData.error,
         }),
       );
-      console.error("There was en arror, wrote a log");
+      console.error("There was an error, wrote a log");
       return null;
     }
     return parsedData.data;
