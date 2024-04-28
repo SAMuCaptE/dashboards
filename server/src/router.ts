@@ -178,6 +178,33 @@ fields.route("/sprint").get(
 );
 
 fields
+  .route("/members")
+  .get(
+    handle<SelectedDashboard>(async function (_, res) {
+      const members = await findField(res.locals, (fields) => fields.members);
+      res.status(200).send(members);
+    }),
+  )
+  .post(
+    handle<SelectedDashboard>(async function (req, res) {
+      const input = z
+        .object({
+          memberIndex: z.number().int(),
+          selected: z.enum(["lastWeek", "nextWeek"]),
+          disponibility: z.coerce.number().int().min(1).max(6),
+        })
+        .parse(req.body);
+
+      await editFields(res.locals, (original) => {
+        original.members[input.memberIndex].disponibility[input.selected] =
+          input.disponibility;
+        return original;
+      });
+      res.sendStatus(200);
+    }),
+  );
+
+fields
   .route("/risks")
   .get(
     handle<SelectedDashboard>(async function (_, res) {

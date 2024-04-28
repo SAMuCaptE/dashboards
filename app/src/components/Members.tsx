@@ -1,8 +1,10 @@
 import { Component, createResource, For, Suspense } from "solid-js";
-import { client } from "../client";
+import { z } from "zod";
+import { client, makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import Editable from "./Editable";
 import Loader from "./Loader";
+import { Member } from "common";
 
 const colors = [
   "bg-red-600",
@@ -15,7 +17,9 @@ const colors = [
 
 const Members: Component = () => {
   const [members, { refetch }] = createResource(() =>
-    client.fields.members.get.query({ dueDate, session }).catch(() => null),
+    makeRequest(`/fields/${session}/${dueDate}/members`)
+      .get(z.array(Member))
+      .catch(() => [] as Member[]),
   );
 
   return (
@@ -47,17 +51,15 @@ const Members: Component = () => {
                   <div class="flex w-4/5 mx-auto relative justify-evenly">
                     <Editable
                       initialValue={member.disponibility.lastWeek.toString()}
-                      onEdit={async (v) => {
-                        await client.fields.members.disponibilities.edit.mutate(
-                          {
-                            session,
-                            dueDate,
-                            selected: "lastWeek",
-                            memberIndex: memberIndex(),
-                            disponibility: parseInt(v),
-                          },
-                        );
-                        refetch();
+                      onEdit={async (disponibility) => {
+                        await makeRequest(
+                          `/fields/${session}/${dueDate}/members`,
+                        ).post(z.any(), {
+                          selected: "lastWeek",
+                          memberIndex: memberIndex(),
+                          disponibility,
+                        });
+                        await refetch();
                       }}
                     >
                       <span
@@ -73,17 +75,15 @@ const Members: Component = () => {
 
                     <Editable
                       initialValue={member.disponibility.nextWeek.toString()}
-                      onEdit={async (v) => {
-                        await client.fields.members.disponibilities.edit.mutate(
-                          {
-                            session,
-                            dueDate,
-                            selected: "nextWeek",
-                            memberIndex: memberIndex(),
-                            disponibility: parseInt(v),
-                          },
-                        );
-                        refetch();
+                      onEdit={async (disponibility) => {
+                        await makeRequest(
+                          `/fields/${session}/${dueDate}/members`,
+                        ).post(z.any(), {
+                          selected: "nextWeek",
+                          memberIndex: memberIndex(),
+                          disponibility,
+                        });
+                        await refetch();
                       }}
                     >
                       <span

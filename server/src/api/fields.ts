@@ -1,5 +1,5 @@
 import { TRPCError, initTRPC } from "@trpc/server";
-import { Risk } from "common";
+import { Member, Risk } from "common";
 import { Connection, createConnection } from "mysql2/promise";
 import { z } from "zod";
 import { mergeDeep } from "../utils";
@@ -42,18 +42,7 @@ const schema = z.object({
         .or(z.array(z.string()).transform((arr) => arr.join(" | "))),
     }),
   ),
-  members: z.array(
-    z.object({
-      img: z.string(),
-      firstname: z.string(),
-      lastname: z.string(),
-      role: z.string(),
-      disponibility: z.object({
-        lastWeek: z.number().min(1).max(6),
-        nextWeek: z.number().min(1).max(6),
-      }),
-    }),
-  ),
+  members: z.array(Member),
   meeting: z.object({
     date: z.string(),
     agenda: z.object({
