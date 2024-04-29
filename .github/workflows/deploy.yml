@@ -32,6 +32,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install common
+        run: npm install
+        working-directory: ./common
+
+      - name: Build common
+        run: npm run build
+        working-directory: ./common
+
       - name: Install
         run: npm install
         working-directory: ./app
