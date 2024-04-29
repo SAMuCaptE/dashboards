@@ -1,5 +1,4 @@
-import { TRPCError } from "@trpc/server";
-import { List } from "../schemas/list";
+import { List } from "common";
 import { getList } from "./lists";
 import { getTasks } from "./tasks";
 
@@ -10,10 +9,9 @@ export async function getBurndown(sprintId: string) {
   const tasks = await getTasks([], [], [sprintId], [], null);
 
   if (!sprint.start_date || !sprint.due_date) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "The specified folder does not have a specified date range",
-    });
+    throw new Error(
+      "The specified folder does not have a specified date range",
+    );
   }
 
   const plannedTime = tasks.reduce(

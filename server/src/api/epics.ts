@@ -18,7 +18,7 @@ export async function getEpics(sessionTag: string, sprintId: string | null) {
 
   const result: Array<Epic> = [];
   for (const { epic, associatedTasks } of allTasks) {
-    if (epic.tags.some((t) => t.name === "no-show")) {
+    if (epic.tags.some((t: any) => t.name === "no-show")) {
       continue;
     }
 

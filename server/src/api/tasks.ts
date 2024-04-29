@@ -1,10 +1,9 @@
-import { TRPCError } from "@trpc/server";
+import { Task } from "common";
 import { z } from "zod";
-import { TaskSchema } from "../schemas/task";
 import { api } from "./api";
 
 const ResponseSchema = z.object({
-  tasks: z.array(TaskSchema),
+  tasks: z.array(Task),
 });
 
 export async function getTasks(
@@ -51,10 +50,7 @@ export async function getTasks(
   );
 
   if (!data?.tasks) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Could not find any tasks",
-    });
+    throw new Error("Could not find any tasks");
   }
 
   return data.tasks;

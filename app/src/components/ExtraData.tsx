@@ -1,16 +1,25 @@
-import { Component, For, Show, createResource, createSignal } from "solid-js";
-import { client } from "../client";
+import { Component, createResource, createSignal, For, Show } from "solid-js";
+import { z } from "zod";
+import { makeRequest } from "../client";
 import { users } from "../resources/users";
 
-const hourCategories: Array<
-  keyof Awaited<
-    ReturnType<(typeof client)["extraData"]["query"]>
-  >["workedHours"][number]
-> = ["unknown", "admin", "mec", "elec", "info", "livrables"];
+const hourCategories = [
+  "unknown",
+  "admin",
+  "mec",
+  "elec",
+  "info",
+  "livrables",
+] as const;
 
 const ExtraData: Component = () => {
   const [show, setShow] = createSignal(false);
-  const [extraData] = createResource(() => client.extraData.query());
+
+  const [extraData] = createResource(() =>
+    makeRequest("/extra").get(
+      z.record(z.coerce.number(), z.record(z.enum(hourCategories), z.number())),
+    ),
+  );
 
   return (
     <div class="w-fit mx-auto border-2 border-black border-solid px-4">
@@ -43,15 +52,14 @@ const ExtraData: Component = () => {
               </tr>
             </thead>
             <tbody>
-              <For each={Object.entries(extraData()?.workedHours ?? {})}>
+              <For each={Object.entries(extraData() ?? {})}>
                 {([userId, hours]) => (
                   <tr>
                     <td>
                       <span>
                         {
-                          users()?.members.find(
-                            (user) => user.id === parseInt(userId),
-                          )?.username
+                          users()?.find((user) => user.id === parseInt(userId))
+                            ?.username
                         }
                       </span>
                     </td>
@@ -59,7 +67,9 @@ const ExtraData: Component = () => {
                     <For each={hourCategories}>
                       {(category) => (
                         <td class="w-20 text-center">
-                          <span>{Math.round(hours[category] * 100) / 100}</span>
+                          <span>
+                            {Math.round((hours[category] ?? 0) * 100) / 100}
+                          </span>
                         </td>
                       )}
                     </For>

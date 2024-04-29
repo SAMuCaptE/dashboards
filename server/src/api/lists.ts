@@ -1,33 +1,26 @@
-import { TRPCError } from "@trpc/server";
+import { EpicList, List } from "common";
 import { z } from "zod";
-import { EpicListSchema, ListSchema } from "../schemas/list";
 import { api } from "./api";
 
 export async function getList(listId: string) {
-  const data = await api(ListSchema).get(
+  const data = await api(List).get(
     `https://api.clickup.com/api/v2/list/${listId}`,
   );
 
   if (!data) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Could not find list",
-    });
+    throw new Error("Could not find list");
   }
 
   return data;
 }
 
 export async function getEpicList(listId: string) {
-  const data = await api(EpicListSchema.or(z.any())).get(
+  const data = await api(EpicList.or(z.any())).get(
     `https://api.clickup.com/api/v2/list/${listId}`,
   );
 
   if (!data) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Could not find epic list",
-    });
+    throw new Error("Could not find epic list");
   }
 
   return data;

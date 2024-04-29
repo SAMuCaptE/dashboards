@@ -1,12 +1,8 @@
-import { TRPCError } from "@trpc/server";
+import { User } from "common";
 import { z } from "zod";
-import { User } from "../schemas/user";
 import { api } from "./api";
 
-const ResponseSchema = z.object({
-  members: z.array(User),
-});
-
+const ResponseSchema = z.object({ members: z.array(User) });
 type ResponseSchema = z.infer<typeof ResponseSchema>;
 
 export async function getUsers() {
@@ -16,10 +12,7 @@ export async function getUsers() {
   );
 
   if (!users) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Could not find any users",
-    });
+    throw new Error("Could not find any users");
   }
 
   return {

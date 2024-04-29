@@ -1,13 +1,4 @@
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import SuperJSON from "superjson";
 import { z } from "zod";
-
-type AppRouter = any;
-
-export const client = createTRPCProxyClient<AppRouter>({
-  links: [httpBatchLink({ url: import.meta.env.VITE_APP_SERVER_URL })],
-  transformer: SuperJSON,
-});
 
 export function makeRequest(url: string) {
   async function request<S extends z.Schema>(

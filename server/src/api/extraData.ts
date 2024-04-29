@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import { convertTags } from "../utils";
 import { getAllTimeEntries } from "./time-entries";
 
@@ -17,10 +16,7 @@ export async function getExtraData() {
   const timeEntries = await getAllTimeEntries();
 
   if (!timeEntries) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Could not find time entries",
-    });
+    throw new Error("Could not find time entries");
   }
 
   const workedHours: Record<

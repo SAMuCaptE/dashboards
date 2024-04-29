@@ -3,7 +3,7 @@ import { Color } from "./color";
 import { TaskStatus } from "./task";
 import { User } from "./user";
 
-export const EpicListSchema = z.object({
+export const EpicList = z.object({
   id: z.string(),
   name: z.string(),
   status: z
@@ -63,7 +63,7 @@ export const EpicListSchema = z.object({
   url: z.string(),
 });
 
-export const ListSchema = z.object({
+export const List = z.object({
   id: z.string(),
   name: z.string(),
   deleted: z.boolean(),
@@ -110,5 +110,5 @@ export const ListSchema = z.object({
   permission_level: z.string(),
 });
 
-export type List = z.infer<typeof ListSchema>;
-export type EpicList = z.infer<typeof EpicListSchema>;
+export type List = z.infer<typeof List>;
+export type EpicList = z.infer<typeof EpicList>;

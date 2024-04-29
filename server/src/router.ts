@@ -1,4 +1,4 @@
-import { Problem, Risk } from "common";
+import { Problem, Risk, Session } from "common";
 import { Router } from "express";
 import { IRoute } from "express-serve-static-core";
 import { z } from "zod";
@@ -7,13 +7,11 @@ import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
-  Fields,
-  SelectedDashboard,
-  Session,
-  copyPreviousFields,
-  editFields,
-  existsFields,
-  findField,
+    Fields,
+    copyPreviousFields,
+    editFields,
+    existsFields,
+    findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTasks } from "./api/tasks";
@@ -22,6 +20,9 @@ import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { cache, cached, clearCache } from "./cache";
 import { handle } from "./utils";
+
+const SelectedDashboard = z.object({ session: Session, dueDate: z.string() });
+type SelectedDashboard = z.infer<typeof SelectedDashboard>;
 
 const DateRange = z.object({
   start: z.string().transform((str) => new Date(parseInt(str))),
@@ -147,7 +148,8 @@ router.get(
   "/extra",
   handle(
     cache(async function (_, res) {
-      res.json(await getExtraData()).status(200);
+      const data = await getExtraData();
+      res.json(data.workedHours).status(200);
     }),
   ),
 );
@@ -463,9 +465,11 @@ crud(
   (a, b) => a === b,
 );
 
-let fieldsIteration = 0; // This is used to track when to invalidate the cache
+// This is used to track when to invalidate the cache
+let fieldsIteration = 0;
 function invalidateFields() {
   fieldsIteration++;
 }
 
 export { router };
+

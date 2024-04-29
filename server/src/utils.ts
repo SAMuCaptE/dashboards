@@ -1,5 +1,5 @@
+import { TimeEntry } from "common";
 import { Request, Response } from "express";
-import { TimeEntry } from "./schemas/time-entry";
 
 export function handle<Locals extends Record<string, any>>(
   fn: (req: Request, res: Response<any, Locals>) => any | Promise<any>,

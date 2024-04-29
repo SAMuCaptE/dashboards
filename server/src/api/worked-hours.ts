@@ -1,4 +1,4 @@
-import { User } from "../schemas/user";
+import { User } from "common";
 import { convertTags } from "../utils";
 import { getAllTimeEntries, getTimeEntriesInRange } from "./time-entries";
 

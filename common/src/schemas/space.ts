@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Color } from "./color";
 import { TaskStatus } from "./task";
 
-export const SpaceSchema = z.object({
+export const Space = z.object({
   id: z.string(),
   name: z.string(),
   color: Color.nullable(),
@@ -65,3 +65,5 @@ export const SpaceSchema = z.object({
     .partial(),
   archived: z.boolean(),
 });
+
+export type Space = z.infer<typeof Space>;
