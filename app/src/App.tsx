@@ -1,17 +1,18 @@
 import {
-  createEffect,
-  createResource,
-  Show,
-  Suspense,
-  type Component,
+    createEffect,
+    createResource,
+    Show,
+    Suspense,
+    type Component
 } from "solid-js";
 import { z } from "zod";
 
-import { makeRequest } from "./client";
+import { makeRequest, rateLimited } from "./client";
 import Controls from "./components/Controls";
 import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
 import Loader from "./components/Loader";
+import RateLimited from "./components/RateLimited";
 import TimeEntries from "./components/TimeEntries";
 import { dueDate, session } from "./stores/params";
 
@@ -33,7 +34,10 @@ const App: Component = () => {
   );
 
   return (
-    <>
+    <Show
+      when={(rateLimited()?.getTime() ?? 0) + 60_000 < new Date().getTime()}
+      fallback={<RateLimited />}
+    >
       <aside>
         <Controls />
         <ExtraData />
@@ -66,7 +70,7 @@ const App: Component = () => {
       </Suspense>
 
       <TimeEntries />
-    </>
+    </Show>
   );
 };
 

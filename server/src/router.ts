@@ -18,8 +18,8 @@ import { getTasks } from "./api/tasks";
 import { getTimeEntriesInRange } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
-import { cache, cached, clearCache } from "./cache";
-import { handle } from "./utils";
+import { bugnet } from "./middlewares/bugnet";
+import { cache, cached, clearCache } from "./middlewares/cache";
 
 const SelectedDashboard = z.object({ session: Session, dueDate: z.string() });
 type SelectedDashboard = z.infer<typeof SelectedDashboard>;
@@ -47,7 +47,7 @@ router
 
 router.get(
   "/users",
-  handle(
+  bugnet(
     cache(async function (_, res) {
       res.json(await getUsers()).status(200);
     }),
@@ -56,7 +56,7 @@ router.get(
 
 router.get(
   "/hours",
-  handle(
+  bugnet(
     cache(
       async function (req, res) {
         const input = DateRange.parse({
@@ -73,7 +73,7 @@ router.get(
 
 router.get(
   "/budget",
-  handle(
+  bugnet(
     cache(async function (_, res) {
       return res.json(getBudget()).status(200);
     }),
@@ -82,7 +82,7 @@ router.get(
 
 router.get(
   "/tasks",
-  handle(
+  bugnet(
     cache(
       async function (req, res) {
         const input = z
@@ -120,7 +120,7 @@ router.get(
 
 router.get(
   "/epics",
-  handle(
+  bugnet(
     cache(
       async function (req, res) {
         const session = Session.parse(req.query.session);
@@ -133,7 +133,7 @@ router.get(
 
 router.get(
   "/burndown",
-  handle(
+  bugnet(
     cache(
       async function (req, res) {
         const sprintId = z.string().parse(req.query.sprintId);
@@ -146,7 +146,7 @@ router.get(
 
 router.get(
   "/extra",
-  handle(
+  bugnet(
     cache(async function (_, res) {
       const data = await getExtraData();
       res.json(data.workedHours).status(200);
@@ -156,7 +156,7 @@ router.get(
 
 router.get(
   "/time-entries",
-  handle(
+  bugnet(
     cache(
       async function (req, res) {
         const input = DateRange.parse({
@@ -190,7 +190,7 @@ router.use(
 fields
   .route("/")
   .get(
-    handle(
+    bugnet(
       cache<SelectedDashboard>(
         async function (_, res) {
           const { session, dueDate } = res.locals;
@@ -211,7 +211,7 @@ fields
     ),
   )
   .post(
-    handle(async function (_, res) {
+    bugnet(async function (_, res) {
       const { session, dueDate } = res.locals;
       await copyPreviousFields(session, dueDate);
       invalidateFields();
@@ -222,7 +222,7 @@ fields
 fields
   .route("/footer")
   .get(
-    handle(
+    bugnet(
       cache<SelectedDashboard>(
         async function (_, res) {
           const date = await findField(
@@ -242,7 +242,7 @@ fields
     ),
   )
   .post(
-    handle<SelectedDashboard>(async function (req, res) {
+    bugnet<SelectedDashboard>(async function (req, res) {
       await editFields(res.locals, (original) => {
         original.meeting.date = z.string().parse(req.body);
         return original;
@@ -255,7 +255,7 @@ fields
 fields
   .route("/sprint")
   .get(
-    handle(
+    bugnet(
       cache<SelectedDashboard>(
         async function (_, res) {
           const id = await findField(res.locals, (fields) => fields.sprint.id);
@@ -272,7 +272,7 @@ fields
     ),
   )
   .post(
-    handle<SelectedDashboard>(async function (req, res) {
+    bugnet<SelectedDashboard>(async function (req, res) {
       const id = z.string().parse(req.body);
       await editFields(res.locals, (original) => {
         original.sprint.id = id;
@@ -293,13 +293,13 @@ crud(
 fields
   .route("/members")
   .get(
-    handle<SelectedDashboard>(async function (_, res) {
+    bugnet<SelectedDashboard>(async function (_, res) {
       const members = await findField(res.locals, (fields) => fields.members);
       res.status(200).send(members);
     }),
   )
   .post(
-    handle<SelectedDashboard>(async function (req, res) {
+    bugnet<SelectedDashboard>(async function (req, res) {
       const input = z
         .object({
           memberIndex: z.number().int(),
@@ -320,13 +320,13 @@ fields
 fields
   .route("/risks")
   .get(
-    handle<SelectedDashboard>(async function (_, res) {
+    bugnet<SelectedDashboard>(async function (_, res) {
       const risks = await findField(res.locals, (fields) => fields.risks);
       res.status(200).json(risks);
     }),
   )
   .put(
-    handle<SelectedDashboard>(async function (req, res) {
+    bugnet<SelectedDashboard>(async function (req, res) {
       const risk = Risk.parse(req.body);
       await editFields(res.locals, (original) => {
         original.risks.push(risk);
@@ -336,7 +336,7 @@ fields
     }),
   )
   .post(
-    handle<SelectedDashboard>(async function (req, res) {
+    bugnet<SelectedDashboard>(async function (req, res) {
       const input = z.object({ original: Risk, updated: Risk }).parse(req.body);
       await editFields(res.locals, (original) => {
         const index = original.risks.findIndex(
@@ -349,7 +349,7 @@ fields
     }),
   )
   .delete(
-    handle<SelectedDashboard>(async function (req, res) {
+    bugnet<SelectedDashboard>(async function (req, res) {
       const risk = Risk.parse(req.body);
       await editFields(res.locals, (original) => {
         original.risks = original.risks.filter(
@@ -362,7 +362,7 @@ fields
   );
 
 fields.route("/objectives").get(
-  handle<SelectedDashboard>(async function (_, res) {
+  bugnet<SelectedDashboard>(async function (_, res) {
     const objectives = await findField(res.locals, (fields) => ({
       sprint: fields.sprint.objective,
       session:
@@ -373,7 +373,7 @@ fields.route("/objectives").get(
 );
 
 fields.route("/objectives/sprint").post(
-  handle<SelectedDashboard>(async function (req, res) {
+  bugnet<SelectedDashboard>(async function (req, res) {
     const objective = z.string().parse(req.body);
     await editFields(res.locals, (original) => {
       original.sprint.objective = objective;
@@ -391,7 +391,7 @@ function crud<R extends string, G>(
 ) {
   route
     .get(
-      handle(
+      bugnet(
         cache<SelectedDashboard>(
           async function (_, res) {
             const selection = await findField(res.locals, selector);
@@ -408,7 +408,7 @@ function crud<R extends string, G>(
       ),
     )
     .put(
-      handle<SelectedDashboard>(async function (req, res) {
+      bugnet<SelectedDashboard>(async function (req, res) {
         const insertion = schema.parse(req.body);
         await editFields(res.locals, (fields) => {
           selector(fields).push(insertion);
@@ -419,7 +419,7 @@ function crud<R extends string, G>(
       }),
     )
     .post(
-      handle<SelectedDashboard>(async function (req, res) {
+      bugnet<SelectedDashboard>(async function (req, res) {
         const input = z
           .object({ original: schema, updated: schema })
           .parse(req.body);
@@ -436,7 +436,7 @@ function crud<R extends string, G>(
       }),
     )
     .delete(
-      handle<SelectedDashboard>(async function (req, res) {
+      bugnet<SelectedDashboard>(async function (req, res) {
         const input = schema.parse(req.body);
         await editFields(res.locals, (fields) => {
           const selection = selector(fields);

@@ -1,4 +1,9 @@
+import { createSignal } from "solid-js";
 import { z } from "zod";
+
+let timeout: number | null = null;
+const [rateLimited, setRateLimited] = createSignal<Date | null>(null);
+export { rateLimited };
 
 export function makeRequest(url: string) {
   async function request<S extends z.Schema>(
@@ -15,6 +20,14 @@ export function makeRequest(url: string) {
 
     try {
       const response = await fetch(destination, details);
+      if (response.status === 429) {
+        if (timeout !== null) {
+          clearTimeout(timeout);
+        }
+        timeout = setTimeout(() => setRateLimited(null), 60_000);
+        setRateLimited(new Date());
+      }
+
       if (!response.ok) {
         throw new Error(await response.text());
       }

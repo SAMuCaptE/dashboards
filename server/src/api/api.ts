@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RATE_LIMITED } from "../middlewares/bugnet";
 
 export function api<S extends z.Schema>(
   schema: S,
@@ -17,6 +18,11 @@ export function api<S extends z.Schema>(
       method,
     });
     const data = await response.json();
+
+    if (response.status === 429) {
+      console.log({ url, data });
+      throw RATE_LIMITED;
+    }
 
     const parsedData = schema.safeParse(data);
     if (!parsedData.success) {
