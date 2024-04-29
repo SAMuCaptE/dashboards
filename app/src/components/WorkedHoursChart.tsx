@@ -1,14 +1,14 @@
 import { Chart } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import {
-  Component,
-  createEffect,
-  createMemo,
-  createResource,
-  Show,
-  Suspense,
+    Component,
+    createEffect,
+    createMemo,
+    createResource,
+    createSignal,
+    Show,
+    Suspense
 } from "solid-js";
-import { Portal } from "solid-js/web";
 import { z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
@@ -117,30 +117,51 @@ const WorkedHoursChart: Component = () => {
   } as const;
 
   const chart = document.getElementById("worked-hours") as HTMLCanvasElement;
+  const [chartError, setChartError] = createSignal(false);
 
   createEffect(() => {
     if (chartData().datasets.length > 1) {
-      const data = chartData() as any;
+      renderGraph();
+    }
+  });
+
+  function renderGraph() {
+    try {
+      setChartError(false);
       new Chart(chart, {
-        data,
+        data: chartData() as any,
         type: "bar",
         options: chartOptions,
         plugins: [ChartDataLabels],
       });
+    } catch (err) {
+      console.error(err);
+      setChartError(true);
     }
-  });
+  }
 
   return (
     <div>
       <h4 class="text-center font-semibold">Répartition du travail</h4>
       <Suspense fallback={<Loader />}>
         <div
-          class="w-[410px] h-[206px] block"
+          class="w-[410px] h-[206px] block relative"
           ref={(ref) => {
+            const backupNode = chart.cloneNode();
+            chart.parentNode?.insertBefore(backupNode, chart);
             ref.appendChild(chart);
             chart.style.visibility = "visible";
           }}
-        />
+        >
+          <Show when={chartError()}>
+            <button
+              onClick={renderGraph}
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hover:font-bold"
+            >
+              Essayer à nouveau
+            </button>
+          </Show>
+        </div>
       </Suspense>
     </div>
   );

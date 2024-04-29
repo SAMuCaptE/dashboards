@@ -5,6 +5,7 @@ import {
     Component,
     createEffect,
     createResource,
+    createSignal,
     Show,
     Suspense
 } from "solid-js";
@@ -69,29 +70,50 @@ const BurndownChart: Component<{ sprintId: string }> = (props) => {
     },
   };
 
+  let chartContainer: HTMLElement | null = null;
   const chart = document.getElementById("burndown") as HTMLCanvasElement;
+  const [chartError, setChartError] = createSignal(false);
 
   createEffect(() => {
     if (burndown()) {
-      new Chart(chart, {
+      renderGraph();
+    }
+  });
+
+  function renderGraph() {
+    try {
+      setChartError(false);
+      const ctx = chart.cloneNode() as HTMLCanvasElement;
+      new Chart(ctx, {
         type: "bar",
         data: burndown() as any,
         options: options as any,
       });
+      chartContainer?.appendChild(ctx);
+      ctx.style.visibility = "visible";
+    } catch (err) {
+      console.error(err);
+      setChartError(true);
     }
-  });
+  }
 
   return (
     <div>
       <h4 class="text-center font-semibold">Burndown</h4>
       <Suspense fallback={<Loader />}>
         <div
-          class="w-[400px] h-[200px] block"
-          ref={(ref) => {
-            ref.appendChild(chart);
-            chart.style.visibility = "visible";
-          }}
-        />
+          class="w-[400px] h-[200px] block relative"
+          ref={(ref) => (chartContainer = ref)}
+        >
+          <Show when={chartError()}>
+            <button
+              onClick={renderGraph}
+              class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hover:font-bold"
+            >
+              Essayer à nouveau
+            </button>
+          </Show>
+        </div>
       </Suspense>
     </div>
   );
