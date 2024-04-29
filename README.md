@@ -36,6 +36,16 @@ VITE_APP_SERVER_URL=http://localhost:16987
 
 Nécessite [NodeJS](https://nodejs.org/en).
 
+**Schémas de validation**
+
+> Partie commune à l'**application client** et au **serveur** pour définir les types utilisés lors des communications
+
+```sh
+cd common
+npm i
+npm run dev
+```
+
 **Application client**
 
 ```sh
