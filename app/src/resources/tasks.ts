@@ -1,6 +1,6 @@
+import { TaskWithProblem } from "common";
 import { createResource, Resource } from "solid-js";
 import { z } from "zod";
-import { TaskWithProblem } from "common";
 
 import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
@@ -20,7 +20,11 @@ const statusOrder = {
 export function useTasks(sprintId: Resource<string | null>) {
   return createResource(sprintId, async (id) => {
     if (!id) {
-      return { tasks: [], subtasks: {} };
+      return {
+        tasks: [] as TaskWithProblem[],
+        subtasks: {} as Record<string, TaskWithProblem[]>,
+        timeTotals: { actual: 0, planned: 0 },
+      };
     }
 
     const tasks = await makeRequest(`/tasks`)

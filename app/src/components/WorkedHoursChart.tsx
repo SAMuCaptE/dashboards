@@ -1,18 +1,20 @@
-import { Chart, Colors, Legend, Title, Tooltip } from "chart.js";
+import { Chart } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { Bar } from "solid-chartjs";
 import {
   Component,
+  createEffect,
   createMemo,
   createResource,
-  onMount,
+  Show,
   Suspense,
 } from "solid-js";
+import { Portal } from "solid-js/web";
 import { z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import { endDate, startDate } from "../stores/params";
 import { colors } from "../utils";
+import Loader from "./Loader";
 
 const alternateLabels: Record<string, string> = {
   admin: "Admin",
@@ -33,10 +35,6 @@ const WorkedHoursChart: Component = () => {
       }),
     ),
   );
-
-  onMount(() => {
-    Chart.register(Title, Tooltip, Legend, Colors);
-  });
 
   const sortedHours = createMemo(() => {
     const sorted: Record<string, number[]> = {};
@@ -118,16 +116,32 @@ const WorkedHoursChart: Component = () => {
     },
   } as const;
 
+  const chart = document.getElementById("worked-hours") as HTMLCanvasElement;
+
+  createEffect(() => {
+    if (chartData().datasets.length > 1) {
+      const data = chartData() as any;
+      new Chart(chart, {
+        data,
+        type: "bar",
+        options: chartOptions,
+        plugins: [ChartDataLabels],
+      });
+    }
+  });
+
   return (
     <div>
       <h4 class="text-center font-semibold">Répartition du travail</h4>
-      <Bar
-        data={chartData()}
-        options={chartOptions}
-        plugins={[ChartDataLabels]}
-        width={400}
-        height={206}
-      />
+      <Suspense fallback={<Loader />}>
+        <div
+          class="w-[410px] h-[206px] block"
+          ref={(ref) => {
+            ref.appendChild(chart);
+            chart.style.visibility = "visible";
+          }}
+        />
+      </Suspense>
     </div>
   );
 };

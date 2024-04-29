@@ -40,15 +40,13 @@ const Dashboard: Component = () => {
         <div class="h-2"></div>
 
         <Columns>
-          <Suspense fallback={<Loader />}>
-            <WorkedHoursChart />
-          </Suspense>
+          <WorkedHoursChart />
 
-          <Suspense fallback={<Loader />}>
-            <Show when={sprintId()}>
+          <Show when={sprintId()}>
+            <Suspense fallback={<Loader />}>
               <BurndownChart sprintId={sprintId()!} />
-            </Show>
-          </Suspense>
+            </Suspense>
+          </Show>
         </Columns>
 
         <div class="w-[95%] mx-auto">

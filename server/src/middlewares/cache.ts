@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, response } from "express";
 
 type CacheSettings<Locals extends Record<string, any>> = {
   expiration: number;
@@ -12,7 +12,7 @@ type CacheRecord<Locals extends Record<string, any> = Record<string, any>> = {
   response: {
     status: number;
     value: unknown;
-    type: "text" | "json" | "none";
+    type: "text" | "json" | "none" | null;
   };
 };
 
@@ -35,7 +35,7 @@ export function cache<Locals extends Record<string, any>>(
 
     console.log(
       `(${new Date().toISOString()}) Request to '${req.url.toString()}': ${
-        record ? "CACHED" : "FETCHING"
+        record ? `CACHED/${record.response.type}` : "FETCHING"
       }`,
     );
 
@@ -57,7 +57,7 @@ export function cache<Locals extends Record<string, any>>(
       response: {
         status: 409,
         value: null,
-        type: "none",
+        type: null,
       },
     };
 
@@ -72,17 +72,21 @@ export function cache<Locals extends Record<string, any>>(
     };
     res.sendStatus = (code: number) => {
       record!.response.status = code;
-      record!.response.type = "none";
+      record!.response.type ??= "none";
       return originalSendStatus.bind(res)(code);
     };
     res.send = (body: any) => {
-      record!.response.value = body;
-      record!.response.type = "text";
+      if (record!.response.type === null) {
+        record!.response.value = body;
+        record!.response.type = "text";
+      }
       return originalSend.bind(res)(body);
     };
     res.json = (body: any) => {
-      record!.response.value = body;
-      record!.response.type = "json";
+      if (record!.response.type === null) {
+        record!.response.value = body;
+        record!.response.type = "json";
+      }
       return originalJson.bind(res)(body);
     };
 

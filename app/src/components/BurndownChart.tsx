@@ -1,14 +1,12 @@
+import { Chart } from "chart.js";
 import "chartjs-adapter-moment";
 
-import { Chart, Colors, Legend, TimeScale, Title, Tooltip } from "chart.js";
-import { Line } from "solid-chartjs";
 import {
-  Component,
-  createEffect,
-  createResource,
-  onMount,
-  Show,
-  Suspense,
+    Component,
+    createEffect,
+    createResource,
+    Show,
+    Suspense
 } from "solid-js";
 import { z } from "zod";
 import { makeRequest } from "../client";
@@ -71,31 +69,31 @@ const BurndownChart: Component<{ sprintId: string }> = (props) => {
     },
   };
 
-  return (
-    <div>
-      <h4 class="text-center font-semibold">Burndown</h4>
-      <Suspense
-        fallback={
-          <div class="mx-auto w-fit">
-            <Loader />
-          </div>
-        }
-      >
-        <Show when={burndown()}>
-          <ChartWrapper data={burndown()} options={options} />
-        </Show>
-      </Suspense>
-    </div>
-  );
-};
+  const chart = document.getElementById("burndown") as HTMLCanvasElement;
 
-const ChartWrapper: Component<{ data: any; options: any }> = (props) => {
-  onMount(() => {
-    Chart.register(Title, Tooltip, Legend, Colors, TimeScale);
+  createEffect(() => {
+    if (burndown()) {
+      new Chart(chart, {
+        type: "bar",
+        data: burndown() as any,
+        options: options as any,
+      });
+    }
   });
 
   return (
-    <Line data={props.data} options={props.options} width={400} height={200} />
+    <div>
+      <h4 class="text-center font-semibold">Burndown</h4>
+      <Suspense fallback={<Loader />}>
+        <div
+          class="w-[400px] h-[200px] block"
+          ref={(ref) => {
+            ref.appendChild(chart);
+            chart.style.visibility = "visible";
+          }}
+        />
+      </Suspense>
+    </div>
   );
 };
 

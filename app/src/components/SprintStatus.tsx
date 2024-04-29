@@ -32,7 +32,7 @@ const statusLabels = {
 };
 
 const SprintStatus: Component<{
-  sprintId: Resource<string>;
+  sprintId: Resource<string | null>;
   tasks: Resource<{
     tasks: TaskWithProblem[];
     subtasks: Record<string, TaskWithProblem[]>;
@@ -54,7 +54,7 @@ const SprintStatus: Component<{
       <ul class="w-[95%] mx-auto pt-3">
         <li class="grid grid-cols-[80px_1fr_120px_70px_70px] items-center">
           <Editable
-            initialValue={props.sprintId()}
+            initialValue={props.sprintId() ?? undefined}
             onEdit={async (id) => {
               await makeRequest(`/fields/${session}/${dueDate}/sprint`).post(
                 z.any(),

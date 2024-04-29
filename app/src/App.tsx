@@ -1,3 +1,4 @@
+import "chart.js/auto";
 import {
     createEffect,
     createResource,

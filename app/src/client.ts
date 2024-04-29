@@ -18,8 +18,9 @@ export function makeRequest(url: string) {
       }
     }
 
+    let response;
     try {
-      const response = await fetch(destination, details);
+      response = await fetch(destination, details);
       if (response.status === 429) {
         if (timeout !== null) {
           clearTimeout(timeout);
@@ -42,6 +43,9 @@ export function makeRequest(url: string) {
     } catch (err) {
       const message =
         "could not fetch '" + destination.toString() + "': " + err;
+
+      console.error(response);
+
       throw new Error(message);
     }
   }
