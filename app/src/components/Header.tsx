@@ -17,7 +17,7 @@ const Header: Component = () => {
       <figure>
         <img
           class="object-contain block h-[1in]"
-          src={`${import.meta.env.BASE_URL}/logo.png`}
+          src={import.meta.env.BASE_URL + "logo.png"}
         />
       </figure>
     </header>

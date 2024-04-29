@@ -1,10 +1,10 @@
+import { Member } from "common";
 import { Component, createResource, For, Suspense } from "solid-js";
 import { z } from "zod";
-import { client, makeRequest } from "../client";
+import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import Editable from "./Editable";
 import Loader from "./Loader";
-import { Member } from "common";
 
 const colors = [
   "bg-red-600",
@@ -36,7 +36,7 @@ const Members: Component = () => {
             <li class="w-[1in] overflow-hidden">
               <figure>
                 <img
-                  src={`${import.meta.env.BASE_URL}/${member.img}`}
+                  src={import.meta.env.BASE_URL + member.img}
                   alt={member.firstname + " " + member.lastname}
                   class="block w-100 h-[1.2in] object-cover"
                 />

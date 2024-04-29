@@ -1,17 +1,17 @@
 import { Risk } from "common";
 import {
-    Component,
-    createEffect,
-    createResource,
-    createSignal,
-    For,
-    onCleanup,
-    onMount,
-    Suspense
+  Component,
+  createEffect,
+  createResource,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Suspense,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 import { z } from "zod";
-import { client, makeRequest } from "../client";
+import { makeRequest } from "../client";
 import { dueDate, session } from "../stores/params";
 import AddButton from "./AddButton";
 import Editable from "./Editable";
