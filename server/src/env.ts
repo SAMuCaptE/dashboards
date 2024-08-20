@@ -10,6 +10,7 @@ const EnvSchema = z.object({
   DB_USER: z.string(),
   DB_PASSWORD: z.string(),
   DB_HOSTNAME: z.string(),
+  DB_PORT: z.string().transform((str) => parseInt(str)),
 });
 
 config();

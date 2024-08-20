@@ -1,7 +1,3 @@
-drop table if exists fields;
-drop table if exists defaults;
-drop table if exists empty_data;
-
 create table if not exists fields (
     session char(2),
     due_date char(10),
@@ -15,6 +11,16 @@ create table if not exists defaults (
 
 create table if not exists empty_data (
     data text
+);
+
+create table if not exists time_entries (
+    id int not null auto_increment,
+    start timestamp not null,
+    end timestamp not null,
+    user_id int not null,
+    task_id text not null,
+    task_url text not null,
+    primary key (id)
 );
 
 insert into defaults (data)
