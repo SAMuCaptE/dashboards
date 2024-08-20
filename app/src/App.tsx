@@ -15,6 +15,7 @@ import ExtraData from "./components/ExtraData";
 import Loader from "./components/Loader";
 import RateLimited from "./components/RateLimited";
 import TimeEntries from "./components/TimeEntries";
+import TimeLogger from "./components/TimeLogger";
 import { dueDate, session } from "./stores/params";
 
 const App: Component = () => {
@@ -70,6 +71,7 @@ const App: Component = () => {
         </Show>
       </Suspense>
 
+      <TimeLogger />
       <TimeEntries />
     </Show>
   );
