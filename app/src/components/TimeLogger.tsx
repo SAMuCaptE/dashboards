@@ -2,7 +2,14 @@ import { Task } from "common";
 import { Component, createEffect, createSignal, For, on, Show } from "solid-js";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
-import { colors, debounce, domainIcons, tagToDomainIcon } from "../utils";
+import {
+  colors,
+  convertToDateTimeLocalString,
+  debounce,
+  domainIcons,
+  formatDeltaTime,
+  tagToDomainIcon,
+} from "../utils";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
 
@@ -22,6 +29,9 @@ const TimeLogger: Component = () => {
   const [selectedUserId, setSelectedUserId] = createSignal<string>(
     localStorage.getItem(USER_ID) ?? "",
   );
+
+  const [startTime, setStartTime] = createSignal(new Date());
+  const [endTime, setEndTime] = createSignal(new Date());
   const [timerIsActive, setTimerIsActive] = createSignal(false);
 
   const [fetchingTask, setFetchingTask] = createSignal(false);
@@ -78,6 +88,9 @@ const TimeLogger: Component = () => {
     }),
   );
 
+  const duration = () =>
+    formatDeltaTime(endTime().getTime() - startTime().getTime());
+
   return (
     <NoPrint>
       <Show when={(users() ?? []).length > 0} fallback={<Loader />}>
@@ -86,14 +99,15 @@ const TimeLogger: Component = () => {
             <div class="flex justify-center gap-4">
               <div>
                 <div>
-                  <label for={USER_ID}>
-                    <i>SAUM</i>atelot
+                  <label for={USER_ID} class="pr-2">
+                    <i>SAUM</i>atelot:
                   </label>
                   <select
                     id={USER_ID}
                     name={USER_ID}
                     value={selectedUserId()}
                     onChange={handleUserSelect}
+                    class="border-[1px] bg-white px-2 rounded"
                   >
                     <option value="">Aucune sélection</option>
                     {users()?.map((user) => (
@@ -102,17 +116,20 @@ const TimeLogger: Component = () => {
                   </select>
                 </div>
                 <div>
-                  <div>
-                    <label for="task">Tâche ClickUp</label>
+                  <div class="flex">
+                    <label for="task" class="pr-2">
+                      Tâche:
+                    </label>
                     <input
                       id="task"
                       type="search"
                       autocomplete="off"
                       value={taskInput()}
                       onChange={(ev) => setTaskInput(ev.target.value)}
+                      class="border-[1px] bg-white px-2 rounded text-sm flex-1"
                     />
                   </div>
-                  <div class="border-[1px] bg-slate-50 rounded-lg p-2">
+                  <div class="border-[1px] bg-slate-50 rounded-lg p-2 my-2">
                     <Show
                       when={taskDetails()}
                       fallback={
@@ -182,15 +199,34 @@ const TimeLogger: Component = () => {
               </div>
 
               <div>
-                <div>
-                  <label for="start-datetime">Début</label>
-                  <input id="start-datetime" type="datetime-local" />
+                <div class="flex">
+                  <label for="start-datetime" class="pr-2">
+                    Début:
+                  </label>
+                  <input
+                    id="start-datetime"
+                    type="datetime-local"
+                    value={convertToDateTimeLocalString(startTime())}
+                    class="border-[1px] bg-white px-2 rounded flex-1"
+                    onChange={(ev) => setStartTime(new Date(ev.target.value))}
+                  />
                 </div>
-                <div>
-                  <label for="end-datetime">Fin</label>
-                  <input id="end-datetime" type="datetime-local" />
+                <div class="flex">
+                  <label for="end-datetime" class="pr-2">
+                    Fin:
+                  </label>
+                  <input
+                    id="end-datetime"
+                    type="datetime-local"
+                    value={convertToDateTimeLocalString(endTime())}
+                    class="border-[1px] bg-white px-2 rounded flex-1"
+                    onChange={(ev) => setEndTime(new Date(ev.target.value))}
+                  />
                 </div>
-                <input />
+                <div class="flex">
+                  <p class="pr-2">Durée:</p>
+                  <p>{duration() || "-"}</p>
+                </div>
 
                 <div>
                   <button onClick={handleManualTimer} type="button">
