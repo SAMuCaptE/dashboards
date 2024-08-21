@@ -6,6 +6,8 @@ const ResponseSchema = z.object({
   tasks: z.array(Task),
 });
 
+const teamId = "9003057443";
+
 export async function getTasks(
   tags: string[],
   assigneeIds: string[],
@@ -44,7 +46,6 @@ export async function getTasks(
     query += `&custom_fields=[${JSON.stringify(filter)}]`;
   }
 
-  const teamId = "9003057443";
   const data = await api(ResponseSchema).get(
     `https://api.clickup.com/api/v2/team/${teamId}/task?${query}`,
   );
@@ -54,4 +55,18 @@ export async function getTasks(
   }
 
   return data.tasks;
+}
+
+export async function getTask(taskId: string) {
+  const query = new URLSearchParams({
+    team_id: teamId,
+    custom_task_ids: "true",
+    include_subtasks: "true",
+    include_markdown_description: "true",
+    custom_fields: "string",
+  }).toString();
+
+  return api(Task).get(
+    `https://api.clickup.com/api/v2/task/${taskId}?${query}`,
+  );
 }
