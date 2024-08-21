@@ -19,7 +19,6 @@ create table if not exists time_entries (
     end timestamp not null,
     user_id int not null,
     task_id text not null,
-    task_url text not null,
     primary key (id)
 );
 

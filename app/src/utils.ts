@@ -40,3 +40,15 @@ export const colors = {
   unknown: "#d8e65a",
   average: "#ababab",
 } as const;
+
+const debounceCallbacks: Record<string, number> = {};
+export function debounce(
+  key: string,
+  callback: Function,
+  delay = 250,
+): Function {
+  clearTimeout(debounceCallbacks[key]);
+  const timeout = setTimeout(callback, delay);
+  debounceCallbacks[key] = timeout;
+  return () => clearTimeout(timeout);
+}
