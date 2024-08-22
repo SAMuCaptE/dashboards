@@ -1,6 +1,7 @@
 import { Task } from "common";
 import { z } from "zod";
 import { api } from "./api";
+import { database } from "./database";
 
 const ResponseSchema = z.object({
   tasks: z.array(Task),
@@ -66,7 +67,34 @@ export async function getTask(taskId: string) {
     custom_fields: "string",
   }).toString();
 
-  return api(Task).get(
+  const task = await api(Task).get(
     `https://api.clickup.com/api/v2/task/${taskId}?${query}`,
   );
+  if (task) {
+    await syncTasks([task]);
+  }
+  return task;
+}
+
+export async function syncTasks(tasks: Task[]) {
+  for (const task of tasks) {
+    const location = {
+      list_id: task.list.id,
+      folder_id: task.folder.id,
+      space_id: task.space.id,
+    };
+
+    await database(async (connection) => {
+      const stmt = await connection.prepare(
+        `replace into tasks (id, name, location, tags) values (?, ?, ?, ?)`,
+      );
+      await stmt.execute([
+        task.id,
+        task.name,
+        JSON.stringify(location),
+        JSON.stringify(task.tags),
+      ]);
+      await stmt.close();
+    });
+  }
 }

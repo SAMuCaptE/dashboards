@@ -19,7 +19,7 @@ export const TimeEntry = z.object({
   duration: StrToNum,
   description: z.string(),
   tags: z.array(z.string()),
-  source: z.enum(["clickup", "clickup_mobile", "clickup_automatic"]),
+  source: z.enum(["clickup", "clickup_mobile", "clickup_automatic", "manual"]),
   at: StrToNum,
   task_location: z.object({
     list_id: z.string(),

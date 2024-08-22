@@ -22,6 +22,14 @@ create table if not exists time_entries (
     primary key (id)
 );
 
+create table if not exists tasks (
+    id char(9) not null,
+    name text not null,
+    location text not null,
+    tags text not null,
+    primary key (id)
+);
+
 insert into defaults (data)
 values ('{"sessions":{"s6":{"objective":["Électrique: Avoir une base pour tout ce qui est alimentation (prototype conceptuel)","Informatique: Architecture globale avec une solution pour la communication","Mécanique: Avoir toutes les parties du système dans un environnement simulé (CAD)"]},"s7":{"objective":["Possibilité de déployer un prototype à l''été - MVP1 complet, MVP2 bien avancé / complet"]}},"members":[{"img":"daniel.jpg","firstname":"Daniel","lastname":"B","role":"Médiateur"},{"img":"ariel.png","firstname":"Ariel","lastname":"M F","role":"Correcteur"},{"img":"zachary.png","firstname":"Zachary","lastname":"G","role":"Animateur"},{"img":"simon.jpg","firstname":"Simon","lastname":"L","role":"Chef d''équipe"},{"img":"natael.jpg","firstname":"Nataël","lastname":"L-L","role":"Vérificateur"},{"img":"mederick.jpg","firstname":"Médérick","lastname":"M","role":"Gestionnaire"},{"img":"julien.png","firstname":"Julien","lastname":"R","role":"Secrétaire"}]}');
 
