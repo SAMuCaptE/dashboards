@@ -74,6 +74,10 @@ export async function addTimeEntry(
   start: Date,
   end?: Date,
 ) {
+  if (end && end.getTime() < start.getTime()) {
+    throw new Error("start date is after end date");
+  }
+
   await database(async (connection) => {
     const query = `
     INSERT INTO time_entries (start, end, user_id, task_id)
@@ -170,15 +174,23 @@ async function getManualTimeEntries(
           taskId: timeEntry.task_id,
           start,
           end,
-          duration: end - start,
+          duration: Math.abs(end - start),
 
           task: {
             id: timeEntry.task_id,
             name: timeEntry.name ?? "tache inconnue",
-            status: { status: "open", type: "", color: "#fff", orderindex: 0 },
+            status: {
+              type: "",
+              orderindex: 0,
+              status: "open",
+              color: "#000000",
+            },
           },
           task_tags: JSON.parse(timeEntry.tags ?? "[]"),
-          task_location: JSON.parse(timeEntry.location ?? "{}"),
+          task_location: JSON.parse(
+            timeEntry.location ??
+              '{"list_id": "", "folder_id": "", "space_id": ""}',
+          ),
           task_url: `https://app.clickup.com/t/${timeEntry.task_id}`,
 
           wid: "",

@@ -30,8 +30,8 @@ export const TimeEntry = z.object({
     z.object({
       name: z.string(),
       tag_fg: Color,
-      tag_bg: Color,
-      creator: z.number(),
+      tag_bg: Color.optional(),
+      creator: z.number().optional(),
     }),
   ),
   task_url: z.string().url(),
