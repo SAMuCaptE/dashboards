@@ -1,10 +1,10 @@
 import "chart.js/auto";
 import {
-    createEffect,
-    createResource,
-    Show,
-    Suspense,
-    type Component
+  createEffect,
+  createResource,
+  Show,
+  Suspense,
+  type Component,
 } from "solid-js";
 import { z } from "zod";
 
@@ -43,6 +43,7 @@ const App: Component = () => {
       <aside>
         <Controls />
         <ExtraData />
+        <TimeLogger />
       </aside>
 
       <Suspense
@@ -71,7 +72,6 @@ const App: Component = () => {
         </Show>
       </Suspense>
 
-      <TimeLogger />
       <TimeEntries />
     </Show>
   );

@@ -193,7 +193,7 @@ const TimeLogger: Component = () => {
   return (
     <NoPrint>
       <Show when={(users() ?? []).length > 0} fallback={<Loader />}>
-        <div class="border-black border-2 rounded-lg p-4 m-2">
+        <div class="border-black border-2 rounded-lg p-4 my-2 mx-auto max-w-2xl">
           <Show when={loading() === false} fallback={<Loader />}>
             <form onSubmit={handleSubmit}>
               <div class="flex justify-center gap-4">
