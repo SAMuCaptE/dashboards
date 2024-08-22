@@ -1,6 +1,7 @@
 import { TimeEntry } from "common";
 import { z } from "zod";
 import { api } from "./api";
+import { database } from "./database";
 import { getUsers } from "./users";
 
 const ResponseSchema = z.object({
@@ -56,4 +57,63 @@ export async function getTimeEntriesForUser(userId: number) {
   return api(ResponseSchema).get(
     `https://api.clickup.com/api/v2/team/${teamId}/time_entries?${params.toString()}`,
   );
+}
+
+export async function addTimeEntry(
+  userId: string,
+  taskId: string,
+  start: Date,
+  end?: Date,
+) {
+  await database(async (connection) => {
+    const query = `
+    INSERT INTO time_entries (start, end, user_id, task_id)
+    VALUES (?, ?, ?, ?)
+    `;
+    const stmt = await connection.prepare(query);
+    await stmt.execute([start, end || null, userId, taskId]);
+    await stmt.close();
+  });
+}
+
+export async function completeTimeEntry(timeEntryId: number, end: Date) {
+  await database(async (connection) => {
+    const query = `UPDATE time_entries SET end = ? WHERE id = ?`;
+    const stmt = await connection.prepare(query);
+    await stmt.execute([end, timeEntryId]);
+    await stmt.close();
+  });
+}
+
+export async function getOngoingTimeEntry(userId: string) {
+  const rows = await database(async (connection) => {
+    const query = `SELECT * FROM time_entries WHERE end IS NULL AND user_id = ?`;
+    const stmt = await connection.prepare(query);
+    const [rows] = await stmt.execute([userId]);
+    await stmt.close();
+    return rows;
+  });
+
+  const timeEntries = z
+    .array(
+      z.object({
+        id: z.number(),
+        start: z.date(),
+        user_id: z.coerce.number(),
+        task_id: z.string(),
+      }),
+    )
+    .parse(rows);
+
+  if (!timeEntries || timeEntries?.length === 0) {
+    return null;
+  }
+
+  const timeEntry = timeEntries[0];
+  return {
+    id: timeEntry.id,
+    userId: timeEntry.user_id,
+    taskId: timeEntry.task_id,
+    start: new Date(timeEntry.start).getTime(),
+  };
 }

@@ -15,7 +15,12 @@ import {
 } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTask, getTasks } from "./api/tasks";
-import { getTimeEntriesInRange } from "./api/time-entries";
+import {
+  addTimeEntry,
+  completeTimeEntry,
+  getOngoingTimeEntry,
+  getTimeEntriesInRange,
+} from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { bugnet } from "./middlewares/bugnet";
@@ -169,6 +174,14 @@ router.get(
 );
 
 router.get(
+  "/time-entries/ongoing",
+  bugnet(async function (req, res) {
+    const userId = z.string().parse(req.query.userId);
+    res.json(await getOngoingTimeEntry(userId)).status(200);
+  }),
+);
+
+router.get(
   "/time-entries",
   bugnet(
     cache(
@@ -184,6 +197,48 @@ router.get(
       { dependsOn: (req) => [req.query.start, req.query.end] },
     ),
   ),
+);
+
+router.post(
+  "/time-entries",
+  bugnet(async function (req, res) {
+    const payload = z
+      .object({
+        userId: z.string(),
+        taskId: z.string(),
+        start: z.number().transform((num) => new Date(num)),
+        end: z
+          .number()
+          .transform((num) => new Date(num))
+          .optional(),
+      })
+      .parse(req.body);
+
+    await addTimeEntry(
+      payload.userId,
+      payload.taskId,
+      payload.start,
+      payload.end,
+    );
+    res.sendStatus(200);
+  }),
+);
+
+router.put(
+  "/time-entries/:ongoingId",
+  bugnet(async function (req, res) {
+    const payload = z
+      .object({
+        id: z.coerce.number(),
+        end: z.number().transform((num) => new Date(num)),
+      })
+      .parse({
+        id: req.params.ongoingId,
+        end: req.body.end,
+      });
+    await completeTimeEntry(payload.id, payload.end);
+    res.sendStatus(200);
+  }),
 );
 
 const fields = Router({ mergeParams: true });

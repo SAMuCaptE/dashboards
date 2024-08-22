@@ -1,5 +1,14 @@
-import { Task } from "common";
-import { Component, createEffect, createSignal, For, on, Show } from "solid-js";
+import { OngoingTimeEntry, Task } from "common";
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  on,
+  onMount,
+  Show,
+} from "solid-js";
+import { date, z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import {
@@ -24,8 +33,6 @@ function parseTaskId(taskOrUrl: string) {
 }
 
 const TimeLogger: Component = () => {
-  let formRef: HTMLFormElement;
-
   const [selectedUserId, setSelectedUserId] = createSignal<string>(
     localStorage.getItem(USER_ID) ?? "",
   );
@@ -33,6 +40,7 @@ const TimeLogger: Component = () => {
   const [startTime, setStartTime] = createSignal(new Date());
   const [endTime, setEndTime] = createSignal(new Date());
   const [timerIsActive, setTimerIsActive] = createSignal(false);
+  const [ongoingId, setOngoingId] = createSignal<number | null>(null);
 
   const [fetchingTask, setFetchingTask] = createSignal(false);
   const [taskInput, setTaskInput] = createSignal(
@@ -40,32 +48,101 @@ const TimeLogger: Component = () => {
   );
   const [taskDetails, setTaskDetails] = createSignal<Task | null>(null);
 
-  const [saving, setSaving] = createSignal(false);
+  const [loading, setLoading] = createSignal(false);
 
-  const handleUserSelect = (ev: Event & { target: HTMLSelectElement }) => {
+  onMount(async () => {
+    setLoading(true);
+    await fetchOngoing(selectedUserId());
+    setLoading(false);
+  });
+
+  const handleUserSelect = async (
+    ev: Event & { target: HTMLSelectElement },
+  ) => {
     if (timerIsActive()) {
       return;
     }
-    localStorage.setItem(USER_ID, ev.target.value);
-    setSelectedUserId(ev.target.value);
+    const userId = ev.target.value;
+    localStorage.setItem(USER_ID, userId);
+    setLoading(true);
+    setSelectedUserId(userId);
+    await fetchOngoing(userId);
+    setLoading(false);
   };
 
-  const handleSubmit = (ev: Event) => {
+  const clearForm = () => {
+    const d = new Date();
+    setStartTime(d);
+    setEndTime(d);
+  };
+
+  const handleSubmit = async (ev: Event) => {
     ev.preventDefault();
     if (timerIsActive()) {
       return;
     }
 
-    console.log("submitted time entry");
-    setSaving(true);
-    setTimeout(() => setSaving(false), 5000);
+    setLoading(true);
+    const taskId = parseTaskId(taskInput());
+    await makeRequest("/time-entries").post(z.any(), {
+      taskId,
+      userId: selectedUserId(),
+      start: startTime().getTime(),
+      end: endTime().getTime(),
+    });
+    clearForm();
+    setLoading(false);
   };
 
-  const handleManualTimer = () => {
-    const isActive = setTimerIsActive((active) => !active);
-    if (isActive === false) {
-      formRef.requestSubmit();
+  const fetchOngoing = async (userId: string) => {
+    const params = new URLSearchParams({ userId });
+    const ongoing = await makeRequest(
+      `/time-entries/ongoing?${params.toString()}`,
+    ).get(
+      z
+        .object({
+          id: z.number(),
+          start: z.number().transform((num) => new Date(num)),
+          taskId: z.string(),
+          userId: z.coerce.string(),
+        })
+        .or(z.null()),
+    );
+
+    if (ongoing === null) {
+      setTimerIsActive(false);
+    } else {
+      setStartTime(ongoing.start);
+      setSelectedUserId(ongoing.userId);
+      setTaskInput(ongoing.taskId);
+      setOngoingId(ongoing.id);
+      setTimerIsActive(true);
     }
+  };
+
+  const handleManualTimer = async () => {
+    setLoading(true);
+    const isActive = setTimerIsActive((active) => !active);
+    if (isActive) {
+      try {
+        await makeRequest("/time-entries").post(z.any(), {
+          userId: selectedUserId(),
+          taskId: parseTaskId(taskInput()),
+          start: startTime().getTime(),
+        });
+        await fetchOngoing(selectedUserId());
+      } catch (err) {
+        console.error(err);
+        setTimerIsActive(false);
+        setOngoingId(null);
+      }
+    } else {
+      await makeRequest(`/time-entries/${ongoingId()}`).put(z.any(), {
+        end: new Date().getTime(),
+      });
+    }
+    clearForm();
+    setLoading(false);
   };
 
   let cancelTaskFetch: Function | null = null;
@@ -99,15 +176,26 @@ const TimeLogger: Component = () => {
     }),
   );
 
+  let durationInterval: number | undefined = undefined;
+  createEffect(() => {
+    clearInterval(durationInterval);
+    if (timerIsActive()) {
+      durationInterval = setInterval(() => setEndTime(new Date()), 1000);
+    }
+  });
+
   const duration = () =>
-    formatDeltaTime(endTime().getTime() - startTime().getTime());
+    formatDeltaTime(
+      endTime().getTime() - startTime().getTime(),
+      timerIsActive(),
+    );
 
   return (
     <NoPrint>
       <Show when={(users() ?? []).length > 0} fallback={<Loader />}>
         <div class="border-black border-2 rounded-lg p-4 m-2">
-          <Show when={saving() === false} fallback={<Loader />}>
-            <form ref={(el) => (formRef = el)} onSubmit={handleSubmit}>
+          <Show when={loading() === false} fallback={<Loader />}>
+            <form onSubmit={handleSubmit}>
               <div class="flex justify-center gap-4">
                 <div>
                   <div>

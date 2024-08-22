@@ -16,7 +16,7 @@ create table if not exists empty_data (
 create table if not exists time_entries (
     id int not null auto_increment,
     start timestamp not null,
-    end timestamp not null,
+    end timestamp,
     user_id int not null,
     task_id text not null,
     primary key (id)
