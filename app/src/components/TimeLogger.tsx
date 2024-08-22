@@ -1,4 +1,4 @@
-import { OngoingTimeEntry, Task } from "common";
+import { Task } from "common";
 import {
   Component,
   createEffect,
@@ -8,7 +8,7 @@ import {
   onMount,
   Show,
 } from "solid-js";
-import { date, z } from "zod";
+import { z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import {
@@ -82,16 +82,22 @@ const TimeLogger: Component = () => {
       return;
     }
 
-    setLoading(true);
-    const taskId = parseTaskId(taskInput());
-    await makeRequest("/time-entries").post(z.any(), {
-      taskId,
-      userId: selectedUserId(),
-      start: startTime().getTime(),
-      end: endTime().getTime(),
-    });
-    clearForm();
-    setLoading(false);
+    try {
+      setLoading(true);
+      const taskId = parseTaskId(taskInput());
+      await makeRequest("/time-entries").post(z.any(), {
+        taskId,
+        userId: selectedUserId(),
+        start: startTime().getTime(),
+        end: endTime().getTime(),
+      });
+      clearForm();
+    } catch (err) {
+      alert("Erreur, voir console");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchOngoing = async (userId: string) => {
@@ -132,14 +138,20 @@ const TimeLogger: Component = () => {
         });
         await fetchOngoing(selectedUserId());
       } catch (err) {
+        alert("Erreur, voir console");
         console.error(err);
         setTimerIsActive(false);
         setOngoingId(null);
       }
     } else {
-      await makeRequest(`/time-entries/${ongoingId()}`).put(z.any(), {
-        end: new Date().getTime(),
-      });
+      try {
+        await makeRequest(`/time-entries/${ongoingId()}`).put(z.any(), {
+          end: new Date().getTime(),
+        });
+      } catch (err) {
+        alert("Erreur, voir console");
+        console.error(err);
+      }
     }
     clearForm();
     setLoading(false);
