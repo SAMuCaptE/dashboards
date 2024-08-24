@@ -1,13 +1,13 @@
 import { Chart } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import {
-    Component,
-    createEffect,
-    createMemo,
-    createResource,
-    createSignal,
-    Show,
-    Suspense
+  Component,
+  createEffect,
+  createMemo,
+  createResource,
+  createSignal,
+  Show,
+  Suspense,
 } from "solid-js";
 import { z } from "zod";
 import { makeRequest } from "../client";
@@ -27,22 +27,32 @@ const alternateLabels: Record<string, string> = {
 
 const WorkedHoursChart: Component = () => {
   const [workedHours] = createResource(() =>
-    makeRequest("/hours").get(
-      z.record(z.string(), z.record(z.string(), z.number())),
-      new URLSearchParams({
-        start: startDate.getTime().toString(),
-        end: endDate.getTime().toString(),
+    makeRequest("/hours")
+      .get(
+        z.record(z.string(), z.record(z.string(), z.number()).or(z.number())),
+        new URLSearchParams({
+          start: startDate.getTime().toString(),
+          end: endDate.getTime().toString(),
+        }),
+      )
+      .then((hours) => {
+        const formatted = Object.entries(hours).reduce(
+          (acc, [key, value]) =>
+            typeof value === "number" ? acc : { ...acc, [key]: value },
+          {} as Record<string, Record<string, number>>,
+        );
+        return [formatted, hours.weekCount as number] as const;
       }),
-    ),
   );
 
   const sortedHours = createMemo(() => {
     const sorted: Record<string, number[]> = {};
-    const hours = workedHours() ?? {};
+
+    const [hours, weekCount] = workedHours() ?? [{}, 1];
     for (const user of users() ?? []) {
       for (const key of Object.keys(hours)) {
         sorted[key] ??= [];
-        sorted[key].push(hours[key][user.id] ?? 0);
+        sorted[key].push(hours[key][user.id] ?? 0) / weekCount;
       }
     }
     return sorted;
@@ -50,7 +60,7 @@ const WorkedHoursChart: Component = () => {
 
   const weeklyTotal = () => {
     const hours = Object.entries(sortedHours())
-      .filter(([key]) => key !== "average")
+      .filter(([key]) => key !== "total")
       .map(([_, values]) => values) as number[][];
 
     const totals: number[] = [];
@@ -67,7 +77,7 @@ const WorkedHoursChart: Component = () => {
     labels: (users() ?? []).map((user) => user.initials),
     datasets: [
       ...Object.entries(sortedHours())
-        .filter(([label]) => label !== "average")
+        .filter(([label]) => label !== "total")
         .map(([label, data]) => ({
           data,
           type: "bar",
@@ -80,7 +90,9 @@ const WorkedHoursChart: Component = () => {
       {
         type: "line",
         label: "Moy",
-        data: sortedHours().average,
+        data: sortedHours().total.map(
+          (total) => total / (workedHours() ?? [{}, 1])[1],
+        ),
       },
     ],
   });

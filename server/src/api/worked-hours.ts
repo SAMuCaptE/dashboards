@@ -3,12 +3,18 @@ import { convertTags } from "../utils";
 import { getAllTimeEntries, getTimeEntriesInRange } from "./time-entries";
 
 type WorkedHoursResult = Record<
-  ReturnType<typeof convertTags> | "average",
+  ReturnType<typeof convertTags> | "total",
   Record<User["id"], number>
->;
+> & { weekCount: number };
 
 export async function getWorkedHours(start: Date, end: Date) {
   const timeEntries = await getTimeEntriesInRange(start, end);
+
+  const averageStartDate = new Date(process.env.HOURS_START_DATE!).getTime();
+  const weekLength = 7 * 24 * 60 * 60 * 1000;
+  const weekCount =
+    Math.floor((end.getTime() - averageStartDate) / weekLength) -
+    parseInt(process.env.HOURS_WEEKLY_OFFSET!);
 
   const result: WorkedHoursResult = {
     admin: {},
@@ -17,14 +23,9 @@ export async function getWorkedHours(start: Date, end: Date) {
     mec: {},
     livrables: {},
     unknown: {},
-    average: {},
+    total: {},
+    weekCount,
   };
-
-  const averageStartDate = new Date(process.env.HOURS_START_DATE!).getTime();
-  const weekLength = 7 * 24 * 60 * 60 * 1000;
-  const weekCount =
-    Math.floor((end.getTime() - averageStartDate) / weekLength) -
-    parseInt(process.env.HOURS_WEEKLY_OFFSET!);
 
   for (const timeEntry of timeEntries) {
     const durationInHours = timeEntry.duration / 3600_000;
@@ -38,8 +39,8 @@ export async function getWorkedHours(start: Date, end: Date) {
   for (const timeEntry of allTimeEntries ?? []) {
     if (timeEntry) {
       const durationInHours = timeEntry.duration / 3600_000;
-      result["average"][timeEntry.user.id] ??= 0;
-      result["average"][timeEntry.user.id] += durationInHours / weekCount;
+      result["total"][timeEntry.user.id] ??= 0;
+      result["total"][timeEntry.user.id] += durationInHours;
     }
   }
 
