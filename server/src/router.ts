@@ -7,19 +7,19 @@ import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
-    Fields,
-    copyPreviousFields,
-    editFields,
-    existsFields,
-    findField,
+  Fields,
+  copyPreviousFields,
+  editFields,
+  existsFields,
+  findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTask, getTasks, syncTasks } from "./api/tasks";
 import {
-    addTimeEntry,
-    completeTimeEntry,
-    getOngoingTimeEntry,
-    getTimeEntriesInRange,
+  addTimeEntry,
+  completeTimeEntry,
+  getOngoingTimeEntry,
+  getTimeEntriesInRange,
 } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
@@ -225,13 +225,13 @@ router.post(
       })
       .parse(req.body);
 
-    await addTimeEntry(
+    const timeEntry = await addTimeEntry(
       payload.userId,
       payload.taskId,
       payload.start,
       payload.end,
     );
-    res.sendStatus(200);
+    res.json(timeEntry).status(200);
   }),
 );
 
@@ -240,15 +240,21 @@ router.put(
   bugnet(async function (req, res) {
     const payload = z
       .object({
+        userId: z.string(),
         id: z.coerce.number(),
         end: z.number().transform((num) => new Date(num)),
       })
       .parse({
         id: req.params.ongoingId,
+        userId: req.body.userId,
         end: req.body.end,
       });
-    await completeTimeEntry(payload.id, payload.end);
-    res.sendStatus(200);
+    const timeEntry = await completeTimeEntry(
+      payload.userId,
+      payload.id,
+      payload.end,
+    );
+    res.json(timeEntry).status(200);
   }),
 );
 
@@ -552,4 +558,3 @@ function invalidateFields() {
 }
 
 export { router };
-

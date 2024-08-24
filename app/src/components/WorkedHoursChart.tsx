@@ -4,17 +4,14 @@ import {
   Component,
   createEffect,
   createMemo,
-  createResource,
   createSignal,
   Show,
   Suspense,
 } from "solid-js";
-import { z } from "zod";
-import { makeRequest } from "../client";
 import { users } from "../resources/users";
-import { endDate, startDate } from "../stores/params";
 import { colors } from "../utils";
 import Loader from "./Loader";
+import { useTime } from "./TimeContext";
 
 const alternateLabels: Record<string, string> = {
   admin: "Admin",
@@ -26,29 +23,12 @@ const alternateLabels: Record<string, string> = {
 };
 
 const WorkedHoursChart: Component = () => {
-  const [workedHours] = createResource(() =>
-    makeRequest("/hours")
-      .get(
-        z.record(z.string(), z.record(z.string(), z.number()).or(z.number())),
-        new URLSearchParams({
-          start: startDate.getTime().toString(),
-          end: endDate.getTime().toString(),
-        }),
-      )
-      .then((hours) => {
-        const formatted = Object.entries(hours).reduce(
-          (acc, [key, value]) =>
-            typeof value === "number" ? acc : { ...acc, [key]: value },
-          {} as Record<string, Record<string, number>>,
-        );
-        return [formatted, hours.weekCount as number] as const;
-      }),
-  );
+  const time = useTime();
 
   const sortedHours = createMemo(() => {
     const sorted: Record<string, number[]> = {};
 
-    const [hours, weekCount] = workedHours() ?? [{}, 1];
+    const [hours, weekCount] = time?.workedHours() ?? [{}, 1];
     for (const user of users() ?? []) {
       for (const key of Object.keys(hours)) {
         sorted[key] ??= [];
@@ -91,7 +71,7 @@ const WorkedHoursChart: Component = () => {
         type: "line",
         label: "Moy",
         data: sortedHours().total.map(
-          (total) => total / (workedHours() ?? [{}, 1])[1],
+          (total) => total / (time?.workedHours() ?? [{}, 1])[1],
         ),
       },
     ],
@@ -111,7 +91,7 @@ const WorkedHoursChart: Component = () => {
           value: number,
           metadata: { datasetIndex: number; dataIndex: number },
         ) => {
-          const datasetCount = Object.keys(workedHours() ?? {}).length;
+          const datasetCount = Object.keys(time?.workedHours() ?? {}).length;
           if (metadata.datasetIndex === datasetCount - 2) {
             return (
               Math.round(weeklyTotal()[metadata.dataIndex] * 100) / 100 + "h"
@@ -137,10 +117,12 @@ const WorkedHoursChart: Component = () => {
     }
   });
 
+  let chartRef;
   function renderGraph() {
     try {
       setChartError(false);
-      new Chart(chart, {
+      chartRef?.destroy();
+      chartRef = new Chart(chart, {
         data: chartData() as any,
         type: "bar",
         options: chartOptions,

@@ -1,25 +1,10 @@
-import { Component, createResource, createSignal, For, Show } from "solid-js";
-import { z } from "zod";
-import { makeRequest } from "../client";
+import { Component, createSignal, For, Show } from "solid-js";
 import { users } from "../resources/users";
-
-const hourCategories = [
-  "unknown",
-  "admin",
-  "mec",
-  "elec",
-  "info",
-  "livrables",
-] as const;
+import { hourCategories, useTime } from "./TimeContext";
 
 const ExtraData: Component = () => {
   const [show, setShow] = createSignal(false);
-
-  const [extraData] = createResource(() =>
-    makeRequest("/extra").get(
-      z.record(z.coerce.number(), z.record(z.enum(hourCategories), z.number())),
-    ),
-  );
+  const time = useTime();
 
   return (
     <div class="w-fit mx-auto border-2 border-black border-solid px-4">
@@ -52,7 +37,7 @@ const ExtraData: Component = () => {
               </tr>
             </thead>
             <tbody>
-              <For each={Object.entries(extraData() ?? {})}>
+              <For each={Object.entries(time?.extraData() ?? {})}>
                 {([userId, hours]) => (
                   <tr>
                     <td>

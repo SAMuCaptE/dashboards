@@ -1,4 +1,4 @@
-import { Task } from "common";
+import { Task, TimeEntry } from "common";
 import {
   Component,
   createEffect,
@@ -21,6 +21,7 @@ import {
 } from "../utils";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
+import { useTime } from "./TimeContext";
 
 const USER_ID = "userId";
 const TASK_ID = "taskId";
@@ -36,6 +37,8 @@ const TimeLogger: Component = () => {
   const [selectedUserId, setSelectedUserId] = createSignal<string>(
     localStorage.getItem(USER_ID) ?? "",
   );
+
+  const time = useTime();
 
   const [startTime, setStartTime] = createSignal(new Date());
   const [endTime, setEndTime] = createSignal(new Date());
@@ -85,12 +88,13 @@ const TimeLogger: Component = () => {
     try {
       setLoading(true);
       const taskId = parseTaskId(taskInput());
-      await makeRequest("/time-entries").post(z.any(), {
+      const timeEntry = await makeRequest("/time-entries").post(TimeEntry, {
         taskId,
         userId: selectedUserId(),
         start: startTime().getTime(),
         end: endTime().getTime(),
       });
+      time?.addTimeEntry(parseInt(selectedUserId()), timeEntry);
       clearForm();
     } catch (err) {
       alert("Erreur, voir console");
@@ -145,9 +149,11 @@ const TimeLogger: Component = () => {
       }
     } else {
       try {
-        await makeRequest(`/time-entries/${ongoingId()}`).put(z.any(), {
-          end: new Date().getTime(),
-        });
+        const timeEntry = await makeRequest(`/time-entries/${ongoingId()}`).put(
+          TimeEntry,
+          { userId: selectedUserId(), end: new Date().getTime() },
+        );
+        time?.addTimeEntry(parseInt(selectedUserId()), timeEntry);
       } catch (err) {
         alert("Erreur, voir console");
         console.error(err);

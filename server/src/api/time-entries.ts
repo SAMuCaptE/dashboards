@@ -73,29 +73,75 @@ export async function addTimeEntry(
   taskId: string,
   start: Date,
   end?: Date,
-) {
+): Promise<TimeEntry> {
   if (end && end.getTime() < start.getTime()) {
     throw new Error("start date is after end date");
   }
 
-  await database(async (connection) => {
-    const query = `
+  const user = (await getUsers()).members.find(
+    (user) => user.id.toString() === userId,
+  );
+  if (!user) {
+    throw new Error("could not find user with id=" + userId);
+  }
+
+  const rows = await database(async (connection) => {
+    const stmt = await connection.prepare(`
     INSERT INTO time_entries (start, end, user_id, task_id)
     VALUES (?, ?, ?, ?)
-    `;
-    const stmt = await connection.prepare(query);
+    `);
     await stmt.execute([start, end || null, userId, taskId]);
     await stmt.close();
+
+    const select = await connection.prepare(`
+    SELECT time_entries.*, t.name, t.location, t.tags
+    FROM time_entries 
+    LEFT JOIN tasks t ON time_entries.task_id = t.id 
+    WHERE end IS NOT NULL AND user_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+    `);
+    const [rows] = await select.execute([userId]);
+    await select.close();
+    return rows;
   });
+
+  return parseTimeEntries(user, rows)[0];
 }
 
-export async function completeTimeEntry(timeEntryId: number, end: Date) {
-  await database(async (connection) => {
-    const query = `UPDATE time_entries SET end = ? WHERE id = ?`;
-    const stmt = await connection.prepare(query);
+export async function completeTimeEntry(
+  userId: string,
+  timeEntryId: number,
+  end: Date,
+): Promise<TimeEntry> {
+  const user = (await getUsers()).members.find(
+    (user) => user.id.toString() === userId,
+  );
+  if (!user) {
+    throw new Error("could not find user with id=" + userId);
+  }
+
+  const rows = await database(async (connection) => {
+    const stmt = await connection.prepare(
+      `UPDATE time_entries SET end = ? WHERE id = ?`,
+    );
     await stmt.execute([end, timeEntryId]);
     await stmt.close();
+
+    const select = await connection.prepare(`
+    SELECT time_entries.*, t.name, t.location, t.tags
+    FROM time_entries 
+    LEFT JOIN tasks t ON time_entries.task_id = t.id 
+    WHERE end IS NOT NULL AND user_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+    `);
+    const [rows] = await select.execute([userId]);
+    await select.close();
+    return rows;
   });
+
+  return parseTimeEntries(user, rows)[0];
 }
 
 export async function getOngoingTimeEntry(userId: string) {
@@ -148,7 +194,10 @@ async function getManualTimeEntries(
     await stmt.close();
     return rows;
   });
+  return parseTimeEntries(user, rows);
+}
 
+function parseTimeEntries(user: User, rows: any) {
   const timeEntries = z
     .array(
       z.object({
@@ -165,41 +214,51 @@ async function getManualTimeEntries(
     .parse(rows);
 
   return timeEntries?.length
-    ? timeEntries.map((timeEntry) => {
-        const start = new Date(timeEntry.start).getTime();
-        const end = new Date(timeEntry.end).getTime();
-        return {
-          user,
-          id: timeEntry.id.toString(),
-          taskId: timeEntry.task_id,
-          start,
-          end,
-          duration: Math.abs(end - start),
-
-          task: {
-            id: timeEntry.task_id,
-            name: timeEntry.name ?? "tache inconnue",
-            status: {
-              type: "",
-              orderindex: 0,
-              status: "open",
-              color: "#000000",
-            },
-          },
-          task_tags: JSON.parse(timeEntry.tags ?? "[]"),
-          task_location: JSON.parse(
-            timeEntry.location ??
-              '{"list_id": "", "folder_id": "", "space_id": ""}',
-          ),
-          task_url: `https://app.clickup.com/t/${timeEntry.task_id}`,
-
-          wid: "",
-          billable: false,
-          description: "",
-          tags: [],
-          source: "manual",
-          at: new Date().getTime(),
-        };
-      })
+    ? timeEntries.map((timeEntry) => makeTimeEntry(user, timeEntry))
     : [];
+}
+
+function makeTimeEntry(
+  user: User,
+  timeEntry: {
+    id: number;
+    task_id: string;
+    start: Date;
+    end: Date;
+    name: string | null;
+    tags: string | null;
+    location: string | null;
+  },
+): TimeEntry {
+  const start = new Date(timeEntry.start).getTime();
+  const end = new Date(timeEntry.end).getTime();
+  return {
+    user,
+    id: timeEntry.id.toString(),
+    start,
+    end,
+    duration: Math.abs(end - start),
+    task: {
+      id: timeEntry.task_id,
+      name: timeEntry.name ?? "tache inconnue",
+      status: {
+        type: "",
+        orderindex: 0,
+        status: "open",
+        color: "#000000",
+      },
+    },
+    task_tags: JSON.parse(timeEntry.tags ?? "[]"),
+    task_location: JSON.parse(
+      timeEntry.location ?? '{"list_id": "", "folder_id": "", "space_id": ""}',
+    ),
+    task_url: `https://app.clickup.com/t/${timeEntry.task_id}`,
+
+    wid: "",
+    billable: false,
+    description: "",
+    tags: [],
+    source: "manual",
+    at: new Date().getTime(),
+  };
 }
