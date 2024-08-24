@@ -17,7 +17,7 @@ import Risks from "./Risks";
 import SprintStatus from "./SprintStatus";
 import WorkedHoursChart from "./WorkedHoursChart";
 
-const tasksInFirstPage = 27;
+const tasksInFirstPage = 23;
 
 const Dashboard: Component = () => {
   const [sprintId, { refetch: refetchSprintId }] = createResource(() =>

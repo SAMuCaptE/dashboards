@@ -14,8 +14,13 @@ import {
     findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
-import { getTasks } from "./api/tasks";
-import { getTimeEntriesInRange } from "./api/time-entries";
+import { getTask, getTasks, syncTasks } from "./api/tasks";
+import {
+    addTimeEntry,
+    completeTimeEntry,
+    getOngoingTimeEntry,
+    getTimeEntriesInRange,
+} from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
 import { bugnet } from "./middlewares/bugnet";
@@ -77,6 +82,20 @@ router.get(
     cache(async function (_, res) {
       return res.json(getBudget()).status(200);
     }),
+  ),
+);
+
+router.get(
+  "/tasks/:id",
+  bugnet(
+    cache(
+      async function (req, res) {
+        const taskId = req.params.id;
+        z.string().parse(taskId);
+        res.json(await getTask(taskId)).status(200);
+      },
+      { dependsOn: (req) => [req.params.id] },
+    ),
   ),
 );
 
@@ -155,6 +174,14 @@ router.get(
 );
 
 router.get(
+  "/time-entries/ongoing",
+  bugnet(async function (req, res) {
+    const userId = z.string().parse(req.query.userId);
+    res.json(await getOngoingTimeEntry(userId)).status(200);
+  }),
+);
+
+router.get(
   "/time-entries",
   bugnet(
     cache(
@@ -170,6 +197,54 @@ router.get(
       { dependsOn: (req) => [req.query.start, req.query.end] },
     ),
   ),
+);
+
+router.post(
+  "/time-entries",
+  bugnet(async function (req, res) {
+    const payload = z
+      .object({
+        userId: z.string(),
+        taskId: z.string(),
+        start: z.number().transform((num) => new Date(num)),
+        end: z
+          .number()
+          .transform((num) => new Date(num))
+          .optional(),
+      })
+      .parse(req.body);
+
+    const timeEntry = await addTimeEntry(
+      payload.userId,
+      payload.taskId,
+      payload.start,
+      payload.end,
+    );
+    res.json(timeEntry).status(200);
+  }),
+);
+
+router.put(
+  "/time-entries/:ongoingId",
+  bugnet(async function (req, res) {
+    const payload = z
+      .object({
+        userId: z.string(),
+        id: z.coerce.number(),
+        end: z.number().transform((num) => new Date(num)),
+      })
+      .parse({
+        id: req.params.ongoingId,
+        userId: req.body.userId,
+        end: req.body.end,
+      });
+    const timeEntry = await completeTimeEntry(
+      payload.userId,
+      payload.id,
+      payload.end,
+    );
+    res.json(timeEntry).status(200);
+  }),
 );
 
 const fields = Router({ mergeParams: true });

@@ -2,20 +2,16 @@ import {
   Component,
   createEffect,
   createMemo,
-  createResource,
   createSignal,
   For,
   on,
   Suspense,
 } from "solid-js";
-import { z } from "zod";
-import { makeRequest } from "../client";
 import { users } from "../resources/users";
-import { endDate, startDate } from "../stores/params";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
-import { TimeEntry } from "common";
+import { useTime } from "./TimeContext";
 
 const TimeEntries: Component = () => {
   const [expanded, setExpanded] = createSignal<Record<number, boolean>>({});
@@ -40,32 +36,7 @@ const TimeEntries: Component = () => {
     }),
   );
 
-  const [timeEntries] = createResource(sortedUsers, async () => {
-    if (sortedUsers().length < 0) {
-      return null;
-    }
-
-    const entries = await makeRequest("/time-entries").get(
-      z.array(TimeEntry),
-      new URLSearchParams({
-        start: startDate.getTime().toString(),
-        end: endDate.getTime().toString(),
-      }),
-    );
-
-    const result: Record<number, Array<TimeEntry>> = {};
-    for (const user of sortedUsers()) {
-      result[user.id] = [];
-    }
-
-    if (entries) {
-      for (const entry of entries) {
-        result[entry.user.id].push(entry);
-      }
-    }
-
-    return result;
-  });
+  const time = useTime();
 
   return (
     <NoPrint>
@@ -99,7 +70,7 @@ const TimeEntries: Component = () => {
                   </button>
 
                   <ul>
-                    <For each={timeEntries()?.[user.id] ?? []}>
+                    <For each={time?.timeEntries()?.[user.id] ?? []}>
                       {(entry) => (
                         <li classList={{ hidden: !expanded()[user.id] }}>
                           <a

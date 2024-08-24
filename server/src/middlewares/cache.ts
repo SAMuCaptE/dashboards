@@ -1,4 +1,4 @@
-import { Request, Response, response } from "express";
+import { Request, Response } from "express";
 
 type CacheSettings<Locals extends Record<string, any>> = {
   expiration: number;

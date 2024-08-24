@@ -19,7 +19,7 @@ export const TimeEntry = z.object({
   duration: StrToNum,
   description: z.string(),
   tags: z.array(z.string()),
-  source: z.enum(["clickup", "clickup_mobile", "clickup_automatic"]),
+  source: z.enum(["clickup", "clickup_mobile", "clickup_automatic", "manual"]),
   at: StrToNum,
   task_location: z.object({
     list_id: z.string(),
@@ -30,8 +30,8 @@ export const TimeEntry = z.object({
     z.object({
       name: z.string(),
       tag_fg: Color,
-      tag_bg: Color,
-      creator: z.number(),
+      tag_bg: Color.optional(),
+      creator: z.number().optional(),
     }),
   ),
   task_url: z.string().url(),

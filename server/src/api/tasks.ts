@@ -1,10 +1,13 @@
 import { Task } from "common";
 import { z } from "zod";
 import { api } from "./api";
+import { database } from "./database";
 
 const ResponseSchema = z.object({
   tasks: z.array(Task),
 });
+
+const teamId = "9003057443";
 
 export async function getTasks(
   tags: string[],
@@ -44,7 +47,6 @@ export async function getTasks(
     query += `&custom_fields=[${JSON.stringify(filter)}]`;
   }
 
-  const teamId = "9003057443";
   const data = await api(ResponseSchema).get(
     `https://api.clickup.com/api/v2/team/${teamId}/task?${query}`,
   );
@@ -54,4 +56,45 @@ export async function getTasks(
   }
 
   return data.tasks;
+}
+
+export async function getTask(taskId: string) {
+  const query = new URLSearchParams({
+    team_id: teamId,
+    custom_task_ids: "true",
+    include_subtasks: "true",
+    include_markdown_description: "true",
+    custom_fields: "string",
+  }).toString();
+
+  const task = await api(Task).get(
+    `https://api.clickup.com/api/v2/task/${taskId}?${query}`,
+  );
+  if (task) {
+    await syncTasks([task]);
+  }
+  return task;
+}
+
+export async function syncTasks(tasks: Task[]) {
+  for (const task of tasks) {
+    const location = {
+      list_id: task.list.id,
+      folder_id: task.folder.id,
+      space_id: task.space.id,
+    };
+
+    await database(async (connection) => {
+      const stmt = await connection.prepare(
+        `replace into tasks (id, name, location, tags) values (?, ?, ?, ?)`,
+      );
+      await stmt.execute([
+        task.id,
+        task.name,
+        JSON.stringify(location),
+        JSON.stringify(task.tags),
+      ]);
+      await stmt.close();
+    });
+  }
 }

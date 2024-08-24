@@ -1,10 +1,10 @@
 import "chart.js/auto";
 import {
-    createEffect,
-    createResource,
-    Show,
-    Suspense,
-    type Component
+  createEffect,
+  createResource,
+  Show,
+  Suspense,
+  type Component,
 } from "solid-js";
 import { z } from "zod";
 
@@ -14,7 +14,9 @@ import Dashboard from "./components/Dashboard";
 import ExtraData from "./components/ExtraData";
 import Loader from "./components/Loader";
 import RateLimited from "./components/RateLimited";
+import TimeProvider from "./components/TimeContext";
 import TimeEntries from "./components/TimeEntries";
+import TimeLogger from "./components/TimeLogger";
 import { dueDate, session } from "./stores/params";
 
 const App: Component = () => {
@@ -39,38 +41,43 @@ const App: Component = () => {
       when={(rateLimited()?.getTime() ?? 0) + 60_000 < new Date().getTime()}
       fallback={<RateLimited />}
     >
-      <aside>
-        <Controls />
-        <ExtraData />
-      </aside>
+      <TimeProvider>
+        <aside>
+          <Controls />
+          <ExtraData />
+          <TimeLogger />
+        </aside>
 
-      <Suspense
-        fallback={
-          <div class="mx-auto w-fit pt-4">
-            <Loader />
-          </div>
-        }
-      >
-        <Show
-          when={exists()?.success}
+        <Suspense
           fallback={
-            <div class="pt-4">
-              <button
-                class="w-fit block mx-auto border-black border-2 hover:font-semibold"
-                onClick={handleNewWeek}
-              >
-                Créer le fichier de la semaine
-              </button>
-
-              <pre class="w-fit mx-auto pt-4">{exists()?.error.toString()}</pre>
+            <div class="mx-auto w-fit pt-4">
+              <Loader />
             </div>
           }
         >
-          <Dashboard />
-        </Show>
-      </Suspense>
+          <Show
+            when={exists()?.success}
+            fallback={
+              <div class="pt-4">
+                <button
+                  class="w-fit block mx-auto border-black border-2 hover:font-semibold"
+                  onClick={handleNewWeek}
+                >
+                  Créer le fichier de la semaine
+                </button>
 
-      <TimeEntries />
+                <pre class="w-fit mx-auto pt-4">
+                  {exists()?.error.toString()}
+                </pre>
+              </div>
+            }
+          >
+            <Dashboard />
+          </Show>
+        </Suspense>
+
+        <TimeEntries />
+      </TimeProvider>
     </Show>
   );
 };
