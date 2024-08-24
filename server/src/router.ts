@@ -7,19 +7,19 @@ import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
-  Fields,
-  copyPreviousFields,
-  editFields,
-  existsFields,
-  findField,
+    Fields,
+    copyPreviousFields,
+    editFields,
+    existsFields,
+    findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
 import { getTask, getTasks, syncTasks } from "./api/tasks";
 import {
-  addTimeEntry,
-  completeTimeEntry,
-  getOngoingTimeEntry,
-  getTimeEntriesInRange,
+    addTimeEntry,
+    completeTimeEntry,
+    getOngoingTimeEntry,
+    getTimeEntriesInRange,
 } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
@@ -135,17 +135,6 @@ router.get(
       },
     ),
   ),
-);
-
-router.post(
-  "/tasks/sync",
-  bugnet(async function (req, res) {
-    const { taskIds } = z
-      .object({ taskIds: z.array(z.string()) })
-      .parse(req.body);
-    await syncTasks(taskIds);
-    res.sendStatus(200);
-  }),
 );
 
 router.get(
@@ -558,3 +547,4 @@ function invalidateFields() {
 }
 
 export { router };
+
