@@ -2,11 +2,11 @@ import { Component } from "solid-js";
 import { z } from "zod";
 import { makeRequest } from "../client";
 import {
-    dueDate,
-    isValidDate,
-    navigate,
-    Session,
-    session
+  dueDate,
+  isValidDate,
+  navigate,
+  Session,
+  session,
 } from "../stores/params";
 
 const Controls: Component = () => {
@@ -59,7 +59,7 @@ const Controls: Component = () => {
 
       {!isValidDate() && (
         <p class="font-bold text-red-600 text-center">
-          La date choisie n'est pas un lundi
+          La date choisie n'est pas un jeudi
         </p>
       )}
     </>

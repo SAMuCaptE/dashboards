@@ -5,12 +5,13 @@ const dueDate = params.get("date")!;
 const session = params.get("session")! as Session;
 
 if (!dueDate || !session) {
-  // const thursday = new Date();
-  // thursday.setDate(thursday.getDate() + ((5 + 7 - thursday.getDay()) % 7));
+  const thursday = new Date();
+  thursday.setDate(thursday.getDate() + ((4 + 7 - thursday.getDay()) % 7));
+  navigate(thursday, "s8");
 
-  const monday = new Date();
-  monday.setDate(monday.getDate() + ((1 + 7 - monday.getDay()) % 7));
-  navigate(monday, "t5");
+  // const monday = new Date();
+  // monday.setDate(monday.getDate() + ((1 + 7 - monday.getDay()) % 7));
+  // navigate(monday, "t5");
 }
 
 function navigate(date: string | Date, session: Session) {
@@ -25,15 +26,15 @@ function navigate(date: string | Date, session: Session) {
   );
 }
 
-// function isThursday() {
-//     return dueDate().getDay() === 4;
-// }
-
-function isMonday() {
-  return new Date(dueDate!).getUTCDay() === 1;
+function isThursday() {
+  return new Date(dueDate!).getUTCDay() === 4;
 }
 
-const isValidDate = isMonday;
+// function isMonday() {
+//   return new Date(dueDate!).getUTCDay() === 1;
+// }
+
+const isValidDate = isThursday;
 
 let dueDateInMs =
   new Date(dueDate!).getTime() +
