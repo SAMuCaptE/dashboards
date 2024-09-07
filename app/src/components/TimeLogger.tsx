@@ -316,11 +316,13 @@ const TimeLogger: Component = () => {
                         when={taskDetails()}
                         fallback={
                           <div class="flex justify-center min-h-12">
-                            <div class="block relative w-12 aspect-square">
-                              <img
-                                src={import.meta.env.BASE_URL + "clickup.svg"}
-                              />
-                            </div>
+                            <a href="https://app.clickup.com" target="_blank">
+                              <div class="block relative w-12 aspect-square">
+                                <img
+                                  src={import.meta.env.BASE_URL + "clickup.svg"}
+                                />
+                              </div>
+                            </a>
                           </div>
                         }
                       >
