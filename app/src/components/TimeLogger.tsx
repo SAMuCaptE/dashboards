@@ -33,6 +33,18 @@ function parseTaskId(taskOrUrl: string) {
   return /^[a-zA-Z0-9]{9}$/.test(taskId) ? taskId : null;
 }
 
+function formatTimeInput(delta: number): string {
+  const deltaInMinutes = delta / 60_000;
+  const hours = Math.floor(deltaInMinutes / 60);
+  const minutes = deltaInMinutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+function trimSeconds(d: Date) {
+  d.setSeconds(0);
+  return d;
+}
+
 const TimeLogger: Component = () => {
   const [selectedUserId, setSelectedUserId] = createSignal<string>(
     localStorage.getItem(USER_ID) ?? "",
@@ -40,8 +52,12 @@ const TimeLogger: Component = () => {
 
   const time = useTime();
 
-  const [startTime, setStartTime] = createSignal(new Date());
-  const [endTime, setEndTime] = createSignal(new Date());
+  const [mode, setMode] = createSignal<"calculation" | "delta" | null>(
+    "calculation",
+  );
+  const [startTime, setStartTime] = createSignal(trimSeconds(new Date()));
+  const [endTime, setEndTime] = createSignal(trimSeconds(new Date()));
+  const [delta, setDelta] = createSignal(0);
   const [timerIsActive, setTimerIsActive] = createSignal(false);
   const [ongoingId, setOngoingId] = createSignal<number | null>(null);
 
@@ -87,12 +103,20 @@ const TimeLogger: Component = () => {
 
     try {
       setLoading(true);
+
+      const end =
+        mode() === "calculation" ? endTime().getTime() : new Date().getTime();
+      const start =
+        mode() === "calculation"
+          ? startTime().getTime()
+          : new Date(end - delta()).getTime();
+
       const taskId = parseTaskId(taskInput());
       const timeEntry = await makeRequest("/time-entries").post(TimeEntry, {
-        taskId,
         userId: selectedUserId(),
-        start: startTime().getTime(),
-        end: endTime().getTime(),
+        taskId,
+        start,
+        end,
       });
       time?.addTimeEntry(parseInt(selectedUserId()), timeEntry);
       clearForm();
@@ -112,7 +136,7 @@ const TimeLogger: Component = () => {
       z
         .object({
           id: z.number(),
-          start: z.number().transform((num) => new Date(num)),
+          start: z.string().transform((str) => new Date(str)),
           taskId: z.string(),
           userId: z.coerce.string(),
         })
@@ -122,16 +146,23 @@ const TimeLogger: Component = () => {
     if (ongoing === null) {
       setTimerIsActive(false);
     } else {
+      // I am too lazy to handle timezones correctly, everything is stored as UTC but the system thinks it is local tz.
+      ongoing.start = new Date(
+        ongoing.start.getTime() - ongoing.start.getTimezoneOffset() * 60_000,
+      );
+
       setStartTime(ongoing.start);
       setSelectedUserId(ongoing.userId);
       setTaskInput(ongoing.taskId);
       setOngoingId(ongoing.id);
       setTimerIsActive(true);
+      setMode("calculation");
     }
   };
 
   const handleManualTimer = async () => {
     setLoading(true);
+    setMode("calculation");
     const isActive = setTimerIsActive((active) => !active);
     if (isActive) {
       try {
@@ -204,7 +235,9 @@ const TimeLogger: Component = () => {
 
   const duration = () =>
     formatDeltaTime(
-      endTime().getTime() - startTime().getTime(),
+      mode() === "calculation"
+        ? endTime().getTime() - startTime().getTime()
+        : delta(),
       timerIsActive(),
     );
 
@@ -218,7 +251,7 @@ const TimeLogger: Component = () => {
                 <div>
                   <div>
                     <label for={USER_ID} class="pr-2 w-24">
-                      <i>SAUM</i>atelot:
+                      Membre:
                     </label>
                     <select
                       id={USER_ID}
@@ -333,13 +366,14 @@ const TimeLogger: Component = () => {
                       disabled={timerIsActive()}
                       value={convertToDateTimeLocalString(startTime())}
                       class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) =>
+                      onChange={(ev) => {
                         setStartTime((previous) =>
                           timerIsActive()
                             ? previous
                             : new Date(ev.target.value),
-                        )
-                      }
+                        );
+                        setMode("calculation");
+                      }}
                     />
                   </div>
                   <div class="flex pt-1">
@@ -352,13 +386,31 @@ const TimeLogger: Component = () => {
                       disabled={timerIsActive()}
                       value={convertToDateTimeLocalString(endTime())}
                       class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) =>
+                      onChange={(ev) => {
+                        console.log(new Date(ev.target.value));
                         setEndTime((previous) =>
                           timerIsActive()
                             ? previous
                             : new Date(ev.target.value),
-                        )
-                      }
+                        );
+                        setMode("calculation");
+                      }}
+                    />
+                  </div>
+                  <div class="flex pt-1">
+                    <label for="delta" class="pr-2 w-16">
+                      Delta:
+                    </label>
+                    <input
+                      id="delta"
+                      type="time"
+                      disabled={timerIsActive()}
+                      value={formatTimeInput(delta())}
+                      class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
+                      onChange={(ev) => {
+                        setDelta(ev.target.valueAsNumber);
+                        setMode("delta");
+                      }}
                     />
                   </div>
                   <div class="flex">

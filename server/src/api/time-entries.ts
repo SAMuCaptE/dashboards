@@ -173,7 +173,7 @@ export async function getOngoingTimeEntry(userId: string) {
     id: timeEntry.id,
     userId: timeEntry.user_id,
     taskId: timeEntry.task_id,
-    start: new Date(timeEntry.start).getTime(),
+    start: timeEntry.start,
   };
 }
 

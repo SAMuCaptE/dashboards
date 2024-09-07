@@ -64,7 +64,7 @@ export function convertToDateTimeLocalString(date: Date) {
 }
 
 export function formatDeltaTime(delta: number, showSeconds = false) {
-  const seconds = delta / 1000;
+  const seconds = delta / 1000 + 1;
   const d = Math.floor(seconds / (3600 * 24));
   const h = Math.floor((seconds % (3600 * 24)) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
