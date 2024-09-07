@@ -4,6 +4,7 @@ import {
   createEffect,
   createSignal,
   For,
+  Index,
   on,
   onMount,
   Show,
@@ -25,6 +26,7 @@ import { useTime } from "./TimeContext";
 
 const USER_ID = "userId";
 const TASK_ID = "taskId";
+const RECENT_TASKS = "recentTasks";
 
 function parseTaskId(taskOrUrl: string) {
   const taskId = taskOrUrl
@@ -66,6 +68,10 @@ const TimeLogger: Component = () => {
     localStorage.getItem(TASK_ID) ?? "",
   );
   const [taskDetails, setTaskDetails] = createSignal<Task | null>(null);
+
+  const [recentTasks, setRecentTasks] = createSignal<string[]>(
+    JSON.parse(localStorage.getItem(RECENT_TASKS) ?? "[]"),
+  );
 
   const [loading, setLoading] = createSignal(false);
 
@@ -199,6 +205,19 @@ const TimeLogger: Component = () => {
     on(taskInput, () => {
       const taskId = parseTaskId(taskInput());
       localStorage.setItem(TASK_ID, taskId ?? "");
+
+      if (taskId) {
+        setRecentTasks((tasks) => {
+          if (tasks.includes(taskId)) {
+            return tasks;
+          }
+
+          tasks.push(taskId);
+          return tasks.length > 5 ? tasks.slice(-5) : [...tasks];
+        });
+        localStorage.setItem(RECENT_TASKS, JSON.stringify(recentTasks()));
+      }
+
       if (!taskId) {
         cancelTaskFetch?.();
         setTaskDetails(null);
@@ -274,6 +293,7 @@ const TimeLogger: Component = () => {
                       </label>
                       <input
                         id="task"
+                        list="recent-tasks"
                         type="search"
                         autocomplete="off"
                         value={taskInput()}
@@ -285,6 +305,11 @@ const TimeLogger: Component = () => {
                         }
                         class="border-[1px] bg-white px-2 rounded text-sm flex-1 disabled:bg-gray-200"
                       />
+                      <datalist id="recent-tasks">
+                        <Index each={[...new Set(recentTasks())]}>
+                          {(task) => <option value={task()} />}
+                        </Index>
+                      </datalist>
                     </div>
                     <div class="border-[1px] bg-slate-50 rounded-lg p-2 my-2">
                       <Show
