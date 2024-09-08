@@ -262,3 +262,35 @@ function makeTimeEntry(
     at: new Date().getTime(),
   };
 }
+
+export async function getTimeSpent(
+  taskIds: string[],
+): Promise<{ taskId: string; timeSpent: number }[]> {
+  if (!taskIds.length) {
+    return [];
+  }
+
+  const records = await database(async (connection) => {
+    const stmt = await connection.prepare(
+      `
+      select task_id, sum(timestampdiff(second, start, end)) * 1000 as time_spent
+      from time_entries
+      where end is not null and task_id in (${Array(taskIds.length).fill("?").join(",")})
+      group by task_id
+      `,
+    );
+    const [rows] = await stmt.execute(taskIds);
+    return z
+      .array(
+        z
+          .object({ task_id: z.string(), time_spent: z.coerce.number() })
+          .transform((row) => ({
+            taskId: row.task_id,
+            timeSpent: row.time_spent,
+          })),
+      )
+      .parse(rows);
+  });
+
+  return records ?? [];
+}

@@ -2,6 +2,7 @@ import { Task } from "common";
 import { z } from "zod";
 import { api } from "./api";
 import { database } from "./database";
+import { getTimeSpent } from "./time-entries";
 
 const ResponseSchema = z.object({
   tasks: z.array(Task),
@@ -54,6 +55,15 @@ export async function getTasks(
   if (!data?.tasks) {
     throw new Error("Could not find any tasks");
   }
+
+  const taskIds = data.tasks.map((task) => task.id);
+  const timeSpent = await getTimeSpent(taskIds);
+
+  timeSpent.forEach(({ taskId, timeSpent }) => {
+    const t = data.tasks.find((t) => t.id === taskId)!;
+    t.time_spent ??= 0;
+    t.time_spent += timeSpent;
+  });
 
   return data.tasks;
 }
