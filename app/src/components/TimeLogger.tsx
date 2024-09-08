@@ -2,6 +2,7 @@ import { Task, TimeEntry } from "common";
 import {
   Component,
   createEffect,
+  createResource,
   createSignal,
   For,
   Index,
@@ -69,9 +70,17 @@ const TimeLogger: Component = () => {
   );
   const [taskDetails, setTaskDetails] = createSignal<Task | null>(null);
 
-  const [recentTasks, setRecentTasks] = createSignal<string[]>(
+  const [recentTaskIds, setRecentTaskIds] = createSignal<string[]>(
     JSON.parse(localStorage.getItem(RECENT_TASKS) ?? "[]"),
   );
+  const [recentTasks, { refetch: refetchTasks }] = createResource(() => {
+    const ids = recentTaskIds();
+    return ids.length
+      ? makeRequest(`/tasks/known/${ids}`).get(
+          z.array(z.object({ id: z.string(), name: z.string() })),
+        )
+      : [];
+  });
 
   const [loading, setLoading] = createSignal(false);
 
@@ -207,15 +216,11 @@ const TimeLogger: Component = () => {
       localStorage.setItem(TASK_ID, taskId ?? "");
 
       if (taskId) {
-        setRecentTasks((tasks) => {
-          if (tasks.includes(taskId)) {
-            return tasks;
-          }
-
-          tasks.push(taskId);
-          return tasks.length > 5 ? tasks.slice(-5) : [...tasks];
+        setRecentTaskIds((taskIds) => {
+          const tasks = taskIds.filter((t) => t !== taskId);
+          tasks.unshift(taskId);
+          return tasks.slice(0, Math.min(tasks.length, 5));
         });
-        localStorage.setItem(RECENT_TASKS, JSON.stringify(recentTasks()));
       }
 
       if (!taskId) {
@@ -250,6 +255,11 @@ const TimeLogger: Component = () => {
     if (timerIsActive()) {
       durationInterval = setInterval(() => setEndTime(new Date()), 1000);
     }
+  });
+
+  createEffect(() => {
+    refetchTasks();
+    localStorage.setItem(RECENT_TASKS, JSON.stringify(recentTaskIds()));
   });
 
   const duration = () =>
@@ -306,9 +316,9 @@ const TimeLogger: Component = () => {
                         class="border-[1px] bg-white px-2 rounded text-sm flex-1 disabled:bg-gray-200"
                       />
                       <datalist id="recent-tasks">
-                        <Index each={[...new Set(recentTasks())]}>
-                          {(task) => <option value={task()} />}
-                        </Index>
+                        <For each={recentTasks()}>
+                          {({ id, name }) => <option value={id}>{name}</option>}
+                        </For>
                       </datalist>
                     </div>
                     <div class="border-[1px] bg-slate-50 rounded-lg p-2 my-2">

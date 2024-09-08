@@ -76,6 +76,16 @@ export async function getTask(taskId: string) {
   return task;
 }
 
+export async function getKnownTasks(taskIds: string[]) {
+  return database(async (connection) => {
+    const stmt = await connection.prepare(
+      `select id, name from tasks where id in (${Array(taskIds.length).fill("?").join(",")})`,
+    );
+    const [rows] = await stmt.execute(taskIds);
+    return z.array(z.object({ id: z.string(), name: z.string() })).parse(rows);
+  });
+}
+
 export async function syncTasks(tasks: Task[]) {
   for (const task of tasks) {
     const location = {

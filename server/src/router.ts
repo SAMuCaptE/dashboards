@@ -7,19 +7,19 @@ import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
-    Fields,
-    copyPreviousFields,
-    editFields,
-    existsFields,
-    findField,
+  Fields,
+  copyPreviousFields,
+  editFields,
+  existsFields,
+  findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
-import { getTask, getTasks, syncTasks } from "./api/tasks";
+import { getKnownTasks, getTask, getTasks, syncTasks } from "./api/tasks";
 import {
-    addTimeEntry,
-    completeTimeEntry,
-    getOngoingTimeEntry,
-    getTimeEntriesInRange,
+  addTimeEntry,
+  completeTimeEntry,
+  getOngoingTimeEntry,
+  getTimeEntriesInRange,
 } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
@@ -83,6 +83,15 @@ router.get(
       return res.json(getBudget()).status(200);
     }),
   ),
+);
+
+router.get(
+  "/tasks/known/:ids",
+  bugnet(async function (req, res) {
+    const taskIds = req.params.ids.split(",");
+    z.array(z.string()).parse(taskIds);
+    res.json(await getKnownTasks(taskIds)).status(200);
+  }),
 );
 
 router.get(
@@ -547,4 +556,3 @@ function invalidateFields() {
 }
 
 export { router };
-
