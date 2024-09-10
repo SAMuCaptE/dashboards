@@ -2,8 +2,10 @@ import { Task, TimeEntry } from "common";
 import {
   Component,
   createEffect,
+  createResource,
   createSignal,
   For,
+  Index,
   on,
   onMount,
   Show,
@@ -25,12 +27,25 @@ import { useTime } from "./TimeContext";
 
 const USER_ID = "userId";
 const TASK_ID = "taskId";
+const RECENT_TASKS = "recentTasks";
 
 function parseTaskId(taskOrUrl: string) {
   const taskId = taskOrUrl
     .replace("https://app.clickup.com/t", "")
     .replaceAll("/", "");
   return /^[a-zA-Z0-9]{9}$/.test(taskId) ? taskId : null;
+}
+
+function formatTimeInput(delta: number): string {
+  const deltaInMinutes = delta / 60_000;
+  const hours = Math.floor(deltaInMinutes / 60);
+  const minutes = deltaInMinutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+function trimSeconds(d: Date) {
+  d.setSeconds(0);
+  return d;
 }
 
 const TimeLogger: Component = () => {
@@ -40,8 +55,12 @@ const TimeLogger: Component = () => {
 
   const time = useTime();
 
-  const [startTime, setStartTime] = createSignal(new Date());
-  const [endTime, setEndTime] = createSignal(new Date());
+  const [mode, setMode] = createSignal<"calculation" | "delta" | null>(
+    "calculation",
+  );
+  const [startTime, setStartTime] = createSignal(trimSeconds(new Date()));
+  const [endTime, setEndTime] = createSignal(trimSeconds(new Date()));
+  const [delta, setDelta] = createSignal(0);
   const [timerIsActive, setTimerIsActive] = createSignal(false);
   const [ongoingId, setOngoingId] = createSignal<number | null>(null);
 
@@ -50,6 +69,18 @@ const TimeLogger: Component = () => {
     localStorage.getItem(TASK_ID) ?? "",
   );
   const [taskDetails, setTaskDetails] = createSignal<Task | null>(null);
+
+  const [recentTaskIds, setRecentTaskIds] = createSignal<string[]>(
+    JSON.parse(localStorage.getItem(RECENT_TASKS) ?? "[]"),
+  );
+  const [recentTasks, { refetch: refetchTasks }] = createResource(() => {
+    const ids = recentTaskIds();
+    return ids.length
+      ? makeRequest(`/tasks/known/${ids}`).get(
+          z.array(z.object({ id: z.string(), name: z.string() })),
+        )
+      : [];
+  });
 
   const [loading, setLoading] = createSignal(false);
 
@@ -87,12 +118,20 @@ const TimeLogger: Component = () => {
 
     try {
       setLoading(true);
+
+      const end =
+        mode() === "calculation" ? endTime().getTime() : new Date().getTime();
+      const start =
+        mode() === "calculation"
+          ? startTime().getTime()
+          : new Date(end - delta()).getTime();
+
       const taskId = parseTaskId(taskInput());
       const timeEntry = await makeRequest("/time-entries").post(TimeEntry, {
-        taskId,
         userId: selectedUserId(),
-        start: startTime().getTime(),
-        end: endTime().getTime(),
+        taskId,
+        start,
+        end,
       });
       time?.addTimeEntry(parseInt(selectedUserId()), timeEntry);
       clearForm();
@@ -112,7 +151,7 @@ const TimeLogger: Component = () => {
       z
         .object({
           id: z.number(),
-          start: z.number().transform((num) => new Date(num)),
+          start: z.string().transform((str) => new Date(str)),
           taskId: z.string(),
           userId: z.coerce.string(),
         })
@@ -122,16 +161,23 @@ const TimeLogger: Component = () => {
     if (ongoing === null) {
       setTimerIsActive(false);
     } else {
+      // I am too lazy to handle timezones correctly, everything is stored as UTC but the system thinks it is local tz.
+      ongoing.start = new Date(
+        ongoing.start.getTime() - ongoing.start.getTimezoneOffset() * 60_000,
+      );
+
       setStartTime(ongoing.start);
       setSelectedUserId(ongoing.userId);
       setTaskInput(ongoing.taskId);
       setOngoingId(ongoing.id);
       setTimerIsActive(true);
+      setMode("calculation");
     }
   };
 
   const handleManualTimer = async () => {
     setLoading(true);
+    setMode("calculation");
     const isActive = setTimerIsActive((active) => !active);
     if (isActive) {
       try {
@@ -168,6 +214,15 @@ const TimeLogger: Component = () => {
     on(taskInput, () => {
       const taskId = parseTaskId(taskInput());
       localStorage.setItem(TASK_ID, taskId ?? "");
+
+      if (taskId) {
+        setRecentTaskIds((taskIds) => {
+          const tasks = taskIds.filter((t) => t !== taskId);
+          tasks.unshift(taskId);
+          return tasks.slice(0, Math.min(tasks.length, 5));
+        });
+      }
+
       if (!taskId) {
         cancelTaskFetch?.();
         setTaskDetails(null);
@@ -202,9 +257,16 @@ const TimeLogger: Component = () => {
     }
   });
 
+  createEffect(() => {
+    refetchTasks();
+    localStorage.setItem(RECENT_TASKS, JSON.stringify(recentTaskIds()));
+  });
+
   const duration = () =>
     formatDeltaTime(
-      endTime().getTime() - startTime().getTime(),
+      mode() === "calculation"
+        ? endTime().getTime() - startTime().getTime()
+        : delta(),
       timerIsActive(),
     );
 
@@ -218,7 +280,7 @@ const TimeLogger: Component = () => {
                 <div>
                   <div>
                     <label for={USER_ID} class="pr-2 w-24">
-                      <i>SAUM</i>atelot:
+                      Membre:
                     </label>
                     <select
                       id={USER_ID}
@@ -241,6 +303,7 @@ const TimeLogger: Component = () => {
                       </label>
                       <input
                         id="task"
+                        list="recent-tasks"
                         type="search"
                         autocomplete="off"
                         value={taskInput()}
@@ -252,17 +315,24 @@ const TimeLogger: Component = () => {
                         }
                         class="border-[1px] bg-white px-2 rounded text-sm flex-1 disabled:bg-gray-200"
                       />
+                      <datalist id="recent-tasks">
+                        <For each={recentTasks()}>
+                          {({ id, name }) => <option value={id}>{name}</option>}
+                        </For>
+                      </datalist>
                     </div>
                     <div class="border-[1px] bg-slate-50 rounded-lg p-2 my-2">
                       <Show
                         when={taskDetails()}
                         fallback={
                           <div class="flex justify-center min-h-12">
-                            <div class="block relative w-12 aspect-square">
-                              <img
-                                src={import.meta.env.BASE_URL + "clickup.svg"}
-                              />
-                            </div>
+                            <a href="https://app.clickup.com" target="_blank">
+                              <div class="block relative w-12 aspect-square">
+                                <img
+                                  src={import.meta.env.BASE_URL + "clickup.svg"}
+                                />
+                              </div>
+                            </a>
                           </div>
                         }
                       >
@@ -333,13 +403,14 @@ const TimeLogger: Component = () => {
                       disabled={timerIsActive()}
                       value={convertToDateTimeLocalString(startTime())}
                       class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) =>
+                      onChange={(ev) => {
                         setStartTime((previous) =>
                           timerIsActive()
                             ? previous
                             : new Date(ev.target.value),
-                        )
-                      }
+                        );
+                        setMode("calculation");
+                      }}
                     />
                   </div>
                   <div class="flex pt-1">
@@ -352,13 +423,31 @@ const TimeLogger: Component = () => {
                       disabled={timerIsActive()}
                       value={convertToDateTimeLocalString(endTime())}
                       class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) =>
+                      onChange={(ev) => {
+                        console.log(new Date(ev.target.value));
                         setEndTime((previous) =>
                           timerIsActive()
                             ? previous
                             : new Date(ev.target.value),
-                        )
-                      }
+                        );
+                        setMode("calculation");
+                      }}
+                    />
+                  </div>
+                  <div class="flex pt-1">
+                    <label for="delta" class="pr-2 w-16">
+                      Delta:
+                    </label>
+                    <input
+                      id="delta"
+                      type="time"
+                      disabled={timerIsActive()}
+                      value={formatTimeInput(delta())}
+                      class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
+                      onChange={(ev) => {
+                        setDelta(ev.target.valueAsNumber);
+                        setMode("delta");
+                      }}
                     />
                   </div>
                   <div class="flex">

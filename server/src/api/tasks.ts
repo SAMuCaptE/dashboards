@@ -2,6 +2,7 @@ import { Task } from "common";
 import { z } from "zod";
 import { api } from "./api";
 import { database } from "./database";
+import { getTimeSpent } from "./time-entries";
 
 const ResponseSchema = z.object({
   tasks: z.array(Task),
@@ -55,6 +56,15 @@ export async function getTasks(
     throw new Error("Could not find any tasks");
   }
 
+  const taskIds = data.tasks.map((task) => task.id);
+  const timeSpent = await getTimeSpent(taskIds);
+
+  timeSpent.forEach(({ taskId, timeSpent }) => {
+    const t = data.tasks.find((t) => t.id === taskId)!;
+    t.time_spent ??= 0;
+    t.time_spent += timeSpent;
+  });
+
   return data.tasks;
 }
 
@@ -74,6 +84,16 @@ export async function getTask(taskId: string) {
     await syncTasks([task]);
   }
   return task;
+}
+
+export async function getKnownTasks(taskIds: string[]) {
+  return database(async (connection) => {
+    const stmt = await connection.prepare(
+      `select id, name from tasks where id in (${Array(taskIds.length).fill("?").join(",")})`,
+    );
+    const [rows] = await stmt.execute(taskIds);
+    return z.array(z.object({ id: z.string(), name: z.string() })).parse(rows);
+  });
 }
 
 export async function syncTasks(tasks: Task[]) {
