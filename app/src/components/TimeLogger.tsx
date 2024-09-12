@@ -1,24 +1,24 @@
 import { Task, TimeEntry } from "common";
 import {
-  Component,
-  createEffect,
-  createResource,
-  createSignal,
-  For,
-  on,
-  onMount,
-  Show,
+    Component,
+    createEffect,
+    createResource,
+    createSignal,
+    For,
+    on,
+    onMount,
+    Show
 } from "solid-js";
 import { z } from "zod";
 import { makeRequest } from "../client";
 import { users } from "../resources/users";
 import {
-  colors,
-  convertToDateTimeLocalString,
-  debounce,
-  domainIcons,
-  formatDeltaTime,
-  tagToDomainIcon,
+    colors,
+    convertToDateTimeLocalString,
+    debounce,
+    domainIcons,
+    formatDeltaTime,
+    tagToDomainIcon
 } from "../utils";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
@@ -171,7 +171,6 @@ const TimeLogger: Component = () => {
 
   const handleManualTimer = async () => {
     setLoading(true);
-    setMode("calculation");
     const isActive = setTimerIsActive((active) => !active);
     if (isActive) {
       try {
@@ -388,81 +387,99 @@ const TimeLogger: Component = () => {
 
                 <div>
                   <div class="flex">
-                    <label for="start-datetime" class="pr-2 w-16">
-                      Début:
+                    <label for="mode" class="pr-2">
+                      Saisir le temps directement
                     </label>
                     <input
-                      id="start-datetime"
-                      type="datetime-local"
-                      disabled={timerIsActive()}
-                      value={convertToDateTimeLocalString(startTime())}
-                      class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) => {
-                        setStartTime((previous) =>
-                          timerIsActive()
-                            ? previous
-                            : new Date(ev.target.value),
-                        );
-                        setMode("calculation");
-                      }}
+                      id="mode"
+                      type="checkbox"
+                      checked={mode() === "delta"}
+                      onChange={(e) =>
+                        setMode(
+                          e.currentTarget.checked ? "delta" : "calculation",
+                        )
+                      }
                     />
                   </div>
-                  <div class="flex pt-1">
-                    <label for="end-datetime" class="pr-2 w-16">
-                      Fin:
-                    </label>
-                    <input
-                      id="end-datetime"
-                      type="datetime-local"
-                      disabled={timerIsActive()}
-                      value={convertToDateTimeLocalString(endTime())}
-                      class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) => {
-                        console.log(new Date(ev.target.value));
-                        setEndTime((previous) =>
-                          timerIsActive()
-                            ? previous
-                            : new Date(ev.target.value),
-                        );
-                        setMode("calculation");
-                      }}
-                    />
-                  </div>
-                  <div class="flex pt-1">
-                    <label for="delta" class="pr-2 w-16">
-                      Delta:
-                    </label>
-                    <input
-                      id="delta"
-                      type="time"
-                      disabled={timerIsActive()}
-                      value={formatTimeInput(delta())}
-                      class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
-                      onChange={(ev) => {
-                        setDelta(ev.target.valueAsNumber);
-                        setMode("delta");
-                      }}
-                    />
-                  </div>
+                  {mode() === "calculation" ? (
+                    <>
+                      <div class="flex">
+                        <label for="start-datetime" class="pr-2 w-16">
+                          Début:
+                        </label>
+                        <input
+                          id="start-datetime"
+                          type="datetime-local"
+                          disabled={timerIsActive()}
+                          value={convertToDateTimeLocalString(startTime())}
+                          class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
+                          onChange={(ev) =>
+                            setStartTime((previous) =>
+                              timerIsActive()
+                                ? previous
+                                : new Date(ev.target.value),
+                            )
+                          }
+                        />
+                      </div>
+                      <div class="flex pt-1">
+                        <label for="end-datetime" class="pr-2 w-16">
+                          Fin:
+                        </label>
+                        <input
+                          id="end-datetime"
+                          type="datetime-local"
+                          disabled={timerIsActive()}
+                          value={convertToDateTimeLocalString(endTime())}
+                          class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
+                          onChange={(ev) =>
+                            setEndTime((previous) =>
+                              timerIsActive()
+                                ? previous
+                                : new Date(ev.target.value),
+                            )
+                          }
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div class="flex pt-1">
+                      <label for="delta" class="pr-2 w-16">
+                        Delta:
+                      </label>
+                      <input
+                        id="delta"
+                        type="time"
+                        disabled={timerIsActive()}
+                        value={formatTimeInput(delta())}
+                        class="border-[1px] bg-white px-2 rounded flex-1 text-sm disabled:bg-gray-200"
+                        onChange={(ev) => setDelta(ev.target.valueAsNumber)}
+                      />
+                    </div>
+                  )}
                   <div class="flex">
                     <p class="pr-2 w-16">Durée:</p>
                     <p>{duration() || "-"}</p>
                   </div>
 
-                  <div>
-                    <button
-                      type="button"
-                      onClick={handleManualTimer}
-                      class="flex items-center border-[1px] px-2 py-1 bg-gray-100 rounded-md mt-3 mx-auto"
-                    >
-                      <span class="material-symbols-outlined pr-1">timer</span>
-                      <p class="text-sm">
-                        {timerIsActive()
-                          ? "Arrêter le minuteur"
-                          : "Démarrer le minuteur"}
-                      </p>
-                    </button>
-                  </div>
+                  <Show when={mode() === "calculation"}>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={handleManualTimer}
+                        class="flex items-center border-[1px] px-2 py-1 bg-gray-100 rounded-md mt-3 mx-auto"
+                      >
+                        <span class="material-symbols-outlined pr-1">
+                          timer
+                        </span>
+                        <p class="text-sm">
+                          {timerIsActive()
+                            ? "Arrêter le minuteur"
+                            : "Démarrer le minuteur"}
+                        </p>
+                      </button>
+                    </div>
+                  </Show>
                 </div>
               </div>
 
