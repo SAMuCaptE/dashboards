@@ -5,7 +5,6 @@ import {
   createResource,
   createSignal,
   For,
-  Index,
   on,
   onMount,
   Show,
@@ -161,11 +160,6 @@ const TimeLogger: Component = () => {
     if (ongoing === null) {
       setTimerIsActive(false);
     } else {
-      // I am too lazy to handle timezones correctly, everything is stored as UTC but the system thinks it is local tz.
-      ongoing.start = new Date(
-        ongoing.start.getTime() - ongoing.start.getTimezoneOffset() * 60_000,
-      );
-
       setStartTime(ongoing.start);
       setSelectedUserId(ongoing.userId);
       setTaskInput(ongoing.taskId);

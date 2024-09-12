@@ -5,33 +5,35 @@ type EditableProps = {
   children: JSX.Element;
   initialValue?: string;
   complexEdit?: boolean;
-  onEdit: (value: string) => void | Promise<void>;
+  onEdit?: (value: string) => void | Promise<void>;
   onDelete?: () => Promise<void>;
 };
 
 const Editable: Component<EditableProps> = (props) => {
   const edit = async (e: Event) => {
-    e.stopPropagation();
-    e.preventDefault();
+    if (props.onEdit || props.complexEdit) {
+      e.stopPropagation();
+      e.preventDefault();
 
-    if (props.complexEdit) {
-      await props.onEdit("");
-      return;
-    }
+      if (props.complexEdit) {
+        await props.onEdit?.("");
+        return;
+      }
 
-    const value = window.prompt(
-      "Saisir la nouvelle valeur",
-      props.initialValue,
-    );
-    if (value) {
-      await props.onEdit(value);
+      const value = window.prompt(
+        "Saisir la nouvelle valeur",
+        props.initialValue,
+      );
+      if (value) {
+        await props.onEdit?.(value);
+      }
     }
   };
 
   return (
     <div
       onclick={edit}
-      class={`relative group hover:cursor-pointer hover:border-4 border-black ${
+      class={`relative group hover:border-4 border-black ${props.onEdit ? "hover:cursor-pointer" : ""}  ${
         props.class ?? ""
       }`}
     >

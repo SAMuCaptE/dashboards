@@ -24,6 +24,7 @@ export const hourCategories = [
 
 type TimeContext = {
   addTimeEntry: (userId: number, entry: TimeEntry) => void;
+  removeTimeEntry: (userId: number, entry: TimeEntry) => void;
   workedHours: Resource<
     readonly [Record<string, Record<string, number>>, number]
   >;
@@ -152,9 +153,61 @@ const TimeProvider: Component<{ children: JSX.Element }> = (props) => {
     });
   };
 
+  const removeTimeEntry = (userId: number, entry: TimeEntry) => {
+    makeRequest(`/time-entries/${entry.id}`).delete(z.any());
+    mutateTimeEntries((previous) => ({
+      ...(previous ?? {}),
+      [userId]: (previous?.[userId] ?? []).filter((e) => e.id !== entry.id),
+    }));
+    mutateExtraData((previous) => ({
+      ...(previous ?? {}),
+      [userId]: {
+        ...(previous?.[userId] ?? {}),
+        [convertTags(entry.task_tags)]: Math.max(
+          (previous?.[userId][convertTags(entry.task_tags)] ?? 0) -
+            entry.duration / 3600_000,
+          0,
+        ),
+      },
+    }));
+    mutateWorkedHours((previous) => {
+      if (!previous) {
+        return previous;
+      }
+      const [hours, weekCount] = previous;
+      return [
+        {
+          ...hours,
+          [convertTags(entry.task_tags)]: {
+            ...hours[convertTags(entry.task_tags)],
+            [userId]: Math.max(
+              (hours[convertTags(entry.task_tags)][userId] ?? 0) -
+                entry.duration / 3600_000,
+              0,
+            ),
+          },
+          total: {
+            ...(hours.total ?? {}),
+            [userId]: Math.max(
+              (hours.total[userId] ?? 0) - entry.duration / 3600_000,
+              0,
+            ),
+          },
+        },
+        weekCount,
+      ];
+    });
+  };
+
   return (
     <TimeContext.Provider
-      value={{ addTimeEntry, workedHours, timeEntries, extraData }}
+      value={{
+        addTimeEntry,
+        removeTimeEntry,
+        workedHours,
+        timeEntries,
+        extraData,
+      }}
     >
       {props.children}
     </TimeContext.Provider>

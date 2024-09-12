@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 import { users } from "../resources/users";
 import { colors, domainIcons, formatTime, tagToDomainIcon } from "../utils";
+import Editable from "./Editable";
 import Loader from "./Loader";
 import NoPrint from "./NoPrint";
 import { useTime } from "./TimeContext";
@@ -73,45 +74,53 @@ const TimeEntries: Component = () => {
                     <For each={time?.timeEntries()?.[user.id] ?? []}>
                       {(entry) => (
                         <li classList={{ hidden: !expanded()[user.id] }}>
-                          <a
-                            target="_blank"
-                            href={entry.task_url}
-                            class="grid grid-cols-[60px_100px_40px_auto]"
+                          <Editable
+                            onDelete={async () =>
+                              time?.removeTimeEntry(user.id, entry)
+                            }
                           >
-                            <div class="text-center">
-                              {formatTime(entry.duration)}
-                            </div>
-                            <div class="text-center">
-                              {new Date(entry.end).toLocaleDateString("fr-CA")}
-                            </div>
-
-                            <div class="flex text-sm items-center justify-center">
-                              <For
-                                each={
-                                  entry.task_tags.length > 0
-                                    ? entry.task_tags
-                                    : [{ name: "unknown", tag_fg: "#ff80f4" }]
-                                }
-                              >
-                                {(tag) => (
-                                  <span
-                                    style={{
-                                      color:
-                                        colors[
-                                          tag.name as keyof typeof colors
-                                        ] || colors.unknown,
-                                    }}
-                                    class="material-symbols-outlined text-sm font-bold pr-1"
-                                  >
-                                    {tagToDomainIcon(tag) ||
-                                      domainIcons.unknown}
-                                  </span>
+                            <a
+                              target="_blank"
+                              href={entry.task_url}
+                              class="grid grid-cols-[60px_100px_40px_auto]"
+                            >
+                              <div class="text-center">
+                                {formatTime(entry.duration)}
+                              </div>
+                              <div class="text-center">
+                                {new Date(entry.end).toLocaleDateString(
+                                  "fr-CA",
                                 )}
-                              </For>
-                            </div>
+                              </div>
 
-                            <div>{entry.task.name}</div>
-                          </a>
+                              <div class="flex text-sm items-center justify-center">
+                                <For
+                                  each={
+                                    entry.task_tags.length > 0
+                                      ? entry.task_tags
+                                      : [{ name: "unknown", tag_fg: "#ff80f4" }]
+                                  }
+                                >
+                                  {(tag) => (
+                                    <span
+                                      style={{
+                                        color:
+                                          colors[
+                                            tag.name as keyof typeof colors
+                                          ] || colors.unknown,
+                                      }}
+                                      class="material-symbols-outlined text-sm font-bold pr-1"
+                                    >
+                                      {tagToDomainIcon(tag) ||
+                                        domainIcons.unknown}
+                                    </span>
+                                  )}
+                                </For>
+                              </div>
+
+                              <div>{entry.task.name}</div>
+                            </a>
+                          </Editable>
                         </li>
                       )}
                     </For>

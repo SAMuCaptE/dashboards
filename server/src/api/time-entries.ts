@@ -177,6 +177,15 @@ export async function getOngoingTimeEntry(userId: string) {
   };
 }
 
+export async function removeTimeEntry(id: number) {
+  await database(async (connection) => {
+    const query = "DELETE FROM time_entries WHERE id = ?";
+    const stmt = await connection.prepare(query);
+    await stmt.execute([id]);
+    await stmt.close();
+  });
+}
+
 async function getManualTimeEntries(
   user: User,
   minDate: Date,

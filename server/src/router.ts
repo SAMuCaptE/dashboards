@@ -7,19 +7,20 @@ import { getBurndown } from "./api/burndown";
 import { getEpics } from "./api/epics";
 import { getExtraData } from "./api/extraData";
 import {
-  Fields,
-  copyPreviousFields,
-  editFields,
-  existsFields,
-  findField,
+    Fields,
+    copyPreviousFields,
+    editFields,
+    existsFields,
+    findField,
 } from "./api/fields";
 import { getBudget } from "./api/money";
-import { getKnownTasks, getTask, getTasks, syncTasks } from "./api/tasks";
+import { getKnownTasks, getTask, getTasks } from "./api/tasks";
 import {
-  addTimeEntry,
-  completeTimeEntry,
-  getOngoingTimeEntry,
-  getTimeEntriesInRange,
+    addTimeEntry,
+    completeTimeEntry,
+    getOngoingTimeEntry,
+    getTimeEntriesInRange,
+    removeTimeEntry,
 } from "./api/time-entries";
 import { getUsers } from "./api/users";
 import { getWorkedHours } from "./api/worked-hours";
@@ -230,6 +231,15 @@ router.post(
       payload.end,
     );
     res.json(timeEntry).status(200);
+  }),
+);
+
+router.delete(
+  "/time-entries/:id",
+  bugnet(async function (req, res) {
+    const id = z.coerce.number().parse(req.params.id);
+    await removeTimeEntry(id);
+    res.sendStatus(200);
   }),
 );
 
@@ -556,3 +566,4 @@ function invalidateFields() {
 }
 
 export { router };
+
