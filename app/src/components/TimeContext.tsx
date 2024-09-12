@@ -8,10 +8,10 @@ import {
   Resource,
   useContext,
 } from "solid-js";
-import { users } from "../resources/users";
-import { endDate, startDate } from "../stores/params";
 import { z } from "zod";
 import { makeRequest } from "../client";
+import { users } from "../resources/users";
+import { endDate, startDate } from "../stores/params";
 
 export const hourCategories = [
   "unknown",
@@ -125,7 +125,7 @@ const TimeProvider: Component<{ children: JSX.Element }> = (props) => {
       [userId]: {
         ...(previous?.[userId] ?? {}),
         [convertTags(entry.task_tags)]:
-          (previous?.[userId][convertTags(entry.task_tags)] ?? 0) +
+          (previous?.[userId]?.[convertTags(entry.task_tags)] ?? 0) +
           entry.duration / 3600_000,
       },
     }));
@@ -140,7 +140,7 @@ const TimeProvider: Component<{ children: JSX.Element }> = (props) => {
           [convertTags(entry.task_tags)]: {
             ...hours[convertTags(entry.task_tags)],
             [userId]:
-              (hours[convertTags(entry.task_tags)][userId] ?? 0) +
+              (hours[convertTags(entry.task_tags)]?.[userId] ?? 0) +
               entry.duration / 3600_000,
           },
           total: {
@@ -164,7 +164,7 @@ const TimeProvider: Component<{ children: JSX.Element }> = (props) => {
       [userId]: {
         ...(previous?.[userId] ?? {}),
         [convertTags(entry.task_tags)]: Math.max(
-          (previous?.[userId][convertTags(entry.task_tags)] ?? 0) -
+          (previous?.[userId]?.[convertTags(entry.task_tags)] ?? 0) -
             entry.duration / 3600_000,
           0,
         ),
@@ -181,7 +181,7 @@ const TimeProvider: Component<{ children: JSX.Element }> = (props) => {
           [convertTags(entry.task_tags)]: {
             ...hours[convertTags(entry.task_tags)],
             [userId]: Math.max(
-              (hours[convertTags(entry.task_tags)][userId] ?? 0) -
+              (hours[convertTags(entry.task_tags)]?.[userId] ?? 0) -
                 entry.duration / 3600_000,
               0,
             ),
