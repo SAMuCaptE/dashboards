@@ -1,8 +1,8 @@
 export function getBudget() {
   const planned = 5480.6;
   const spent = {
-    mec: 941.26,
-    élec: 1195.78,
+    mec: 929.77,
+    élec: 937.6,
     info: 999.96,
     nature: 1480.6,
   };

@@ -10,6 +10,7 @@ export const domainIcons = {
   Mécanique: "manufacturing",
   Livrables: "school",
   Administration: "contract",
+  Tous: "arrow_right",
   unknown: "question_mark",
 };
 
