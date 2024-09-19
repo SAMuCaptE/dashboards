@@ -174,6 +174,7 @@ const TimeLogger: Component = () => {
     const isActive = setTimerIsActive((active) => !active);
     if (isActive) {
       try {
+        setStartTime(new Date());
         await makeRequest("/time-entries").post(z.any(), {
           userId: selectedUserId(),
           taskId: parseTaskId(taskInput()),
