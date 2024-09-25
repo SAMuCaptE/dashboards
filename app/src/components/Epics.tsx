@@ -90,10 +90,7 @@ const Epics: Component = () => {
 
                   <div class="text-sm text-center">
                     <Show when={epic.ticketCount > 0} fallback={"N/A"}>
-                      {Math.round(
-                        (100 * epic.completedTicketCount) / epic.ticketCount,
-                      )}
-                      %
+                      {epic.completedTicketCount} / {epic.ticketCount}
                     </Show>
                   </div>
 
