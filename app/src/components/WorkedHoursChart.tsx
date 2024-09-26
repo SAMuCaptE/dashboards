@@ -1,12 +1,12 @@
 import { Chart } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import {
-  Component,
-  createEffect,
-  createMemo,
-  createSignal,
-  Show,
-  Suspense,
+    Component,
+    createEffect,
+    createMemo,
+    createSignal,
+    Show,
+    Suspense
 } from "solid-js";
 import { users } from "../resources/users";
 import { colors } from "../utils";
@@ -88,18 +88,16 @@ const WorkedHoursChart: Component = () => {
         align: "top",
         anchor: "end",
         formatter: (
-          value: number,
+          _: number,
           metadata: { datasetIndex: number; dataIndex: number },
         ) => {
-          const datasetCount = Object.keys(time?.workedHours() ?? {}).length;
+          const datasetCount = Object.keys(
+            time?.workedHours()?.[0] ?? {},
+          ).length;
           if (metadata.datasetIndex === datasetCount - 2) {
             return (
               Math.round(weeklyTotal()[metadata.dataIndex] * 100) / 100 + "h"
             );
-          } else if (metadata.datasetIndex === datasetCount - 1) {
-            return weeklyTotal()[metadata.dataIndex] - value > 2
-              ? Math.round(value * 10) / 10 + "h"
-              : "";
           }
           return "";
         },
