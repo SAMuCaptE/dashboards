@@ -213,7 +213,7 @@ const TimeLogger: Component = () => {
         setRecentTaskIds((taskIds) => {
           const tasks = taskIds.filter((t) => t !== taskId);
           tasks.unshift(taskId);
-          return tasks.slice(0, Math.min(tasks.length, 5));
+          return tasks.slice(0, Math.min(tasks.length, 10));
         });
       }
 
