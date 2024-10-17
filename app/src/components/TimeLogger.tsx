@@ -125,6 +125,13 @@ const TimeLogger: Component = () => {
           ? startTime().getTime()
           : new Date(end - delta()).getTime();
 
+      if (end - start === 0) {
+        alert(
+          "Es-tu certain? Voulais-tu partir le chrono et t'es-tu trompé de piton?",
+        );
+        return;
+      }
+
       const taskId = parseTaskId(taskInput());
       const timeEntry = await makeRequest("/time-entries").post(TimeEntry, {
         userId: selectedUserId(),
