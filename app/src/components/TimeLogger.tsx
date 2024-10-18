@@ -130,6 +130,11 @@ const TimeLogger: Component = () => {
           "Es-tu certain? Voulais-tu partir le chrono et t'es-tu trompé de piton?",
         );
         return;
+      } else if (end - start > 5 * 3600 * 1000) {
+        const message = `La saisie (${duration()}) est supérieure à 5h. Est-ce volontaire?`;
+        if (!confirm(message)) {
+          return;
+        }
       }
 
       const taskId = parseTaskId(taskInput());
