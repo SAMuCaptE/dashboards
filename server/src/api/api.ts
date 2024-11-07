@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { RATE_LIMITED } from "../middlewares/bugnet";
 
+const keys = process.env.API_KEY!.split(",");
+
 export function api<S extends z.Schema>(
   schema: S,
   options?: Omit<RequestInit, "method">,
@@ -8,20 +10,33 @@ export function api<S extends z.Schema>(
   const execute = async (
     method: "GET" | "POST",
     url: string,
+    attemptsLeft = 3,
   ): Promise<z.infer<S> | null> => {
+    const key = keys[0];
     const response = await fetch(url, {
       ...options,
       headers: {
         ...options?.headers,
-        Authorization: process.env.API_KEY!,
+        Authorization: key,
       },
       method,
     });
     const data = await response.json();
 
     if (response.status === 429) {
-      console.log({ url, data });
-      throw RATE_LIMITED;
+      // Put used api key to the end of the queue
+      if (keys[0] === key) {
+        keys.push(keys.shift()!);
+      }
+
+      if (attemptsLeft > 0) {
+        console.log("Rate limit reached, swapping api keys.");
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        return execute(method, url, attemptsLeft - 1);
+      } else {
+        console.log({ url, data });
+        throw RATE_LIMITED;
+      }
     }
 
     const parsedData = schema.safeParse(data);
