@@ -43,10 +43,11 @@ let startDate = new Date(dueDate!);
 
 startDate = new Date(dueDateInMs);
 startDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-startDate = new Date(startDate.getTime() + 3 * 60 * 60 * 1000);
+startDate = new Date(startDate.getTime() + 6 * 60 * 60 * 1000);
 
 let endDate = new Date(dueDateInMs);
-endDate = new Date(endDate.getTime() + 3 * 60 * 60 * 1000);
+endDate = new Date(endDate.getTime() + 6 * 60 * 60 * 1000);
 endDate = new Date(endDate.getTime() - 1 * 1000);
 
 export { dueDate, startDate, endDate, isValidDate, session, navigate };
+
