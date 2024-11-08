@@ -1,12 +1,12 @@
 import { Chart } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import {
-    Component,
-    createEffect,
-    createMemo,
-    createSignal,
-    Show,
-    Suspense
+  Component,
+  createEffect,
+  createMemo,
+  createSignal,
+  Show,
+  Suspense,
 } from "solid-js";
 import { users } from "../resources/users";
 import { colors } from "../utils";
@@ -18,8 +18,9 @@ const alternateLabels: Record<string, string> = {
   mec: "Mec",
   elec: "Élec",
   info: "Info",
-  livrables: "Livrables",
+  livrables: "Uni",
   unknown: "Autre",
+  mega: "Méga",
 };
 
 const WorkedHoursChart: Component = () => {
@@ -102,7 +103,14 @@ const WorkedHoursChart: Component = () => {
           return "";
         },
       },
-      legend: { labels: { usePointStyle: true } },
+      legend: {
+        labels: {
+          usePointStyle: true,
+          filter: function (item) {
+            return item.text !== "Autre";
+          },
+        },
+      },
     },
   } as const;
 

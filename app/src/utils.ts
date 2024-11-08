@@ -12,6 +12,7 @@ export const domainIcons = {
   Administration: "contract",
   Tous: "arrow_right",
   unknown: "question_mark",
+  mega: "festival",
 };
 
 export function tagToDomainIcon(tag: { name: string }) {
@@ -26,6 +27,8 @@ export function tagToDomainIcon(tag: { name: string }) {
       return domainIcons["Administration"];
     case "livrables":
       return domainIcons["Livrables"];
+    case "mega":
+      return domainIcons["mega"];
     default:
       return domainIcons.unknown;
   }
@@ -40,6 +43,7 @@ export const colors = {
   livrables: "#2ecd6f",
   unknown: "#d8e65a",
   average: "#ababab",
+  mega: "#de4bc1",
 } as const;
 
 const debounceCallbacks: Record<string, number> = {};

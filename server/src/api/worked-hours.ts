@@ -22,6 +22,7 @@ export async function getWorkedHours(start: Date, end: Date) {
     info: {},
     mec: {},
     livrables: {},
+    mega: {},
     unknown: {},
     total: {},
     weekCount,

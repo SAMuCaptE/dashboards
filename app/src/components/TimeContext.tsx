@@ -19,6 +19,7 @@ export const hourCategories = [
   "mec",
   "elec",
   "info",
+  "mega",
   "livrables",
 ] as const;
 
@@ -49,6 +50,8 @@ function convertTags(tags: TimeEntry["task_tags"]) {
     return "mec";
   } else if (names.includes("livrables")) {
     return "livrables";
+  } else if (names.includes("mega")) {
+    return "mega";
   }
   return "unknown";
 }
