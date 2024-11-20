@@ -15,6 +15,7 @@ const categories: Record<
   mec: { label: "Mec", color: "#ed21dc" },
   élec: { label: "Élec", color: "#12a308" },
   info: { label: "Info", color: "#5fdae8" },
+  mega: { label: "Méga", color: "#9600b8" },
   nature: { label: "Nature", color: "#dbd51a" },
   available: { label: "Disponible", color: availableStripe, shadow: true },
 };
@@ -86,7 +87,10 @@ const Expense: Component<{
     >
       <Show when={props.expense >= 200}>
         <span class="font-semibold text-white text-sm">
-          {(Math.round(props.expense * 100) / 100).toFixed(2)}$
+          {(Math.round(props.expense * 100) / 100).toFixed(
+            props.expense > 500 ? 2 : 0,
+          )}
+          $
         </span>
       </Show>
     </div>
